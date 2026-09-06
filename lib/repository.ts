@@ -185,5 +185,5 @@ export const privateDiaryRepo = createLocalRepository<PrivateDiary>(
 );
 export const settingsRepo = createLocalSingleRepository<Settings>(
   "settings",
-  { nickname: "小佳佳" },
+  { nickname: "小佳佳", autoLock: true },
 );

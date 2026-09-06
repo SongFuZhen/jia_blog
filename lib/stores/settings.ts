@@ -10,7 +10,7 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  settings: { nickname: "小佳佳" },
+  settings: { nickname: "小佳佳", autoLock: true },
   hydrated: false,
 
   hydrate: async () => {

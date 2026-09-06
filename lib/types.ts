@@ -153,4 +153,8 @@ export interface PrivateDiary {
 /** 我的（设置） */
 export interface Settings {
   nickname: string;
+  /** 私密空间体重目标（kg） */
+  targetWeight?: number;
+  /** 私密空间自动上锁（默认开） */
+  autoLock?: boolean;
 }

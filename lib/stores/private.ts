@@ -34,7 +34,9 @@ export const usePrivateStore = create<PrivateState>((set, get) => ({
   hydrated: false,
 
   unlock: () => set({ locked: false }),
-  lock: () => set({ locked: true }),
+  /** 上锁并清空内存中的私密数据 */
+  lock: () =>
+    set({ locked: true, weightLogs: [], periodLogs: [], diaries: [], hydrated: false }),
 
   /** 仅在解锁后才允许 hydrate，避免私密数据提前进内存 */
   hydrate: async () => {
@@ -44,7 +46,12 @@ export const usePrivateStore = create<PrivateState>((set, get) => ({
       periodLogsRepo.list(),
       privateDiaryRepo.list(),
     ]);
-    set({ weightLogs, periodLogs, diaries, hydrated: true });
+    set({
+      weightLogs: [...weightLogs].sort((a, b) => a.date.localeCompare(b.date)),
+      periodLogs: [...periodLogs].sort((a, b) => b.start.localeCompare(a.start)),
+      diaries,
+      hydrated: true,
+    });
   },
 
   addWeightLog: async (data) => {
