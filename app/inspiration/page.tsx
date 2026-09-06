@@ -1,80 +1,62 @@
-import { Camera, Image as ImageIcon, Music, Quote } from "lucide-react";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Camera, Image as ImageIcon, Music, Plus, Quote, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { useInspirationStore } from "@/lib/stores/inspiration";
+import type { InspirationType } from "@/lib/types";
 
-const filters = ["全部", "文字", "美图", "瞬间"];
-
-const items = [
-  {
-    type: "文字",
-    tagClass: "bg-[#F2E9FE] text-[#8B5FD6]",
-    icon: Quote,
-    bg: "bg-gradient-to-br from-[#F6E7FB] to-[#EFE0FC]",
-    height: "h-[150px]",
-    content:
-      "“你爬山不是为了登顶，而是为了看看路上的花开了没有。”",
-    big: true,
-  },
-  {
-    type: "美图",
-    tagClass: "bg-[#FEF0EE] text-[#D95570]",
-    icon: ImageIcon,
-    bg: "bg-gradient-to-br from-[#FFE4EA] to-[#FFD3DE]",
-    height: "h-[110px]",
-    content: "晚霞收集者",
-    big: false,
-  },
-  {
-    type: "瞬间",
-    tagClass: "bg-[#E9F3EC] text-[#4E9A6E]",
-    icon: Camera,
-    bg: "bg-gradient-to-br from-[#E7F3EB] to-[#D5EBDE]",
-    height: "h-[120px]",
-    content: "猫咪踩了我一脸",
-    big: false,
-  },
-  {
-    type: "文字",
-    tagClass: "bg-[#F2E9FE] text-[#8B5FD6]",
-    icon: Quote,
-    bg: "bg-gradient-to-br from-[#FDEFE0] to-[#FBE4CC]",
-    height: "h-[130px]",
-    content: "“慢慢来，谁还没有一段黎明前的路要走呢。”",
-    big: true,
-  },
-  {
-    type: "美图",
-    tagClass: "bg-[#FEF0EE] text-[#D95570]",
-    icon: ImageIcon,
-    bg: "bg-gradient-to-br from-[#FDEFE8] to-[#FFDFD2]",
-    height: "h-[105px]",
-    content: "窗边的光",
-    big: false,
-  },
-  {
-    type: "瞬间",
-    tagClass: "bg-[#E9F3EC] text-[#4E9A6E]",
-    icon: Music,
-    bg: "bg-gradient-to-br from-[#FFE9EE] to-[#FFDCE5]",
-    height: "h-[140px]",
-    content: "单曲循环的日落歌单",
-    big: true,
-  },
+const filters: (InspirationType | "全部")[] = [
+  "全部",
+  "妆容",
+  "穿搭",
+  "发型",
+  "家居",
+  "美食",
+  "摄影",
+  "文案",
+  "笔记",
 ];
 
-export const metadata = { title: "灵感收藏 · 小佳佳的生活日记" };
+const typeStyles: Record<InspirationType, { icon: typeof Quote; tagClass: string; bg: string }> = {
+  妆容: { icon: ImageIcon, tagClass: "bg-[#F2E9FE] text-[#8B5FD6]", bg: "bg-gradient-to-br from-[#F6E7FB] to-[#EFE0FC]" },
+  穿搭: { icon: ImageIcon, tagClass: "bg-[#F2E9FE] text-[#8B5FD6]", bg: "bg-gradient-to-br from-[#EFE0FC] to-[#F6E7FB]" },
+  发型: { icon: ImageIcon, tagClass: "bg-[#E4F1FB] text-[#4E96DB]", bg: "bg-gradient-to-br from-[#E4F1FB] to-[#D5E9F9]" },
+  家居: { icon: ImageIcon, tagClass: "bg-[#E9F3EC] text-[#4E9A6E]", bg: "bg-gradient-to-br from-[#E7F3EB] to-[#D5EBDE]" },
+  美食: { icon: Camera, tagClass: "bg-[#FEF4EC] text-[#E07A3F]", bg: "bg-gradient-to-br from-[#FDEFE0] to-[#FBE4CC]" },
+  摄影: { icon: ImageIcon, tagClass: "bg-[#FEF0EE] text-[#D95570]", bg: "bg-gradient-to-br from-[#FFE4EA] to-[#FFD3DE]" },
+  文案: { icon: Quote, tagClass: "bg-[#F2E9FE] text-[#8B5FD6]", bg: "bg-gradient-to-br from-[#F6E7FB] to-[#EFE0FC]" },
+  笔记: { icon: Music, tagClass: "bg-[#E9F3EC] text-[#4E9A6E]", bg: "bg-gradient-to-br from-[#FFE9EE] to-[#FFDCE5]" },
+};
 
 export default function InspirationPage() {
+  const { items, hydrate, add, remove } = useInspirationStore();
+  const [filter, setFilter] = useState<InspirationType | "全部">("全部");
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState<{ type: InspirationType; content: string; tags: string }>({
+    type: "文案",
+    content: "",
+    tags: "",
+  });
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  const filtered = filter === "全部" ? items : items.filter((i) => i.type === filter);
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="灵感收藏" subtitle="喜欢的都装进小口袋" />
 
       {/* 筛选 */}
-      <div className="mt-5 flex gap-2">
-        {filters.map((f, i) => (
+      <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {filters.map((f) => (
           <button
             key={f}
-            className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
-              i === 0
+            onClick={() => setFilter(f)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+              filter === f
                 ? "bg-[#F16D88] text-white"
                 : "bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
             }`}
@@ -84,41 +66,131 @@ export default function InspirationPage() {
         ))}
       </div>
 
+      {/* 添加 */}
+      <div className="mt-3">
+        {showAdd ? (
+          <div className="space-y-2 rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+            <div className="flex flex-wrap gap-1.5">
+              {filters.filter((f) => f !== "全部").map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setForm({ ...form, type: t as InspirationType })}
+                  className={`rounded-full px-2.5 py-1 text-[11.5px] transition-colors ${
+                    form.type === t
+                      ? "bg-[#FDECEC] font-medium text-[#E0697E]"
+                      : "bg-[#F7F0EC] text-[#8A7A72]"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              rows={2}
+              placeholder="记下这句文案 / 这个瞬间…"
+              className="w-full resize-none rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+            />
+            <input
+              value={form.tags}
+              onChange={(e) => setForm({ ...form, tags: e.target.value })}
+              placeholder="标签，空格分隔：眼妆 穿搭"
+              className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowAdd(false)}
+                className="rounded-full bg-[#F7F0EC] px-4 py-1.5 text-[12.5px] text-[#8A7A72]"
+              >
+                取消
+              </button>
+              <button
+                onClick={async () => {
+                  if (!form.content.trim()) return;
+                  await add({
+                    type: form.type,
+                    content: form.content.trim(),
+                    tags: form.tags.split(/[\s,，]+/).map((t) => t.trim()).filter(Boolean),
+                    createdAt: new Date().toISOString(),
+                  });
+                  setForm({ type: "文案", content: "", tags: "" });
+                  setShowAdd(false);
+                }}
+                disabled={!form.content.trim()}
+                className="rounded-full bg-[#E96882] px-4 py-1.5 text-[12.5px] font-medium text-white disabled:opacity-40"
+              >
+                收进口袋
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowAdd(true)}
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+            收一条灵感
+          </button>
+        )}
+      </div>
+
       {/* 瀑布流卡片 */}
       <div className="mt-4 columns-2 gap-3 [&>*]:mb-3">
-        {items.map((it, idx) => (
-          <article
-            key={idx}
-            className="break-inside-avoid overflow-hidden rounded-[16px] bg-[#FEFCFB] shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
-          >
-            <div
-              className={`flex items-center justify-center bg-gradient-to-br ${it.bg} ${it.height} ${
-                it.big ? "px-4" : ""
-              }`}
+        {filtered.map((it) => {
+          const style = typeStyles[it.type];
+          const isQuote = it.type === "文案";
+          return (
+            <article
+              key={it.id}
+              className="group break-inside-avoid overflow-hidden rounded-[16px] bg-[#FEFCFB] shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
             >
-              {it.big ? (
-                <p className="font-display text-center text-[14.5px] leading-6 text-[#5C4B45]">
-                  {it.content}
-                </p>
-              ) : (
-                <it.icon className={`size-8 opacity-70`} strokeWidth={1.5} />
-              )}
-            </div>
-            <div className="flex items-center justify-between p-3">
-              <span
-                className={`rounded-full px-2 py-[3px] text-[11px] leading-none ${it.tagClass}`}
+              <div
+                className={`flex items-center justify-center bg-gradient-to-br ${style.bg} ${
+                  isQuote ? "px-4 py-8 min-h-[110px]" : "min-h-[90px]"
+                }`}
               >
-                {it.type}
-              </span>
-              {!it.big && (
-                <span className="text-[12px] text-[#7A6A63]">
-                  {it.content}
+                {isQuote ? (
+                  <p className="font-display text-center text-[14.5px] leading-6 text-[#5C4B45]">
+                    “{it.content}”
+                  </p>
+                ) : (
+                  <p className="px-3 text-center text-[13px] leading-relaxed text-[#5C4B45]">
+                    {it.content}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center justify-between p-3">
+                <span
+                  className={`rounded-full px-2 py-[3px] text-[11px] leading-none ${style.tagClass}`}
+                >
+                  {it.type}
                 </span>
-              )}
-            </div>
-          </article>
-        ))}
+                <div className="flex items-center gap-2">
+                  {it.tags.slice(0, 1).map((t) => (
+                    <span key={t} className="text-[10.5px] text-[#C0ABA3]">
+                      #{t}
+                    </span>
+                  ))}
+                  <button
+                    onClick={() => remove(it.id)}
+                    aria-label="删除"
+                    className="text-[#E3CBCF] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#E76F7B]"
+                  >
+                    <Trash2 className="size-3.5" strokeWidth={1.8} />
+                  </button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
+
+      {filtered.length === 0 && (
+        <p className="mt-8 text-center text-[13px] text-[#A8928B]">
+          这个分类下还没有收藏
+        </p>
+      )}
     </main>
   );
 }

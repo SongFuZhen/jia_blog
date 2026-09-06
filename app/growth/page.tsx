@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Check, Sparkles, Star } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { useRecordsStore } from "@/lib/stores/records";
 
 type Item = { id: string; text: string; done: boolean };
 
@@ -40,6 +41,27 @@ const initialSections: { title: string; tone: string; items: Item[] }[] = [
 
 export default function GrowthPage() {
   const [sections, setSections] = useState(initialSections);
+  const records = useRecordsStore((s) => s.records);
+  const hydrateRecords = useRecordsStore((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrateRecords();
+  }, [hydrateRecords]);
+
+  // 成长时间线：自动提取带「第一次」的记录
+  const firstTimes = useMemo(
+    () =>
+      records
+        .filter(
+          (r) =>
+            !r.draft &&
+            (r.tags.includes("第一次") ||
+              r.title.includes("第一次") ||
+              r.content.includes("第一次")),
+        )
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    [records],
+  );
 
   const { total, done } = useMemo(() => {
     const all = sections.flatMap((s) => s.items);
@@ -66,6 +88,31 @@ export default function GrowthPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="成长清单" subtitle="慢慢来，都会实现的" />
+
+      {/* 成长时间线 */}
+      <section className="mt-5 rounded-[20px] bg-gradient-to-r from-[#FFF6EC] to-[#FDEFE0] p-4 shadow-[var(--shadow-soft-sm)]">
+        <p className="flex items-center gap-1.5 text-[14px] font-semibold text-[#B0763B]">
+          <Star className="size-4 fill-[#F0A24B] text-[#F0A24B]" strokeWidth={1.8} />
+          成长时间线 · 我的「第一次」
+        </p>
+        {firstTimes.length === 0 ? (
+          <p className="mt-2 text-[12px] text-[#C79A6B]">
+            给记录加上「第一次」标签，就会自动出现在这里
+          </p>
+        ) : (
+          <ol className="mt-3 space-y-2.5">
+            {firstTimes.map((r) => (
+              <li key={r.id} className="flex items-start gap-2.5">
+                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-[#F0A24B]" />
+                <div>
+                  <p className="text-[13px] font-medium text-[#5C4B45]">{r.title}</p>
+                  <p className="text-[11px] text-[#C79A6B]">{r.createdAt.slice(0, 10)}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
 
       {/* 总进度 */}
       <div className="mt-5 rounded-[20px] bg-gradient-to-r from-[#FEEBEE] to-[#FBE5EC] p-4">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  BarChart3,
   Bookmark,
   Cat,
   ChevronRight,
@@ -19,6 +20,7 @@ const stats = [
 const menus = [
   { label: "我的草稿", icon: NotebookPen, href: "/drafts" },
   { label: "我的收藏", icon: Bookmark, href: "/inspiration" },
+  { label: "月度回顾", icon: BarChart3, href: "/review" },
   { label: "设置", icon: Settings, href: "/settings" },
   { label: "帮助与关于", icon: Info, href: "/settings" },
 ];
