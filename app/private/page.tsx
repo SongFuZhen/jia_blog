@@ -2,27 +2,32 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { verifyPrivatePassword } from "@/app/actions";
 import {
   ArrowLeft,
   CalendarHeart,
   Heart,
   ListChecks,
+  Loader2,
   Lock,
   Scale,
   Unlock,
 } from "lucide-react";
 
-const PASSWORD = "0723";
-
 export default function PrivatePage() {
   const [locked, setLocked] = useState(true);
   const [pwd, setPwd] = useState("");
   const [error, setError] = useState(false);
+  const [checking, setChecking] = useState(false);
 
-  function handleUnlock() {
-    if (pwd === PASSWORD) {
+  async function handleUnlock() {
+    if (checking || pwd.length === 0) return;
+    setChecking(true);
+    setError(false);
+    const ok = await verifyPrivatePassword(pwd);
+    setChecking(false);
+    if (ok) {
       setLocked(false);
-      setError(false);
     } else {
       setError(true);
     }
@@ -65,6 +70,9 @@ export default function PrivatePage() {
                   setPwd(e.target.value.replace(/\D/g, ""));
                   setError(false);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleUnlock();
+                }}
                 placeholder="····"
                 autoFocus
                 className={`mt-6 h-12 w-[180px] rounded-[14px] border bg-white text-center text-[20px] tracking-[10px] outline-none placeholder:text-[#E3CBCF] focus:border-[#E96882] ${
@@ -79,14 +87,19 @@ export default function PrivatePage() {
 
               <button
                 onClick={handleUnlock}
-                className="mt-5 inline-flex h-11 w-[180px] items-center justify-center gap-1.5 rounded-[14px] bg-[#E96882] text-[14.5px] font-medium text-white shadow-[0_6px_16px_rgba(233,104,130,0.32)] transition-colors hover:bg-[#D56983]"
+                disabled={checking}
+                className="mt-5 inline-flex h-11 w-[180px] items-center justify-center gap-1.5 rounded-[14px] bg-[#E96882] text-[14.5px] font-medium text-white shadow-[0_6px_16px_rgba(233,104,130,0.32)] transition-colors hover:bg-[#D56983] disabled:opacity-60"
               >
-                <Unlock className="size-4" strokeWidth={1.8} />
-                去解锁
+                {checking ? (
+                  <Loader2 className="size-4 animate-spin" strokeWidth={1.8} />
+                ) : (
+                  <Unlock className="size-4" strokeWidth={1.8} />
+                )}
+                {checking ? "验证中…" : "去解锁"}
               </button>
 
               <p className="mt-4 text-[11.5px] text-[#C9A9AF]">
-                演示密码：{PASSWORD}
+                忘记密码的话，悄悄问问他吧
               </p>
             </div>
           </div>
