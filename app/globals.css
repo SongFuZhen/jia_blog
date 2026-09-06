@@ -1,26 +1,239 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "LXGW WenKai Lite", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --font-display: "LXGW WenKai Lite", "STKaiti", "KaiTi", "楷体", cursive;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* ===== Brand / 樱花粉 ===== */
+  --primary: #f56f89;
+  --primary-hover: #e95773;
+  --primary-soft: #fff1f4;
+  --primary-light: #ffe8ed;
+  --primary-foreground: #ffffff;
+
+  /* ===== Background / 奶油底色 ===== */
+  --background: #fdf9f7;
+  --background-soft: #fff5f2;
+  --background-warm: #fff0ec;
+
+  /* ===== Surface / 卡片 ===== */
+  --surface: #ffffff;
+  --surface-soft: #fffdfb;
+  --surface-hover: #fff8f8;
+  --surface-selected: #fff1f4;
+
+  /* ===== Text / 暖黑 + 灰棕 ===== */
+  --foreground: #332a28;
+  --text-secondary: #6f6561;
+  --text-tertiary: #9c918c;
+  --text-placeholder: #b8ada8;
+  --text-disabled: #cfc7c3;
+
+  /* ===== Border ===== */
+  --border: #f0e7e3;
+  --border-soft: #f6efec;
+  --border-active: #ffb8c6;
+
+  /* ===== shadcn 语义映射 ===== */
+  --card: #ffffff;
+  --card-foreground: #332a28;
+  --popover: #ffffff;
+  --popover-foreground: #332a28;
+  --secondary: #fff1f4;
+  --secondary-foreground: #e95773;
+  --muted: #fff5f2;
+  --muted-foreground: #9c918c;
+  --accent: #fff1f4;
+  --accent-foreground: #e95773;
+  --destructive: #e76f7b;
+  --input: #f0e7e3;
+  --ring: #ffb8c6;
+  --chart-1: #f56f89;
+  --chart-2: #a879e8;
+  --chart-3: #f09a62;
+  --chart-4: #63a995;
+  --chart-5: #c94f6b;
+
+  /* 大圆角：lg=20px(Card)，md=16px，sm=12px(Input)，xl=28px */
+  --radius: 1.25rem;
+
+  --sidebar: #fffdfb;
+  --sidebar-foreground: #332a28;
+  --sidebar-primary: #f56f89;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fff1f4;
+  --sidebar-accent-foreground: #e95773;
+  --sidebar-border: #f0e7e3;
+  --sidebar-ring: #ffb8c6;
+
+  /* ===== Functional Colors / 功能色 ===== */
+  --beauty: #a879e8;
+  --beauty-soft: #f4ecff;
+  --beauty-light: #faf6ff;
+
+  --daily: #f47d8f;
+  --daily-soft: #fff0f3;
+  --daily-light: #fff8f9;
+
+  --inspiration: #f09a62;
+  --inspiration-soft: #fff2e8;
+  --inspiration-light: #fff9f4;
+
+  --collection: #63a995;
+  --collection-soft: #ecf8f3;
+  --collection-light: #f6fcf9;
+
+  /* ===== Private / 私密空间 ===== */
+  --private: #c94f6b;
+  --private-primary: #e96882;
+  --private-soft: #fff0f3;
+  --private-background: #ffe7ed;
+  --private-icon: #d95d76;
+
+  /* ===== Status ===== */
+  --success: #62b891;
+  --success-soft: #edf9f3;
+  --warning: #eba85d;
+  --warning-soft: #fff5e9;
+  --error: #e76f7b;
+  --error-soft: #fff0f1;
+
+  /* ===== Shadow / 暖色柔阴影 ===== */
+  --shadow-xs: 0 1px 3px rgba(91, 61, 51, 0.04);
+  --shadow-soft-sm: 0 4px 12px rgba(91, 61, 51, 0.06);
+  --shadow-soft-md: 0 8px 24px rgba(91, 61, 51, 0.08);
+  --shadow-soft-lg: 0 16px 40px rgba(91, 61, 51, 0.1);
+}
+
+/* ===== 品牌色阶（供 bg-primary-500 等使用） ===== */
+@theme {
+  --color-primary-50: #fff5f7;
+  --color-primary-100: #ffe8ed;
+  --color-primary-200: #ffd0da;
+  --color-primary-300: #ffb4c3;
+  --color-primary-400: #ff91a7;
+  --color-primary-500: #f56f89;
+  --color-primary-600: #e95773;
+  --color-primary-700: #cf3f5c;
+  --color-primary-800: #a9344c;
+
+  --color-text-secondary: #6f6561;
+  --color-text-tertiary: #9c918c;
+  --color-text-placeholder: #b8ada8;
+  --color-text-disabled: #cfc7c3;
+
+  --color-background-soft: #fff5f2;
+  --color-background-warm: #fff0ec;
+  --color-background-pink: #fff1f4;
+  --color-background-purple: #f8f3ff;
+  --color-background-green: #f1faf6;
+
+  --color-surface: #ffffff;
+  --color-surface-soft: #fffdfb;
+  --color-surface-hover: #fff8f8;
+  --color-surface-selected: #fff1f4;
+  --color-surface-disabled: #f7f3f1;
+
+  --color-border-soft: #f6efec;
+  --color-border-active: #ffb8c6;
+  --color-border-pink: #ffdde4;
+
+  --color-beauty: #a879e8;
+  --color-beauty-soft: #f4ecff;
+  --color-beauty-light: #faf6ff;
+
+  --color-daily: #f47d8f;
+  --color-daily-soft: #fff0f3;
+  --color-daily-light: #fff8f9;
+
+  --color-inspiration: #f09a62;
+  --color-inspiration-soft: #fff2e8;
+  --color-inspiration-light: #fff9f4;
+
+  --color-collection: #63a995;
+  --color-collection-soft: #ecf8f3;
+  --color-collection-light: #f6fcf9;
+
+  --color-private: #c94f6b;
+  --color-private-primary: #e96882;
+  --color-private-soft: #fff0f3;
+  --color-private-background: #ffe7ed;
+  --color-private-icon: #d95d76;
+
+  --color-success: #62b891;
+  --color-success-soft: #edf9f3;
+  --color-warning: #eba85d;
+  --color-warning-soft: #fff5e9;
+  --color-error: #e76f7b;
+  --color-error-soft: #fff0f1;
+}
+
+.dark {
+  /* 暗色模式暂不启用，保留浅色奶油基调 */
+  --background: #fff9f6;
+  --foreground: #332a28;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
 }
