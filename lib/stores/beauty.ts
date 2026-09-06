@@ -3,15 +3,18 @@ import {
   beautyTipsRepo,
   productsRepo,
   usageLogsRepo,
+  wishesRepo,
 } from "@/lib/repository";
-import type { BeautyTip, Product, UsageLog } from "@/lib/types";
+import type { BeautyTip, Product, UsageLog, Wish } from "@/lib/types";
 
 type NewProduct = Parameters<typeof productsRepo.create>[0];
+type NewWish = Parameters<typeof wishesRepo.create>[0];
 
 interface BeautyState {
   tips: BeautyTip[];
   products: Product[];
   usageLogs: UsageLog[];
+  wishes: Wish[];
   hydrated: boolean;
   hydrate: () => Promise<void>;
 
@@ -33,22 +36,32 @@ interface BeautyState {
   removeProduct: (id: string) => Promise<void>;
   /** 使用打卡：今天用了某个产品 */
   logUsage: (productId: string, date?: string) => Promise<void>;
+
+  addWish: (data: NewWish) => Promise<void>;
+  /** 状态流转：想买 → 已购买 → 已使用 → 不推荐 */
+  updateWish: (
+    id: string,
+    patch: Partial<Omit<Wish, "id">>,
+  ) => Promise<void>;
+  removeWish: (id: string) => Promise<void>;
 }
 
 export const useBeautyStore = create<BeautyState>((set, get) => ({
   tips: [],
   products: [],
   usageLogs: [],
+  wishes: [],
   hydrated: false,
 
   hydrate: async () => {
     if (get().hydrated) return;
-    const [tips, products, usageLogs] = await Promise.all([
+    const [tips, products, usageLogs, wishes] = await Promise.all([
       beautyTipsRepo.list(),
       productsRepo.list(),
       usageLogsRepo.list(),
+      wishesRepo.list(),
     ]);
-    set({ tips, products, usageLogs, hydrated: true });
+    set({ tips, products, usageLogs, wishes, hydrated: true });
   },
 
   markTried: async (tipId, data) => {
@@ -91,5 +104,23 @@ export const useBeautyStore = create<BeautyState>((set, get) => ({
       date: date ?? new Date().toISOString().slice(0, 10),
     });
     set((s) => ({ usageLogs: [log, ...s.usageLogs] }));
+  },
+
+  addWish: async (data) => {
+    const wish = await wishesRepo.create(data);
+    set((s) => ({ wishes: [wish, ...s.wishes] }));
+  },
+
+  updateWish: async (id, patch) => {
+    const updated = await wishesRepo.update(id, patch);
+    if (!updated) return;
+    set((s) => ({
+      wishes: s.wishes.map((w) => (w.id === id ? updated : w)),
+    }));
+  },
+
+  removeWish: async (id) => {
+    await wishesRepo.remove(id);
+    set((s) => ({ wishes: s.wishes.filter((w) => w.id !== id) }));
   },
 }));
