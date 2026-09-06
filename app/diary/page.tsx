@@ -1,7 +1,24 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { useRecordsStore } from "@/lib/stores/records";
+import type { LifeRecord, Mood } from "@/lib/types";
 
 type MoodTone = "pink" | "green" | "orange" | "purple";
+
+const moodTones: Record<Mood, MoodTone> = {
+  开心: "pink",
+  幸福: "pink",
+  平静: "green",
+  委屈: "purple",
+  难过: "purple",
+  生气: "orange",
+  好困: "orange",
+  有成就感: "green",
+};
 
 const moodClasses: Record<MoodTone, string> = {
   pink: "bg-[#FEF0EE] text-[#D95570]",
@@ -10,52 +27,100 @@ const moodClasses: Record<MoodTone, string> = {
   purple: "bg-[#F2E9FE] text-[#8B5FD6]",
 };
 
-const entries = [
-  {
-    date: "08-30",
-    weekday: "周六",
-    mood: "开心",
-    tone: "pink" as MoodTone,
-    title: "今天的妆容超满意",
-    excerpt: "新手奶茶妆第一次成功，出门被夸了两回，开心到路上都想跳起来～",
-  },
-  {
-    date: "08-28",
-    weekday: "周四",
-    mood: "平静",
-    tone: "green" as MoodTone,
-    title: "下班路上的晚霞",
-    excerpt: "天空是橘子汽水的颜色，忽然觉得慢一点的生活也很珍贵。",
-  },
-  {
-    date: "08-26",
-    weekday: "周二",
-    mood: "元气",
-    tone: "orange" as MoodTone,
-    title: "早起打卡第一天",
-    excerpt: "七点起床做了早餐，一整天都精神满满，希望可以坚持一个月！",
-  },
-  {
-    date: "08-24",
-    weekday: "周日",
-    mood: "有点emo",
-    tone: "purple" as MoodTone,
-    title: "莫名低落的一天",
-    excerpt: "也不知道为什么，就是有点提不起劲。抱抱自己，早点睡吧。",
-  },
-  {
-    date: "08-21",
-    weekday: "周四",
-    mood: "开心",
-    tone: "pink" as MoodTone,
-    title: "和好朋友逛街啦",
-    excerpt: "试了好多条裙子，最后买了那条奶白色的，晚上吃了火锅，满足。",
-  },
+const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+const allMoods: (Mood | "全部")[] = [
+  "全部",
+  "开心",
+  "幸福",
+  "平静",
+  "委屈",
+  "难过",
+  "生气",
+  "好困",
+  "有成就感",
 ];
 
-export const metadata = { title: "日记 · 小嘉的生活日记" };
+const monthNames = [
+  "一月",
+  "二月",
+  "三月",
+  "四月",
+  "五月",
+  "六月",
+  "七月",
+  "八月",
+  "九月",
+  "十月",
+  "十一月",
+  "十二月",
+];
+
+/** 连续记录天数：从最近一条往前数连续的自然日 */
+function fmtLocalDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function calcStreak(dates: string[]): number {
+  if (dates.length === 0) return 0;
+  const set = new Set(dates);
+  const cursor = new Date(`${dates[0]}T00:00:00`);
+  const today = new Date();
+  const diffDays = Math.floor(
+    (today.setHours(0, 0, 0, 0) - cursor.getTime()) / 86400000,
+  );
+  if (diffDays > 1) return 0;
+  let streak = 0;
+  while (set.has(fmtLocalDate(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
 
 export default function DiaryPage() {
+  const records = useRecordsStore((s) => s.records);
+  const hydrate = useRecordsStore((s) => s.hydrate);
+  const [moodFilter, setMoodFilter] = useState<Mood | "全部">("全部");
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  const filtered = useMemo(
+    () =>
+      records.filter(
+        (r) =>
+          !r.draft &&
+          (moodFilter === "全部" || r.mood === moodFilter),
+      ),
+    [records, moodFilter],
+  );
+
+  // 按月分组（records 已按 createdAt 倒序）
+  const groups = useMemo(() => {
+    const map = new Map<string, LifeRecord[]>();
+    for (const r of filtered) {
+      const key = r.createdAt.slice(0, 7);
+      const list = map.get(key) ?? [];
+      list.push(r);
+      map.set(key, list);
+    }
+    return [...map.entries()];
+  }, [filtered]);
+
+  const now = new Date();
+  const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const monthCount = records.filter(
+    (r) => !r.draft && r.createdAt.startsWith(monthPrefix),
+  ).length;
+  const streak = calcStreak(
+    records
+      .filter((r) => !r.draft)
+      .map((r) => r.createdAt.slice(0, 10))
+      .sort()
+      .reverse(),
+  );
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="我的日记" subtitle="把每天的心情都收藏起来" />
@@ -67,7 +132,7 @@ export default function DiaryPage() {
         </span>
         <div>
           <p className="text-[14.5px] font-semibold text-[#3B2E2A]">
-            8月已记录 12 篇 · 连续记录 5 天
+            {now.getMonth() + 1}月已记录 {monthCount} 篇 · 连续记录 {streak} 天
           </p>
           <p className="mt-0.5 text-[12px] text-[#A8928B]">
             坚持记录的你，一直在闪闪发光
@@ -75,41 +140,76 @@ export default function DiaryPage() {
         </div>
       </div>
 
-      {/* 日记列表 */}
-      <div className="mt-5 space-y-3">
-        {entries.map((e) => (
-          <article
-            key={e.title}
-            className="flex gap-3.5 rounded-[16px] bg-[#FEFCFB] p-3.5 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
+      {/* 心情筛选 */}
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {allMoods.map((m) => (
+          <button
+            key={m}
+            onClick={() => setMoodFilter(m)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+              moodFilter === m
+                ? "bg-[#F16D88] text-white"
+                : "bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
+            }`}
           >
-            {/* 日期块 */}
-            <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-[#FDF3F0] py-2">
-              <span className="text-[15px] leading-none font-bold text-[#E0697E]">
-                {e.date}
-              </span>
-              <span className="mt-1 text-[11px] text-[#A8928B]">
-                {e.weekday}
-              </span>
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="truncate text-[15px] font-semibold text-[#2E2422]">
-                  {e.title}
-                </h2>
-                <span
-                  className={`shrink-0 rounded-full px-2.5 py-[3px] text-[11px] leading-none ${moodClasses[e.tone]}`}
-                >
-                  {e.mood}
-                </span>
-              </div>
-              <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-[#7A6A63]">
-                {e.excerpt}
-              </p>
-            </div>
-          </article>
+            {m}
+          </button>
         ))}
       </div>
+
+      {/* 分组列表 */}
+      {groups.length === 0 ? (
+        <p className="mt-10 text-center text-[13px] text-[#A8928B]">
+          {moodFilter === "全部" ? "还没有记录，点下面的 ＋ 写下第一条吧" : "这个心情下还没有记录"}
+        </p>
+      ) : (
+        groups.map(([month, list]) => (
+          <section key={month} className="mt-5">
+            <h2 className="px-1 text-[13px] font-semibold text-[#B08A80]">
+              {monthNames[Number(month.slice(5, 7)) - 1]}
+            </h2>
+            <div className="mt-2.5 space-y-3">
+              {list.map((e) => {
+                const d = new Date(`${e.createdAt.slice(0, 10)}T00:00:00`);
+                return (
+                  <Link
+                    key={e.id}
+                    href={`/record/${e.id}`}
+                    className="flex gap-3.5 rounded-[16px] bg-[#FEFCFB] p-3.5 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
+                  >
+                    <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-[#FDF3F0] py-2">
+                      <span className="text-[15px] leading-none font-bold text-[#E0697E]">
+                        {e.createdAt.slice(5, 10)}
+                      </span>
+                      <span className="mt-1 text-[11px] text-[#A8928B]">
+                        {weekdays[d.getDay()]}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="truncate text-[15px] font-semibold text-[#2E2422]">
+                          {e.title}
+                        </h3>
+                        {e.mood && (
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-[3px] text-[11px] leading-none ${moodClasses[moodTones[e.mood]]}`}
+                          >
+                            {e.mood}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-[#7A6A63]">
+                        {e.content}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        ))
+      )}
     </main>
   );
 }

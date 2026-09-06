@@ -3,6 +3,7 @@ import { Hero } from "@/components/home/hero";
 import { PrivateCard } from "@/components/home/private-card";
 import { QuickEntries } from "@/components/home/quick-entries";
 import { RecentPosts } from "@/components/home/recent-posts";
+import { TodaySurprise } from "@/components/home/today-surprise";
 
 export default function Home() {
   return (
@@ -14,6 +15,8 @@ export default function Home() {
         <QuickEntries />
 
         <PrivateCard />
+
+        <TodaySurprise />
 
         <RecentPosts />
 
