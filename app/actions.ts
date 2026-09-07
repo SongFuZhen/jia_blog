@@ -100,8 +100,8 @@ export async function aiPolishDiary(
  * P2-13：AI 生成小红书文案。
  */
 export async function aiGenerateXhs(input: DiaryInput): Promise<string> {
-  return chat(
-    "你是一位小红书文案写手。根据用户的日记内容，写一条真实、可爱、不夸张的小红书文案：带一个吸睛但不说谎的标题、简短分段的正文、贴合内容的 emoji，最后给出 5-8 个话题标签（#开头）。整体口语化、像真人和朋友分享。只输出文案本身。",
+  const text = await chat(
+    "你是一位小红书文案写手。根据用户的日记内容，写一条真实、可爱、不夸张的小红书文案。格式要求：第一行是标题；空一行后是正文，分 2-3 个短段；最后一行是 5-8 个话题标签（#开头，空格分隔）。语气口语化、像真人和朋友分享，贴合适量的 emoji。不要用 markdown 加粗或代码块，标题不要带「标题：」前缀。只输出文案本身。",
     [
       `日记标题：${input.title}`,
       input.mood ? `心情：${input.mood}` : "",
@@ -111,4 +111,49 @@ export async function aiGenerateXhs(input: DiaryInput): Promise<string> {
       .filter(Boolean)
       .join("\n"),
   );
+  return formatXhs(text);
+}
+
+/** 小红书文案格式化：不依赖模型自觉，总是重排为「标题 / 空行 / 短段落 / 空行 / 标签行」 */
+function formatXhs(text: string): string {
+  let t = text
+    .trim()
+    .replace(/^```(?:\w*)\n?|\n?```$/g, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .trim();
+
+  // 1. 提取末尾标签块
+  let tags = "";
+  const tagMatch = t.match(/((?:#\S+[ \t]*)+)[。！~!！]?$/);
+  if (tagMatch) {
+    tags = tagMatch[1].replace(/\s+/g, " ").trim();
+    t = t.slice(0, tagMatch.index).trim();
+  }
+
+  // 2. 拆行；若没有独立标题（只有一行或首行过长），按句重拆、首句作标题
+  let lines = t.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  if (lines.length === 1 || lines[0].length > 40) {
+    const merged = lines.join("");
+    const firstEnd = merged.search(/[。！？!?~]/);
+    if (firstEnd !== -1 && firstEnd < 40) {
+      lines = [
+        merged.slice(0, firstEnd + 1),
+        ...splitSentences(merged.slice(firstEnd + 1)),
+      ];
+    } else {
+      lines = splitSentences(merged);
+    }
+  }
+
+  return [lines[0], "", ...lines.slice(1), "", tags]
+    .filter((s) => s !== "")
+    .join("\n");
+}
+
+function splitSentences(s: string): string[] {
+  return s
+    .replace(/([。！？!?~])(?=[^\s#])/g, "$1\n")
+    .split("\n")
+    .map((x) => x.trim())
+    .filter(Boolean);
 }
