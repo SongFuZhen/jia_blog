@@ -90,7 +90,7 @@ export default function GrowthPage() {
       <PageHeader title="成长清单" subtitle="慢慢来，都会实现的" />
 
       {/* 成长时间线 */}
-      <section className="mt-5 rounded-[20px] bg-gradient-to-r from-orange-soft to-orange-soft p-4 shadow-[var(--shadow-soft-sm)]">
+      <section className="mt-5 rounded-[20px] bg-gradient-to-r from-orange-soft to-orange-soft-2 p-4 shadow-[var(--shadow-soft-sm)]">
         <p className="flex items-center gap-1.5 text-[14px] font-semibold text-gold-ink">
           <Star className="size-4 fill-[#F0A24B] text-[#F0A24B]" strokeWidth={1.8} />
           成长时间线 · 我的「第一次」

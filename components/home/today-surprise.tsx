@@ -36,7 +36,7 @@ export function TodaySurprise() {
         className={`flex items-center gap-3 rounded-[20px] p-4 shadow-[var(--shadow-soft-sm)] ${
           surprise.isAnniversary
             ? "bg-gradient-to-r from-pink-soft to-pink-soft-2"
-            : "bg-gradient-to-r from-orange-soft to-orange-soft"
+            : "bg-gradient-to-r from-orange-soft to-orange-soft-2"
         }`}
       >
         <span

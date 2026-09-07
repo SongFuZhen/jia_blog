@@ -58,7 +58,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 backdrop-blur-lg [mask-image:linear-gradient(to_bottom,transparent,black)]" />
 
       {/* 向下延伸的同色渐变，增加 Hero 高度并融入页面底色 */}
-      <div className="h-28 bg-gradient-to-b from-[#FAF3F0] to-background" />
+      <div className="h-28 bg-gradient-to-b from-[#FAF3F0] to-background dark:from-[#241B1E]" />
     </section>
   );
 }

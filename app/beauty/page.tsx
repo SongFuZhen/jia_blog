@@ -190,7 +190,7 @@ export default function BeautyPage() {
         <>
           {/* 本月常用 Top5 */}
           {monthlyTop.length > 0 && (
-            <div className="mt-4 rounded-[16px] bg-gradient-to-r from-purple-soft to-purple-soft p-4">
+            <div className="mt-4 rounded-[16px] bg-gradient-to-r from-purple-soft to-purple-soft-2 p-4">
               <p className="text-[13px] font-semibold text-purple-ink">
                 本月最常用
               </p>

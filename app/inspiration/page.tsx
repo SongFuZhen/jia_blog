@@ -19,13 +19,13 @@ const filters: (InspirationType | "全部")[] = [
 ];
 
 const typeStyles: Record<InspirationType, { icon: typeof Quote; tagClass: string; bg: string }> = {
-  妆容: { icon: ImageIcon, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft" },
-  穿搭: { icon: ImageIcon, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft" },
-  发型: { icon: ImageIcon, tagClass: "bg-blue-soft text-blue-ink", bg: "bg-gradient-to-br from-blue-soft to-blue-soft" },
-  家居: { icon: ImageIcon, tagClass: "bg-green-soft text-green-ink", bg: "bg-gradient-to-br from-green-soft to-green-soft" },
-  美食: { icon: Camera, tagClass: "bg-orange-soft text-orange-ink", bg: "bg-gradient-to-br from-orange-soft to-orange-soft" },
+  妆容: { icon: ImageIcon, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft-2" },
+  穿搭: { icon: ImageIcon, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft-2" },
+  发型: { icon: ImageIcon, tagClass: "bg-blue-soft text-blue-ink", bg: "bg-gradient-to-br from-blue-soft to-blue-soft-2" },
+  家居: { icon: ImageIcon, tagClass: "bg-green-soft text-green-ink", bg: "bg-gradient-to-br from-green-soft to-green-soft-2" },
+  美食: { icon: Camera, tagClass: "bg-orange-soft text-orange-ink", bg: "bg-gradient-to-br from-orange-soft to-orange-soft-2" },
   摄影: { icon: ImageIcon, tagClass: "bg-pink-soft text-pink-ink", bg: "bg-gradient-to-br from-pink-soft to-pink-soft-2" },
-  文案: { icon: Quote, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft" },
+  文案: { icon: Quote, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft-2" },
   笔记: { icon: Music, tagClass: "bg-green-soft text-green-ink", bg: "bg-gradient-to-br from-pink-soft to-pink-soft-2" },
 };
 
