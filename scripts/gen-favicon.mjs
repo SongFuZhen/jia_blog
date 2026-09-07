@@ -1,13 +1,13 @@
 /**
- * 生成多尺寸 app/favicon.ico（16/32/48，PNG 内嵌式 ICO，现代浏览器全支持）。
- * 手写 ICO 容器：ICONDIR + ICONDIRENTRY×N + 各尺寸 PNG 数据。
+ * 生成多尺寸 app/favicon.ico（16/32/48/64/128/256，PNG 内嵌式 ICO）。
+ * 源用已裁切填充的 icon-256.png，高分屏下不糊。
  * 换图标时：先跑 scripts/gen-icons.mjs，再跑本脚本。
  */
 import sharp from "sharp";
 import fs from "node:fs";
 
-const SRC = "public/icons/icon-source.png";
-const SIZES = [16, 32, 48];
+const SRC = "public/icons/icon-256.png";
+const SIZES = [16, 32, 48, 64, 128, 256];
 
 const pngs = [];
 for (const size of SIZES) {
@@ -26,8 +26,8 @@ const entries = [];
 const datas = [];
 for (const { size, buf } of pngs) {
   const entry = Buffer.alloc(16);
-  entry.writeUInt8(size, 0); // width（256 写 0，这里最大 48）
-  entry.writeUInt8(size, 1); // height
+  entry.writeUInt8(size === 256 ? 0 : size, 0); // width（256 约定写 0）
+  entry.writeUInt8(size === 256 ? 0 : size, 1); // height
   entry.writeUInt8(0, 2); // palette
   entry.writeUInt8(0, 3); // reserved
   entry.writeUInt16LE(1, 4); // planes
