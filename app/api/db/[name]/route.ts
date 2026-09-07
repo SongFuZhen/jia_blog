@@ -4,7 +4,24 @@ import { isDbCollection, PRIVATE_COLLECTIONS } from "@/lib/db-collections";
 
 export const dynamic = "force-dynamic";
 
-const sql = neon(process.env.DATABASE_URL!);
+// 惰性初始化：构建时环境变量可能尚未注入，首次请求才创建连接
+let _sql: ReturnType<typeof neon> | null = null;
+function getSql(): (
+  strings: TemplateStringsArray,
+  ...params: unknown[]
+) => Promise<Record<string, unknown>[]> {
+  if (!_sql) {
+    const url = process.env.DATABASE_URL;
+    if (!url) {
+      throw new Error("DATABASE_URL 未配置");
+    }
+    _sql = neon(url);
+  }
+  return _sql as (
+    strings: TemplateStringsArray,
+    ...params: unknown[]
+  ) => Promise<Record<string, unknown>[]>;
+}
 
 /** 校验集合名与私密访问凭证；返回错误响应或 null */
 function guard(req: NextRequest, name: string): NextResponse | null {
@@ -30,7 +47,7 @@ export async function GET(
   const denied = guard(req, name);
   if (denied) return denied;
 
-  const rows = await sql`SELECT data FROM jia.collections WHERE name = ${name}`;
+  const rows = await getSql()`SELECT data FROM jia.collections WHERE name = ${name}`;
   return NextResponse.json(rows.map((r) => r.data));
 }
 
@@ -51,7 +68,7 @@ export async function POST(
     if (!id) {
       return NextResponse.json({ error: "missing id" }, { status: 400 });
     }
-    await sql`
+    await getSql()`
       INSERT INTO jia.collections (name, id, data, updated_at)
       VALUES (${name}, ${id}, ${JSON.stringify({ ...data, id })}::jsonb, now())
       ON CONFLICT (name, id) DO UPDATE
@@ -74,7 +91,7 @@ export async function PATCH(
   if (!id) return NextResponse.json({ error: "missing id" }, { status: 400 });
 
   const patch = await req.json();
-  const rows = await sql`
+  const rows = await getSql()`
     UPDATE jia.collections
     SET data = data || ${JSON.stringify(patch)}::jsonb, updated_at = now()
     WHERE name = ${name} AND id = ${id}
@@ -98,7 +115,7 @@ export async function DELETE(
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "missing id" }, { status: 400 });
 
-  const rows = await sql`
+  const rows = await getSql()`
     DELETE FROM jia.collections WHERE name = ${name} AND id = ${id} RETURNING id
   `;
   return NextResponse.json({ ok: rows.length > 0 });

@@ -5,6 +5,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { useComposeStore } from "@/lib/stores/ui";
 import { useRecordsStore } from "@/lib/stores/records";
 import { compressImage } from "@/lib/image";
+import { uploadImage } from "@/lib/upload";
 import type { Mood, RecordType } from "@/lib/types";
 
 const typeOptions: { value: RecordType; label: string }[] = [
@@ -59,12 +60,18 @@ export function ComposeSheet() {
     if (!files || files.length === 0) return;
     setBusy(true);
     try {
-      const compressed = await Promise.all(
-        Array.from(files)
-          .slice(0, 4)
-          .map((f) => compressImage(f)),
-      );
-      setImages((prev) => [...prev, ...compressed].slice(0, 6));
+      const picked = Array.from(files).slice(0, 6 - images.length);
+      for (const file of picked) {
+        // 压缩 → 上传图床换外链；失败则回退 base64 直存
+        const compressed = await compressImage(file);
+        let src = compressed;
+        try {
+          src = await uploadImage(compressed);
+        } catch {
+          // 图床不可用时静默回退，记录依然可保存
+        }
+        setImages((prev) => (prev.length >= 6 ? prev : [...prev, src]));
+      }
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
