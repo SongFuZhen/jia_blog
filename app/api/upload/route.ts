@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const IMGBED_URL = process.env.IMGBED_URL;
+// 图床地址为默认值（自建 ImgBed），部署平台只需配 IMGBED_API_TOKEN
+const IMGBED_URL =
+  process.env.IMGBED_URL ?? "https://cloudflare-imgbed-91r.pages.dev";
 const IMGBED_TOKEN = process.env.IMGBED_API_TOKEN;
 
 const MAX_BYTES = 5 * 1024 * 1024;
