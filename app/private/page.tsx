@@ -156,22 +156,22 @@ export default function PrivatePage() {
           <Link
             href="/"
             aria-label="返回"
-            className="flex size-9 items-center justify-center rounded-full bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+            className="flex size-9 items-center justify-center rounded-full bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
           >
             <ArrowLeft className="size-4.5" strokeWidth={1.8} />
           </Link>
         </header>
 
         <div className="mt-16 flex flex-col items-center">
-          <div className="rounded-[28px] bg-gradient-to-b from-[#FFF0F3] to-[#FFE7ED] p-8 shadow-[var(--shadow-soft-md)]">
+          <div className="rounded-[28px] bg-gradient-to-b from-pink-soft to-pink-soft-2 p-8 shadow-[var(--shadow-soft-md)]">
             <div className="flex flex-col items-center">
               <span className="flex size-14 items-center justify-center rounded-full bg-[#D56983] text-white shadow-[0_6px_16px_rgba(213,105,131,0.35)]">
                 <Lock className="size-6" strokeWidth={1.8} />
               </span>
-              <h1 className="mt-4 text-[18px] font-bold text-[#9F3E56]">
+              <h1 className="mt-4 text-[18px] font-bold text-pink-ink">
                 专属私密空间
               </h1>
-              <p className="mt-1.5 text-center text-[12.5px] text-[#9B777E]">
+              <p className="mt-1.5 text-center text-[12.5px] text-ink-3">
                 这里放着只属于你的小秘密
                 <br />
                 输入密码才能进入哦
@@ -191,8 +191,8 @@ export default function PrivatePage() {
                 }}
                 placeholder="····"
                 autoFocus
-                className={`mt-6 h-12 w-[180px] rounded-[14px] border bg-white text-center text-[20px] tracking-[10px] outline-none placeholder:text-[#E3CBCF] focus:border-[#E96882] ${
-                  error ? "border-[#E76F7B]" : "border-[#FFD1DB]"
+                className={`mt-6 h-12 w-[180px] rounded-[14px] border bg-white text-center text-[20px] tracking-[10px] outline-none placeholder:text-ink-5 focus:border-[#E96882] ${
+                  error ? "border-[#E76F7B]" : "border-border-strong"
                 }`}
               />
               {error && (
@@ -214,7 +214,7 @@ export default function PrivatePage() {
                 {checking ? "验证中…" : "去解锁"}
               </button>
 
-              <p className="mt-4 text-[11.5px] text-[#C9A9AF]">
+              <p className="mt-4 text-[11.5px] text-ink-5">
                 忘记密码的话，悄悄问问他吧
               </p>
             </div>
@@ -228,16 +228,16 @@ export default function PrivatePage() {
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <header className="flex items-center justify-between pt-9">
         <div>
-          <h1 className="text-[22px] font-bold text-[#2F2528]">
+          <h1 className="text-[22px] font-bold text-ink">
             欢迎回来，{settings.nickname}
           </h1>
-          <p className="font-display mt-1.5 text-[15px] text-[#B79A90]">
+          <p className="font-display mt-1.5 text-[15px] text-ink-3">
             这里只有你能进来
           </p>
         </div>
         <button
           onClick={handleLock}
-          className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+          className="flex items-center gap-1.5 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
         >
           <Lock className="size-3.5" strokeWidth={1.8} />
           上锁
@@ -245,13 +245,13 @@ export default function PrivatePage() {
       </header>
 
       {/* 体重记录 */}
-      <section className="mt-5 rounded-[20px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+      <section className="mt-5 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-full bg-[#FDEFE8] text-[#F08A4B]">
+            <span className="flex size-8 items-center justify-center rounded-full bg-orange-soft text-orange-ink">
               <Scale className="size-4" strokeWidth={1.8} />
             </span>
-            <h2 className="text-[14.5px] font-semibold text-[#3B2E2A]">体重记录</h2>
+            <h2 className="text-[14.5px] font-semibold text-ink">体重记录</h2>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -259,7 +259,7 @@ export default function PrivatePage() {
               onChange={(e) => setWeightInput(e.target.value.replace(/[^\d.]/g, ""))}
               placeholder="今天 52.3"
               inputMode="decimal"
-              className="w-[88px] rounded-[10px] bg-[#FAF5F2] px-2.5 py-1.5 text-right text-[12.5px] outline-none placeholder:text-[#C9B8B2]"
+              className="w-[88px] rounded-[10px] bg-field px-2.5 py-1.5 text-right text-[12.5px] outline-none placeholder:text-ink-5"
             />
             <button
               onClick={async () => {
@@ -272,48 +272,48 @@ export default function PrivatePage() {
                 setWeightInput("");
               }}
               disabled={!weightInput}
-              className="rounded-full bg-[#FDECEC] px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] transition-colors hover:bg-[#FBDDE2] disabled:opacity-40"
+              className="rounded-full bg-pink-soft px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] transition-colors hover:bg-pink-hover disabled:opacity-40"
             >
               记一笔
             </button>
           </div>
         </div>
         <div className="mt-3 flex items-end justify-between">
-          <p className="text-[26px] leading-none font-bold text-[#3B2E2A]">
+          <p className="text-[26px] leading-none font-bold text-ink">
             {latestWeight ? latestWeight.weight : "--"}
-            <span className="ml-1 text-[13.5px] font-medium text-[#A8928B]">kg</span>
+            <span className="ml-1 text-[13.5px] font-medium text-ink-4">kg</span>
           </p>
           {remain !== null && (
-            <p className="text-[12px] text-[#A8928B]">
+            <p className="text-[12px] text-ink-4">
               距目标还差 <span className="text-[#E0697E]">{remain.toFixed(1)} kg</span>
             </p>
           )}
         </div>
         <WeightTrend logs={weightLogs} />
-        <p className="mt-1 text-[11px] text-[#C0ABA3]">
+        <p className="mt-1 text-[11px] text-ink-5">
           目标 {target} kg · 认识自己的身体，而不是要求自己变成某个数字
         </p>
       </section>
 
       {/* 经期提醒 */}
-      <section className="mt-3 rounded-[20px] bg-gradient-to-r from-[#FFF0F3] to-[#FFE7ED] p-4 shadow-[var(--shadow-soft-sm)]">
+      <section className="mt-3 rounded-[20px] bg-gradient-to-r from-pink-soft to-pink-soft-2 p-4 shadow-[var(--shadow-soft-sm)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="flex size-8 items-center justify-center rounded-full bg-[#D56983] text-white">
               <CalendarHeart className="size-4" strokeWidth={1.8} />
             </span>
-            <h2 className="text-[14.5px] font-semibold text-[#3B2E2A]">经期提醒</h2>
+            <h2 className="text-[14.5px] font-semibold text-ink">经期提醒</h2>
           </div>
         </div>
         {periodInfo ? (
           <>
-            <p className="mt-3 text-[13.5px] text-[#5C4B45]">
-              <span className="font-bold text-[#C94F6B]">{periodInfo.text}</span>
+            <p className="mt-3 text-[13.5px] text-ink-2">
+              <span className="font-bold text-pink-ink">{periodInfo.text}</span>
             </p>
-            <p className="mt-1 text-[11.5px] text-[#A8928B]">{periodInfo.tip}</p>
+            <p className="mt-1 text-[11.5px] text-ink-4">{periodInfo.tip}</p>
           </>
         ) : (
-          <p className="mt-3 text-[13px] text-[#5C4B45]">
+          <p className="mt-3 text-[13px] text-ink-2">
             还没有记录，先记下最近一次开始的日子吧
           </p>
         )}
@@ -322,13 +322,13 @@ export default function PrivatePage() {
             type="date"
             value={periodStart}
             onChange={(e) => setPeriodStart(e.target.value)}
-            className="flex-1 rounded-[10px] bg-white/80 px-2.5 py-1.5 text-[12px] text-[#5C4B45] outline-none"
+            className="flex-1 rounded-[10px] bg-white/80 dark:bg-field/90 px-2.5 py-1.5 text-[12px] text-ink-2 outline-none"
           />
           <input
             type="date"
             value={periodEnd}
             onChange={(e) => setPeriodEnd(e.target.value)}
-            className="flex-1 rounded-[10px] bg-white/80 px-2.5 py-1.5 text-[12px] text-[#5C4B45] outline-none"
+            className="flex-1 rounded-[10px] bg-white/80 dark:bg-field/90 px-2.5 py-1.5 text-[12px] text-ink-2 outline-none"
           />
           <button
             onClick={async () => {
@@ -353,20 +353,20 @@ export default function PrivatePage() {
           value={periodFeeling}
           onChange={(e) => setPeriodFeeling(e.target.value)}
           placeholder="这次的感觉（选填）：有点累 / 腰酸…"
-          className="mt-2 w-full rounded-[10px] bg-white/80 px-2.5 py-1.5 text-[12px] outline-none placeholder:text-[#C9A9AF]"
+          className="mt-2 w-full rounded-[10px] bg-white/80 dark:bg-field/90 px-2.5 py-1.5 text-[12px] outline-none placeholder:text-ink-5"
         />
       </section>
 
       {/* 私密日记 */}
-      <section className="mt-3 rounded-[20px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+      <section className="mt-3 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-full bg-[#FDECEC] text-[#E0697E]">
+            <span className="flex size-8 items-center justify-center rounded-full bg-pink-soft text-[#E0697E]">
               <Heart className="size-4" strokeWidth={1.8} />
             </span>
-            <h2 className="text-[14.5px] font-semibold text-[#3B2E2A]">私密日记</h2>
+            <h2 className="text-[14.5px] font-semibold text-ink">私密日记</h2>
           </div>
-          <p className="text-[11px] text-[#C0ABA3]">🔒 只有你能看到</p>
+          <p className="text-[11px] text-ink-5">🔒 只有你能看到</p>
         </div>
 
         <div className="mt-3">
@@ -375,7 +375,7 @@ export default function PrivatePage() {
             onChange={(e) => setDiaryContent(e.target.value)}
             rows={2}
             placeholder="只写给自己的话…"
-            className="w-full resize-none rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] leading-relaxed outline-none placeholder:text-[#C9B8B2]"
+            className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13px] leading-relaxed outline-none placeholder:text-ink-5"
           />
           <div className="mt-2 flex items-center justify-between">
             <div className="flex gap-1.5">
@@ -385,8 +385,8 @@ export default function PrivatePage() {
                   onClick={() => setDiaryMood(diaryMood === m ? null : m)}
                   className={`rounded-full px-2.5 py-1 text-[11px] transition-colors ${
                     diaryMood === m
-                      ? "bg-[#FDECEC] font-medium text-[#E0697E]"
-                      : "bg-[#F7F0EC] text-[#8A7A72]"
+                      ? "bg-pink-soft font-medium text-[#E0697E]"
+                      : "bg-cream text-ink-3"
                   }`}
                 >
                   {m}
@@ -416,19 +416,19 @@ export default function PrivatePage() {
           {diaries.map((d) => (
             <div
               key={d.id}
-              className="rounded-[12px] bg-[#FFF9F6] px-3.5 py-2.5"
+              className="rounded-[12px] bg-card-warm px-3.5 py-2.5"
             >
-              <p className="text-[11px] text-[#C0ABA3]">
+              <p className="text-[11px] text-ink-5">
                 {d.date}
                 {d.mood && ` · ${d.mood}`}
               </p>
-              <p className="mt-0.5 text-[12.5px] leading-relaxed text-[#5C4B45]">
+              <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-2">
                 {d.content}
               </p>
             </div>
           ))}
           {hydrated && diaries.length === 0 && (
-            <p className="py-2 text-center text-[12px] text-[#C9B8B2]">
+            <p className="py-2 text-center text-[12px] text-ink-5">
               还没有私密日记
             </p>
           )}
@@ -436,18 +436,18 @@ export default function PrivatePage() {
       </section>
 
       {/* 小秘密清单（占位提醒） */}
-      <section className="mt-3 rounded-[20px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+      <section className="mt-3 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
         <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-full bg-[#FDECEC] text-[#E0697E]">
+          <span className="flex size-8 items-center justify-center rounded-full bg-pink-soft text-[#E0697E]">
             <ListChecks className="size-4" strokeWidth={1.8} />
           </span>
-          <h2 className="text-[14.5px] font-semibold text-[#3B2E2A]">小秘密清单</h2>
+          <h2 className="text-[14.5px] font-semibold text-ink">小秘密清单</h2>
         </div>
         <div className="mt-3 space-y-2">
           {["想去看一次海", "学会盘头发", "攒钱买那支口红"].map((t) => (
             <div key={t} className="flex items-center gap-2">
               <Heart className="size-3.5 fill-[#F5B8C4] text-[#F5B8C4]" strokeWidth={1.8} />
-              <span className="text-[12.5px] text-[#5C4B45]">{t}</span>
+              <span className="text-[12.5px] text-ink-2">{t}</span>
             </div>
           ))}
         </div>

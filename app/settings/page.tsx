@@ -13,7 +13,7 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
       role="switch"
       aria-checked={on}
       className={`relative h-6.5 w-11 shrink-0 rounded-full transition-colors ${
-        on ? "bg-[#F16D88]" : "bg-[#E8D5CE]"
+        on ? "bg-[#F16D88]" : "bg-toggle-off"
       }`}
     >
       <span
@@ -43,7 +43,11 @@ export default function SettingsPage() {
   }, [hydrate, beautyHydrate, recordsHydrate]);
 
   // settings 从 store 加载完成后，同步一次到本地表单（渲染期同步，避免 effect 级联）
-  if (settings !== syncedSettings) {
+  // 只同步昵称/目标体重，切换深色模式等其它设置变更不会打断输入
+  if (
+    settings.nickname !== syncedSettings.nickname ||
+    settings.targetWeight !== syncedSettings.targetWeight
+  ) {
     setSyncedSettings(settings);
     setNickname(settings.nickname);
     setTargetWeight(settings.targetWeight ? String(settings.targetWeight) : "");
@@ -95,24 +99,24 @@ export default function SettingsPage() {
       <PageHeader title="设置" subtitle="把小站调成喜欢的样子" />
 
       {/* 个人资料 */}
-      <div className="mt-5 space-y-3 rounded-[20px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+      <div className="mt-5 space-y-3 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
         <div>
-          <p className="text-[12.5px] font-medium text-[#8A7A72]">你的昵称</p>
+          <p className="text-[12.5px] font-medium text-ink-3">你的昵称</p>
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             placeholder="小佳佳"
-            className="mt-1.5 w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13.5px] outline-none"
+            className="mt-1.5 w-full rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] outline-none"
           />
         </div>
         <div>
-          <p className="text-[12.5px] font-medium text-[#8A7A72]">体重目标（kg）</p>
+          <p className="text-[12.5px] font-medium text-ink-3">体重目标（kg）</p>
           <input
             value={targetWeight}
             onChange={(e) => setTargetWeight(e.target.value.replace(/[^\d.]/g, ""))}
             placeholder="49.9"
             inputMode="decimal"
-            className="mt-1.5 w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13.5px] outline-none"
+            className="mt-1.5 w-full rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] outline-none"
           />
         </div>
         <button
@@ -124,22 +128,22 @@ export default function SettingsPage() {
       </div>
 
       {/* 通用设置 */}
-      <div className="mt-3 overflow-hidden rounded-[20px] bg-[#FEFCFB] shadow-[var(--shadow-soft-sm)]">
+      <div className="mt-3 overflow-hidden rounded-[20px] bg-card shadow-[var(--shadow-soft-sm)]">
         <div className="flex items-center justify-between px-4 py-3.5">
           <div>
-            <p className="text-[14.5px] font-medium text-[#3B2E2A]">提醒我记录</p>
-            <p className="mt-0.5 text-[11.5px] text-[#A8928B]">
+            <p className="text-[14.5px] font-medium text-ink">提醒我记录</p>
+            <p className="mt-0.5 text-[11.5px] text-ink-4">
               每晚八点，轻轻提醒一下
             </p>
           </div>
           <Toggle on={remind} onClick={() => setRemind(!remind)} />
         </div>
-        <div className="flex items-center justify-between border-t border-[#F6EFEC] px-4 py-3.5">
+        <div className="flex items-center justify-between border-t border-border-soft px-4 py-3.5">
           <div>
-            <p className="text-[14.5px] font-medium text-[#3B2E2A]">
+            <p className="text-[14.5px] font-medium text-ink">
               离开时自动上锁
             </p>
-            <p className="mt-0.5 text-[11.5px] text-[#A8928B]">
+            <p className="mt-0.5 text-[11.5px] text-ink-4">
               私密空间 5 分钟无操作或切 Tab 自动上锁
             </p>
           </div>
@@ -148,44 +152,49 @@ export default function SettingsPage() {
             onClick={() => updateSettings({ autoLock: !(settings.autoLock ?? true) })}
           />
         </div>
-        <div className="flex items-center justify-between border-t border-[#F6EFEC] px-4 py-3.5 opacity-60">
+        <div className="flex items-center justify-between border-t border-border-soft px-4 py-3.5 opacity-60">
           <div>
-            <p className="text-[14.5px] font-medium text-[#3B2E2A]">深色模式</p>
-            <p className="mt-0.5 text-[11.5px] text-[#A8928B]">即将上线</p>
+            <p className="text-[14.5px] font-medium text-ink">深色模式</p>
+            <p className="mt-0.5 text-[11.5px] text-ink-4">
+              默认亮色，在夜间换成温柔的暗色
+            </p>
           </div>
-          <Toggle on={false} onClick={() => {}} />
+          <Toggle
+            on={!!settings.dark}
+            onClick={() => updateSettings({ dark: !settings.dark })}
+          />
         </div>
       </div>
 
       {/* 数据 */}
-      <div className="mt-3 overflow-hidden rounded-[20px] bg-[#FEFCFB] shadow-[var(--shadow-soft-sm)]">
+      <div className="mt-3 overflow-hidden rounded-[20px] bg-card shadow-[var(--shadow-soft-sm)]">
         <button
           onClick={clearCache}
-          className="flex w-full items-center justify-between px-4 py-3.5 transition-colors hover:bg-[#FFF8F5]"
+          className="flex w-full items-center justify-between px-4 py-3.5 transition-colors hover:bg-card-hover"
         >
-          <span className="text-[14.5px] font-medium text-[#3B2E2A]">
+          <span className="text-[14.5px] font-medium text-ink">
             清除本地数据
           </span>
-          <span className="text-[12.5px] text-[#C0ABA3]">{sizeLabel}</span>
+          <span className="text-[12.5px] text-ink-5">{sizeLabel}</span>
         </button>
         <button
           onClick={exportData}
-          className="flex w-full items-center justify-between border-t border-[#F6EFEC] px-4 py-3.5 transition-colors hover:bg-[#FFF8F5]"
+          className="flex w-full items-center justify-between border-t border-border-soft px-4 py-3.5 transition-colors hover:bg-card-hover"
         >
-          <span className="text-[14.5px] font-medium text-[#3B2E2A]">
+          <span className="text-[14.5px] font-medium text-ink">
             导出我的数据
           </span>
-          <span className="text-[12.5px] text-[#C0ABA3]">备份为 JSON</span>
+          <span className="text-[12.5px] text-ink-5">备份为 JSON</span>
         </button>
       </div>
 
       {/* 关于 */}
-      <div className="mt-3 rounded-[20px] bg-[#FEFCFB] p-5 text-center shadow-[var(--shadow-soft-sm)]">
-        <p className="font-display text-[17px] text-[#B79A90]">
+      <div className="mt-3 rounded-[20px] bg-card p-5 text-center shadow-[var(--shadow-soft-sm)]">
+        <p className="font-display text-[17px] text-ink-3">
           小佳佳的生活日记
         </p>
-        <p className="mt-1 text-[12px] text-[#C0ABA3]">Version 0.1.0</p>
-        <p className="font-display mt-3 text-[13.5px] text-[#CBB3AA]">
+        <p className="mt-1 text-[12px] text-ink-5">Version 0.1.0</p>
+        <p className="font-display mt-3 text-[13.5px] text-ink-5">
           不必很完美 · 只需做自己
         </p>
       </div>

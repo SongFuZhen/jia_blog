@@ -70,12 +70,12 @@ export default function RecordPage({
           <button
             onClick={() => router.back()}
             aria-label="返回"
-            className="flex size-9 items-center justify-center rounded-full bg-white text-[#8A7A72] shadow-[var(--shadow-xs)]"
+            className="flex size-9 items-center justify-center rounded-full bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)]"
           >
             <ArrowLeft className="size-4.5" strokeWidth={1.8} />
           </button>
         </header>
-        <p className="mt-16 text-center text-[13.5px] text-[#A8928B]">
+        <p className="mt-16 text-center text-[13.5px] text-ink-4">
           {records.length === 0 ? "加载中…" : "这条记录不见啦"}
         </p>
       </main>
@@ -170,7 +170,7 @@ export default function RecordPage({
         <button
           onClick={() => router.back()}
           aria-label="返回"
-          className="flex size-9 items-center justify-center rounded-full bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+          className="flex size-9 items-center justify-center rounded-full bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
         >
           <ArrowLeft className="size-4.5" strokeWidth={1.8} />
         </button>
@@ -179,14 +179,14 @@ export default function RecordPage({
             <>
               <button
                 onClick={() => setShowXhs((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+                className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
               >
                 <Sparkles className="size-3.5" strokeWidth={1.8} />
                 小红书文案
               </button>
               <button
                 onClick={startEdit}
-                className="rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+                className="rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
               >
                 编辑
               </button>
@@ -206,17 +206,17 @@ export default function RecordPage({
 
       {/* 小红书文案面板 */}
       {showXhs && (
-        <div className="mt-4 rounded-[16px] bg-[#FFF6EC] p-4 shadow-[var(--shadow-soft-sm)]">
-          <p className="text-[12px] font-medium text-[#C79A6B]">
+        <div className="mt-4 rounded-[16px] bg-orange-soft p-4 shadow-[var(--shadow-soft-sm)]">
+          <p className="text-[12px] font-medium text-gold-ink">
             小红书文案（{isAiText ? "AI 生成" : "模板生成"}）
           </p>
           {aiBusy && !isAiText ? (
-            <p className="mt-3 flex items-center gap-2 text-[12.5px] text-[#C79A6B]">
+            <p className="mt-3 flex items-center gap-2 text-[12.5px] text-gold-ink">
               <Loader2 className="size-4 animate-spin" />
               AI 正在写，稍等一下…
             </p>
           ) : (
-            <pre className="font-display mt-2 text-[12.5px] leading-relaxed whitespace-pre-wrap text-[#5C4B45]">
+            <pre className="font-display mt-2 text-[12.5px] leading-relaxed whitespace-pre-wrap text-ink-2">
               {xhsText}
             </pre>
           )}
@@ -227,7 +227,7 @@ export default function RecordPage({
             <button
               onClick={handleAiXhs}
               disabled={aiBusy}
-              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E] disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225] py-1.5 text-[12px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E] disabled:opacity-50"
             >
               <WandSparkles className="size-3.5" strokeWidth={1.8} />
               {aiBusy ? "生成中…" : "AI 生成"}
@@ -235,7 +235,7 @@ export default function RecordPage({
             {isAiText && (
               <button
                 onClick={() => setXhsOverride(null)}
-                className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+                className="rounded-full bg-white px-3 dark:bg-[#2B2225] py-1.5 text-[12px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
               >
                 看模板版
               </button>
@@ -246,7 +246,7 @@ export default function RecordPage({
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1500);
               }}
-              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+              className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225] py-1.5 text-[12px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
             >
               <Copy className="size-3.5" strokeWidth={1.8} />
               {copied ? "复制好啦" : "复制文案"}
@@ -256,19 +256,19 @@ export default function RecordPage({
       )}
 
       {/* 正文卡片 */}
-      <article className="mt-4 rounded-[20px] bg-[#FEFCFB] p-5 shadow-[var(--shadow-soft-sm)]">
+      <article className="mt-4 rounded-[20px] bg-card p-5 shadow-[var(--shadow-soft-sm)]">
         {editing && form ? (
           <div className="space-y-3">
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[15px] font-medium text-[#3B2E2A] outline-none"
+              className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[15px] font-medium text-ink outline-none"
             />
             <textarea
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
               rows={6}
-              className="w-full resize-none rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13.5px] leading-relaxed text-[#3B2E2A] outline-none"
+              className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] leading-relaxed text-ink outline-none"
             />
             <div className="flex flex-wrap gap-1.5">
               {moods.map((m) => (
@@ -277,8 +277,8 @@ export default function RecordPage({
                   onClick={() => setForm({ ...form, mood: form.mood === m ? null : m })}
                   className={`rounded-full px-3 py-1.5 text-[12.5px] transition-colors ${
                     form.mood === m
-                      ? "bg-[#FDECEC] font-medium text-[#E0697E]"
-                      : "bg-[#F7F0EC] text-[#8A7A72]"
+                      ? "bg-pink-soft font-medium text-[#E0697E]"
+                      : "bg-cream text-ink-3"
                   }`}
                 >
                   {m}
@@ -289,7 +289,7 @@ export default function RecordPage({
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
               placeholder="标签，空格分隔"
-              className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] text-[#3B2E2A] outline-none"
+              className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] text-ink outline-none"
             />
             {aiError && editing && (
               <p className="text-[11.5px] text-[#E76F7B]">{aiError}</p>
@@ -297,7 +297,7 @@ export default function RecordPage({
             <button
               onClick={handlePolish}
               disabled={aiBusy || !form.content.trim()}
-              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-[12px] bg-[#FFF6EC] text-[13px] font-medium text-[#C79A6B] transition-colors hover:bg-[#FDEFE0] disabled:opacity-50"
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-[12px] bg-orange-soft text-[13px] font-medium text-gold-ink transition-colors hover:bg-orange-soft disabled:opacity-50"
             >
               {aiBusy ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -309,10 +309,10 @@ export default function RecordPage({
           </div>
         ) : (
           <>
-            <h1 className="text-[19px] leading-snug font-bold text-[#2E2422]">
+            <h1 className="text-[19px] leading-snug font-bold text-ink">
               {record.title}
             </h1>
-            <p className="mt-1.5 text-[11.5px] text-[#A08D85]">
+            <p className="mt-1.5 text-[11.5px] text-ink-4">
               {record.createdAt.slice(0, 10)}
               {record.mood && ` · ${record.mood}`}
               {record.weather && ` · ${record.weather}`}
@@ -332,7 +332,7 @@ export default function RecordPage({
                 ))}
               </div>
             )}
-            <p className="mt-3 text-[13.5px] leading-relaxed whitespace-pre-wrap text-[#4A3C37]">
+            <p className="mt-3 text-[13.5px] leading-relaxed whitespace-pre-wrap text-ink-2">
               {record.content}
             </p>
             {record.tags.length > 0 && (
@@ -340,7 +340,7 @@ export default function RecordPage({
                 {record.tags.map((t) => (
                   <span
                     key={t}
-                    className="rounded-full bg-[#FEF0EE] px-2.5 py-[3px] text-[11px] text-[#D95570]"
+                    className="rounded-full bg-pink-soft px-2.5 py-[3px] text-[11px] text-pink-ink"
                   >
                     #{t}
                   </span>
@@ -355,7 +355,7 @@ export default function RecordPage({
       {!editing && (
         <button
           onClick={handleDelete}
-          className="mx-auto mt-5 flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] text-[#C9A9AF] transition-colors hover:bg-[#FFF0F1] hover:text-[#E76F7B]"
+          className="mx-auto mt-5 flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] text-ink-5 transition-colors hover:bg-pink-hover hover:text-[#E76F7B]"
         >
           <Trash2 className="size-3.5" strokeWidth={1.8} />
           删除这条记录

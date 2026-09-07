@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/bottom-nav";
 import { ComposeSheet } from "@/components/compose-sheet";
 import { PwaRegister } from "@/components/pwa-register";
+import { ThemeSync } from "@/components/theme-sync";
 import "lxgw-wenkai-lite-webfont/lxgwwenkailite-regular.css";
 import "lxgw-wenkai-lite-webfont/lxgwwenkailite-bold.css";
 import "./globals.css";
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="zh-CN" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         {children}
+        <ThemeSync />
         <ComposeSheet />
         <BottomNav />
         <PwaRegister />

@@ -157,4 +157,6 @@ export interface Settings {
   targetWeight?: number;
   /** 私密空间自动上锁（默认开） */
   autoLock?: boolean;
+  /** 暗色模式（默认关） */
+  dark?: boolean;
 }

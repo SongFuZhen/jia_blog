@@ -21,10 +21,10 @@ const moodTones: Record<Mood, MoodTone> = {
 };
 
 const moodClasses: Record<MoodTone, string> = {
-  pink: "bg-[#FEF0EE] text-[#D95570]",
-  green: "bg-[#E9F3EC] text-[#4E9A6E]",
-  orange: "bg-[#FEF4EC] text-[#E07A3F]",
-  purple: "bg-[#F2E9FE] text-[#8B5FD6]",
+  pink: "bg-pink-soft text-pink-ink",
+  green: "bg-green-soft text-green-ink",
+  orange: "bg-orange-soft text-orange-ink",
+  purple: "bg-purple-soft text-purple-ink",
 };
 
 const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
@@ -126,15 +126,15 @@ export default function DiaryPage() {
       <PageHeader title="我的日记" subtitle="把每天的心情都收藏起来" />
 
       {/* 本月记录摘要 */}
-      <div className="mt-5 flex items-center gap-3 rounded-[20px] bg-gradient-to-r from-[#FEEBEE] to-[#FBE5EC] p-4">
+      <div className="mt-5 flex items-center gap-3 rounded-[20px] bg-gradient-to-r from-pink-soft to-pink-soft-2 p-4">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#D56983] text-white">
           <Sparkles className="size-5" strokeWidth={1.8} />
         </span>
         <div>
-          <p className="text-[14.5px] font-semibold text-[#3B2E2A]">
+          <p className="text-[14.5px] font-semibold text-ink">
             {now.getMonth() + 1}月已记录 {monthCount} 篇 · 连续记录 {streak} 天
           </p>
-          <p className="mt-0.5 text-[12px] text-[#A8928B]">
+          <p className="mt-0.5 text-[12px] text-ink-4">
             坚持记录的你，一直在闪闪发光
           </p>
         </div>
@@ -149,7 +149,7 @@ export default function DiaryPage() {
             className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
               moodFilter === m
                 ? "bg-[#F16D88] text-white"
-                : "bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
+                : "bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
             }`}
           >
             {m}
@@ -159,13 +159,13 @@ export default function DiaryPage() {
 
       {/* 分组列表 */}
       {groups.length === 0 ? (
-        <p className="mt-10 text-center text-[13px] text-[#A8928B]">
+        <p className="mt-10 text-center text-[13px] text-ink-4">
           {moodFilter === "全部" ? "还没有记录，点下面的 ＋ 写下第一条吧" : "这个心情下还没有记录"}
         </p>
       ) : (
         groups.map(([month, list]) => (
           <section key={month} className="mt-5">
-            <h2 className="px-1 text-[13px] font-semibold text-[#B08A80]">
+            <h2 className="px-1 text-[13px] font-semibold text-ink-3">
               {monthNames[Number(month.slice(5, 7)) - 1]}
             </h2>
             <div className="mt-2.5 space-y-3">
@@ -175,20 +175,20 @@ export default function DiaryPage() {
                   <Link
                     key={e.id}
                     href={`/record/${e.id}`}
-                    className="flex gap-3.5 rounded-[16px] bg-[#FEFCFB] p-3.5 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
+                    className="flex gap-3.5 rounded-[16px] bg-card p-3.5 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
                   >
-                    <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-[#FDF3F0] py-2">
+                    <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-pink-soft py-2">
                       <span className="text-[15px] leading-none font-bold text-[#E0697E]">
                         {e.createdAt.slice(5, 10)}
                       </span>
-                      <span className="mt-1 text-[11px] text-[#A8928B]">
+                      <span className="mt-1 text-[11px] text-ink-4">
                         {weekdays[d.getDay()]}
                       </span>
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="truncate text-[15px] font-semibold text-[#2E2422]">
+                        <h3 className="truncate text-[15px] font-semibold text-ink">
                           {e.title}
                         </h3>
                         {e.mood && (
@@ -199,7 +199,7 @@ export default function DiaryPage() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-[#7A6A63]">
+                      <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-ink-2">
                         {e.content}
                       </p>
                     </div>

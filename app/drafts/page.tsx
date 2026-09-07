@@ -20,10 +20,10 @@ const moodTones: Record<Mood, MoodTone> = {
 };
 
 const moodClasses: Record<MoodTone, string> = {
-  pink: "bg-[#FEF0EE] text-[#D95570]",
-  green: "bg-[#E9F3EC] text-[#4E9A6E]",
-  orange: "bg-[#FEF4EC] text-[#E07A3F]",
-  purple: "bg-[#F2E9FE] text-[#8B5FD6]",
+  pink: "bg-pink-soft text-pink-ink",
+  green: "bg-green-soft text-green-ink",
+  orange: "bg-orange-soft text-orange-ink",
+  purple: "bg-purple-soft text-purple-ink",
 };
 
 const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
@@ -50,14 +50,14 @@ export default function DraftsPage() {
       <PageHeader title="我的草稿" subtitle="没写完的，慢慢补" />
 
       {drafts.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center rounded-[20px] bg-[#FEFCFB] px-6 py-10 shadow-[var(--shadow-soft-sm)]">
-          <span className="flex size-12 items-center justify-center rounded-full bg-[#FDECEC] text-[#E0697E]">
+        <div className="mt-8 flex flex-col items-center rounded-[20px] bg-card px-6 py-10 shadow-[var(--shadow-soft-sm)]">
+          <span className="flex size-12 items-center justify-center rounded-full bg-pink-soft text-[#E0697E]">
             <NotebookPen className="size-6" strokeWidth={1.8} />
           </span>
-          <p className="mt-3 text-[14px] font-medium text-[#3B2E2A]">
+          <p className="mt-3 text-[14px] font-medium text-ink">
             还没有草稿
           </p>
-          <p className="mt-1 text-center text-[12px] text-[#A8928B]">
+          <p className="mt-1 text-center text-[12px] text-ink-4">
             想到什么先存着，有空再来接着写
           </p>
         </div>
@@ -68,20 +68,20 @@ export default function DraftsPage() {
             return (
               <article
                 key={d.id}
-                className="flex gap-3.5 rounded-[16px] bg-[#FEFCFB] p-3.5 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
+                className="flex gap-3.5 rounded-[16px] bg-card p-3.5 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
               >
-                <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-[#FDF3F0] py-2">
+                <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-pink-soft py-2">
                   <span className="text-[15px] leading-none font-bold text-[#E0697E]">
                     {date}
                   </span>
-                  <span className="mt-1 text-[11px] text-[#A8928B]">
+                  <span className="mt-1 text-[11px] text-ink-4">
                     {weekday}
                   </span>
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="truncate text-[15px] font-semibold text-[#2E2422]">
+                    <h2 className="truncate text-[15px] font-semibold text-ink">
                       {d.title || "无标题草稿"}
                     </h2>
                     {d.mood && (
@@ -92,7 +92,7 @@ export default function DraftsPage() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-[#7A6A63]">
+                  <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-ink-2">
                     {d.content || "（还没有正文）"}
                   </p>
                 </div>

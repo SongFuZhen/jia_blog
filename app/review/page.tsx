@@ -73,7 +73,7 @@ export default function ReviewPage() {
       <PageHeader title="回顾" subtitle="原来这段时间变了这么多" />
 
       {/* 月报 / 年报切换 */}
-      <div className="mt-4 flex gap-1.5 rounded-full bg-[#F7F0EC] p-1">
+      <div className="mt-4 flex gap-1.5 rounded-full bg-cream p-1">
         {(
           [
             { key: "month", label: "月报" },
@@ -85,8 +85,8 @@ export default function ReviewPage() {
             onClick={() => setMode(t.key)}
             className={`h-9 flex-1 rounded-full text-[13.5px] font-medium transition-colors ${
               mode === t.key
-                ? "bg-white text-[#E0697E] shadow-[var(--shadow-xs)]"
-                : "text-[#8A7A72]"
+                ? "bg-white text-[#E0697E] dark:bg-[#342A2E] shadow-[var(--shadow-xs)]"
+                : "text-ink-3"
             }`}
           >
             {t.label}
@@ -103,62 +103,62 @@ export default function ReviewPage() {
         <button
           onClick={() => shiftMonth(-1)}
           aria-label="上个月"
-          className="flex size-8 items-center justify-center rounded-full text-[#8A7A72] hover:bg-[#FFF5F2] hover:text-[#E0697E]"
+          className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-card-hover hover:text-[#E0697E]"
         >
           <ArrowLeft className="size-4" strokeWidth={1.8} />
         </button>
-        <p className="text-[14.5px] font-bold text-[#3B2E2A]">
+        <p className="text-[14.5px] font-bold text-ink">
           {year} 年 {Number(monthNum)} 月
         </p>
         <button
           onClick={() => shiftMonth(1)}
           disabled={isFuture}
           aria-label="下个月"
-          className="flex size-8 items-center justify-center rounded-full text-[#8A7A72] hover:bg-[#FFF5F2] hover:text-[#E0697E] disabled:opacity-30"
+          className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-card-hover hover:text-[#E0697E] disabled:opacity-30"
         >
           <ArrowRight className="size-4" strokeWidth={1.8} />
         </button>
       </div>
 
       {/* 生活小报 */}
-      <div className="mt-4 rounded-[20px] bg-[#FEFCFB] p-5 shadow-[var(--shadow-soft-sm)]">
-        <p className="font-display text-center text-[18px] font-bold text-[#9F3E56]">
+      <div className="mt-4 rounded-[20px] bg-card p-5 shadow-[var(--shadow-soft-sm)]">
+        <p className="font-display text-center text-[18px] font-bold text-pink-ink">
           {settings.nickname}的 {Number(monthNum)} 月生活小报
         </p>
         <div className="mx-auto mt-2 h-px w-16 bg-[#F5B8C4]" />
 
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
+          <div className="rounded-[14px] bg-card-warm py-3">
             <p className="text-[20px] font-bold text-[#E0697E]">{monthRecords.length}</p>
-            <p className="mt-0.5 text-[11px] text-[#A8928B]">条记录</p>
+            <p className="mt-0.5 text-[11px] text-ink-4">条记录</p>
           </div>
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
-            <p className="text-[20px] font-bold text-[#8B63D9]">{monthInspirations.length}</p>
-            <p className="mt-0.5 text-[11px] text-[#A8928B]">个灵感</p>
+          <div className="rounded-[14px] bg-card-warm py-3">
+            <p className="text-[20px] font-bold text-purple-ink">{monthInspirations.length}</p>
+            <p className="mt-0.5 text-[11px] text-ink-4">个灵感</p>
           </div>
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
-            <p className="text-[20px] font-bold text-[#4E9A6E]">{triedTips.length}</p>
-            <p className="mt-0.5 text-[11px] text-[#A8928B]">次美妆尝试</p>
+          <div className="rounded-[14px] bg-card-warm py-3">
+            <p className="text-[20px] font-bold text-green-ink">{triedTips.length}</p>
+            <p className="mt-0.5 text-[11px] text-ink-4">次美妆尝试</p>
           </div>
         </div>
 
         {/* 心情分布 */}
         {moodCount.length > 0 && (
           <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">心情天气图</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">心情天气图</h2>
             <div className="mt-2 space-y-1.5">
               {moodCount.slice(0, 4).map(([mood, count]) => {
                 const max = moodCount[0][1];
                 return (
                   <div key={mood} className="flex items-center gap-2">
-                    <span className="w-16 shrink-0 text-[12px] text-[#7A6A63]">{mood}</span>
-                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#F7EDE8]">
+                    <span className="w-16 shrink-0 text-[12px] text-ink-2">{mood}</span>
+                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border-soft">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88]"
                         style={{ width: `${(count / max) * 100}%` }}
                       />
                     </div>
-                    <span className="w-6 text-right text-[11px] text-[#A8928B]">{count}</span>
+                    <span className="w-6 text-right text-[11px] text-ink-4">{count}</span>
                   </div>
                 );
               })}
@@ -169,12 +169,12 @@ export default function ReviewPage() {
         {/* 高频标签 */}
         {topTags.length > 0 && (
           <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">这个月在忙什么</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">这个月在忙什么</h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {topTags.map(([tag, count]) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-[#FEF0EE] px-3 py-1 text-[12px] text-[#D95570]"
+                  className="rounded-full bg-pink-soft px-3 py-1 text-[12px] text-pink-ink"
                 >
                   {tag} × {count}
                 </span>
@@ -186,7 +186,7 @@ export default function ReviewPage() {
         {/* 照片墙 */}
         {photos.length > 0 && (
           <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">照片角落</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">照片角落</h2>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {photos.map((src, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -202,7 +202,7 @@ export default function ReviewPage() {
         )}
 
         {monthRecords.length === 0 && monthInspirations.length === 0 && (
-          <p className="mt-5 text-center text-[12.5px] text-[#C9B8B2]">
+          <p className="mt-5 text-center text-[12.5px] text-ink-5">
             这个月还很安静，去写下点什么吧
           </p>
         )}

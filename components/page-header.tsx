@@ -30,15 +30,15 @@ export function PageHeader({
         <button
           onClick={handleBack}
           aria-label="返回"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
         >
           <ArrowLeft className="size-4.5" strokeWidth={1.8} />
         </button>
       )}
       <div>
-        <h1 className="text-[22px] font-bold text-[#2F2528]">{title}</h1>
+        <h1 className="text-[22px] font-bold text-ink">{title}</h1>
         {subtitle && (
-          <p className="font-display mt-1.5 text-[15px] text-[#B79A90]">
+          <p className="font-display mt-1.5 text-[15px] text-ink-3">
             {subtitle}
           </p>
         )}

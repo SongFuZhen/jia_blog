@@ -33,12 +33,12 @@ export default function TipDetailPage({
           <button
             onClick={() => router.back()}
             aria-label="返回"
-            className="flex size-9 items-center justify-center rounded-full bg-white text-[#8A7A72] shadow-[var(--shadow-xs)]"
+            className="flex size-9 items-center justify-center rounded-full bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)]"
           >
             <ArrowLeft className="size-4.5" strokeWidth={1.8} />
           </button>
         </header>
-        <p className="mt-16 text-center text-[13.5px] text-[#A8928B]">
+        <p className="mt-16 text-center text-[13.5px] text-ink-4">
           {tips.length === 0 ? "加载中…" : "这篇技巧不见啦"}
         </p>
       </main>
@@ -51,14 +51,14 @@ export default function TipDetailPage({
         <button
           onClick={() => router.back()}
           aria-label="返回"
-          className="flex size-9 items-center justify-center rounded-full bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+          className="flex size-9 items-center justify-center rounded-full bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
         >
           <ArrowLeft className="size-4.5" strokeWidth={1.8} />
         </button>
         {!showTried && (
           <button
             onClick={() => setShowTried(true)}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
           >
             <NotebookPen className="size-3.5" strokeWidth={1.8} />
             我试过了
@@ -66,9 +66,9 @@ export default function TipDetailPage({
         )}
       </header>
 
-      <article className="mt-4 rounded-[20px] bg-[#FEFCFB] p-5 shadow-[var(--shadow-soft-sm)]">
-        <h1 className="text-[19px] font-bold text-[#2E2422]">{tip.title}</h1>
-        <p className="mt-1.5 text-[11.5px] text-[#A08D85]">
+      <article className="mt-4 rounded-[20px] bg-card p-5 shadow-[var(--shadow-soft-sm)]">
+        <h1 className="text-[19px] font-bold text-ink">{tip.title}</h1>
+        <p className="mt-1.5 text-[11.5px] text-ink-4">
           {tip.category}
           {tip.scene && ` · 适合${tip.scene}`}
           {" · "}
@@ -80,11 +80,11 @@ export default function TipDetailPage({
 
         {tip.steps.length > 0 && (
           <>
-            <h2 className="mt-4 text-[14px] font-semibold text-[#3B2E2A]">步骤</h2>
+            <h2 className="mt-4 text-[14px] font-semibold text-ink">步骤</h2>
             <ol className="mt-2 space-y-1.5">
               {tip.steps.map((s, i) => (
-                <li key={i} className="flex gap-2 text-[13px] leading-relaxed text-[#4A3C37]">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#FDECEC] text-[11px] font-bold text-[#E0697E]">
+                <li key={i} className="flex gap-2 text-[13px] leading-relaxed text-ink-2">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-pink-soft text-[11px] font-bold text-[#E0697E]">
                     {i + 1}
                   </span>
                   {s}
@@ -96,12 +96,12 @@ export default function TipDetailPage({
 
         {tip.products.length > 0 && (
           <>
-            <h2 className="mt-4 text-[14px] font-semibold text-[#3B2E2A]">用到的东西</h2>
+            <h2 className="mt-4 text-[14px] font-semibold text-ink">用到的东西</h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {tip.products.map((p) => (
                 <span
                   key={p}
-                  className="rounded-full bg-[#F2E9FE] px-2.5 py-[3px] text-[11.5px] text-[#8B5FD6]"
+                  className="rounded-full bg-purple-soft px-2.5 py-[3px] text-[11.5px] text-purple-ink"
                 >
                   {p}
                 </span>
@@ -112,21 +112,21 @@ export default function TipDetailPage({
 
         {tip.notes && (
           <>
-            <h2 className="mt-4 text-[14px] font-semibold text-[#3B2E2A]">注意事项</h2>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-[#4A3C37]">{tip.notes}</p>
+            <h2 className="mt-4 text-[14px] font-semibold text-ink">注意事项</h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-ink-2">{tip.notes}</p>
           </>
         )}
       </article>
 
       {/* 「我试过了」记录 */}
       {tip.triedAt && !showTried && (
-        <div className="mt-3 rounded-[16px] bg-[#E9F3EC] p-4">
-          <p className="text-[13px] font-semibold text-[#4E9A6E]">
+        <div className="mt-3 rounded-[16px] bg-green-soft p-4">
+          <p className="text-[13px] font-semibold text-green-ink">
             <Check className="mr-1 inline size-4" strokeWidth={2.4} />
             {tip.triedAt.slice(0, 10)} 试过了 · 效果 {tip.triedEffect ?? "—"} 分
           </p>
           {tip.nextAdjust && (
-            <p className="mt-1 text-[12px] text-[#5C8A6E]">
+            <p className="mt-1 text-[12px] text-green-ink">
               下次想调整：{tip.nextAdjust}
             </p>
           )}
@@ -134,21 +134,21 @@ export default function TipDetailPage({
       )}
 
       {showTried && (
-        <div className="mt-3 rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
-          <p className="text-[13.5px] font-semibold text-[#3B2E2A]">记录这次尝试</p>
+        <div className="mt-3 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+          <p className="text-[13.5px] font-semibold text-ink">记录这次尝试</p>
           <div className="mt-2.5 flex items-center gap-3">
             <input
               type="date"
               value={triedAt}
               onChange={(e) => setTriedAt(e.target.value)}
-              className="rounded-[10px] bg-[#FAF5F2] px-3 py-2 text-[12.5px] text-[#3B2E2A] outline-none"
+              className="rounded-[10px] bg-field px-3 py-2 text-[12.5px] text-ink outline-none"
             />
             <div className="flex gap-0.5">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} onClick={() => setEffect(n)}>
                   <Star
                     className={`size-5 ${
-                      n <= effect ? "fill-[#FFC46B] text-[#FFC46B]" : "text-[#E8D5CE]"
+                      n <= effect ? "fill-[#FFC46B] text-[#FFC46B]" : "text-toggle-off"
                     }`}
                   />
                 </button>
@@ -159,12 +159,12 @@ export default function TipDetailPage({
             value={nextAdjust}
             onChange={(e) => setNextAdjust(e.target.value)}
             placeholder="下次想调整的点（选填）：比如眼影再淡一点"
-            className="mt-2.5 w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+            className="mt-2.5 w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
           />
           <div className="mt-3 flex justify-end gap-2">
             <button
               onClick={() => setShowTried(false)}
-              className="rounded-full bg-[#F7F0EC] px-3.5 py-1.5 text-[12.5px] text-[#8A7A72] transition-colors hover:bg-[#FDECEC] hover:text-[#E0697E]"
+              className="rounded-full bg-cream px-3.5 py-1.5 text-[12.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
             >
               取消
             </button>

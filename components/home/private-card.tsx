@@ -4,7 +4,7 @@ import Image from "next/image";
 export function PrivateCard() {
   return (
     <section className="mt-2 px-6">
-      <div className="relative flex overflow-hidden rounded-[20px] bg-gradient-to-r from-[#FEEBEE] to-[#FBE5EC] shadow-[var(--shadow-soft-sm)]">
+      <div className="relative flex overflow-hidden rounded-[20px] bg-gradient-to-r from-pink-soft to-pink-soft-2 shadow-[var(--shadow-soft-sm)]">
         {/* 左侧信封插画 + 右缘模糊过渡 */}
         <div className="relative w-[96px] shrink-0">
           <Image
@@ -17,7 +17,7 @@ export function PrivateCard() {
           {/* 右缘模糊：越靠右越模糊 */}
           <div className="pointer-events-none absolute inset-y-0 right-0 w-12 backdrop-blur-[3px] [mask-image:linear-gradient(to_left,black,transparent)]" />
           {/* 右缘渐变融入卡片底色 */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-r from-transparent to-[#FEEBEE]" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-r from-transparent to-pink-soft" />
         </div>
 
         {/* 右上角装饰爱心 */}
@@ -30,12 +30,12 @@ export function PrivateCard() {
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#D56983] text-white">
               <Lock className="size-4" strokeWidth={2} />
             </span>
-            <h2 className="text-[15px] font-bold text-[#3B2E2A]">专属私密空间</h2>
+            <h2 className="text-[15px] font-bold text-ink">专属私密空间</h2>
           </div>
-          <p className="mt-1.5 text-[12.5px] font-medium text-[#5C4B45]">
+          <p className="mt-1.5 text-[12.5px] font-medium text-ink-2">
             体重 · 经期 · 更多属于你的小秘密
           </p>
-          <p className="mt-0.5 text-[11px] text-[#A8928B]">
+          <p className="mt-0.5 text-[11px] text-ink-4">
             需要输入密码才能查看哦～
           </p>
 
@@ -43,7 +43,7 @@ export function PrivateCard() {
           <div className="mt-2 flex justify-end">
             <a
               href="/private"
-              className="inline-flex h-8 items-center gap-0.5 rounded-full bg-[#D56983] px-4 text-[12.5px] font-medium text-white shadow-[0_4px_10px_rgba(213,105,131,0.3)] transition-colors hover:bg-[#C94F6B]"
+              className="inline-flex h-8 items-center gap-0.5 rounded-full bg-[#D56983] px-4 text-[12.5px] font-medium text-white shadow-[0_4px_10px_rgba(213,105,131,0.3)] transition-colors hover:bg-pink-ink"
             >
               去解锁
               <ChevronRight className="size-3.5" strokeWidth={2.2} />

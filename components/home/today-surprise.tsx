@@ -35,8 +35,8 @@ export function TodaySurprise() {
       <div
         className={`flex items-center gap-3 rounded-[20px] p-4 shadow-[var(--shadow-soft-sm)] ${
           surprise.isAnniversary
-            ? "bg-gradient-to-r from-[#FFE9EE] to-[#FFDCE5]"
-            : "bg-gradient-to-r from-[#FFF6EC] to-[#FDEFE0]"
+            ? "bg-gradient-to-r from-pink-soft to-pink-soft-2"
+            : "bg-gradient-to-r from-orange-soft to-orange-soft"
         }`}
       >
         <span
@@ -47,10 +47,10 @@ export function TodaySurprise() {
           <Gift className="size-5" strokeWidth={1.8} />
         </span>
         <div className="min-w-0">
-          <p className="text-[12px] font-medium text-[#C79A6B]">
+          <p className="text-[12px] font-medium text-gold-ink">
             {surprise.isAnniversary ? "纪念日快乐" : "今日小惊喜"}
           </p>
-          <p className="font-display mt-0.5 text-[14px] leading-snug text-[#5C4B45]">
+          <p className="font-display mt-0.5 text-[14px] leading-snug text-ink-2">
             {surprise.text}
           </p>
         </div>
@@ -58,7 +58,7 @@ export function TodaySurprise() {
 
       {/* 本月心情统计（有数据才显示） */}
       {monthRecords.length > 0 && (
-        <p className="px-1 text-[12px] text-[#A8928B]">
+        <p className="px-1 text-[12px] text-ink-4">
           这个月已经记录 {monthRecords.length} 条
           {topMood
             ? `，「${topMood[0]}」最多，有 ${topMood[1]} 次`

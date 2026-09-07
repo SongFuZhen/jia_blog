@@ -133,50 +133,50 @@ export function YearReview() {
         <button
           onClick={() => setYear((y) => y - 1)}
           aria-label="上一年"
-          className="flex size-8 items-center justify-center rounded-full text-[#8A7A72] hover:bg-[#FFF5F2] hover:text-[#E0697E]"
+          className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-card-hover hover:text-[#E0697E]"
         >
           <ArrowLeft className="size-4" strokeWidth={1.8} />
         </button>
-        <p className="text-[14.5px] font-bold text-[#3B2E2A]">{year} 年</p>
+        <p className="text-[14.5px] font-bold text-ink">{year} 年</p>
         <button
           onClick={() => setYear((y) => y + 1)}
           disabled={year >= now.getFullYear()}
           aria-label="下一年"
-          className="flex size-8 items-center justify-center rounded-full text-[#8A7A72] hover:bg-[#FFF5F2] hover:text-[#E0697E] disabled:opacity-30"
+          className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-card-hover hover:text-[#E0697E] disabled:opacity-30"
         >
           <ArrowRight className="size-4" strokeWidth={1.8} />
         </button>
       </div>
 
       {/* 年度小报 */}
-      <div className="mt-4 rounded-[20px] bg-[#FEFCFB] p-5 shadow-[var(--shadow-soft-sm)]">
-        <p className="font-display text-center text-[18px] font-bold text-[#9F3E56]">
+      <div className="mt-4 rounded-[20px] bg-card p-5 shadow-[var(--shadow-soft-sm)]">
+        <p className="font-display text-center text-[18px] font-bold text-pink-ink">
           {settings.nickname}的 {year} 年
         </p>
         <div className="mx-auto mt-2 h-px w-16 bg-[#F5B8C4]" />
 
         <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
+          <div className="rounded-[14px] bg-card-warm py-3">
             <p className="text-[19px] font-bold text-[#E0697E]">{yearRecords.length}</p>
-            <p className="mt-0.5 text-[10.5px] text-[#A8928B]">条记录</p>
+            <p className="mt-0.5 text-[10.5px] text-ink-4">条记录</p>
           </div>
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
-            <p className="text-[19px] font-bold text-[#F08A4B]">{photoCount}</p>
-            <p className="mt-0.5 text-[10.5px] text-[#A8928B]">张照片</p>
+          <div className="rounded-[14px] bg-card-warm py-3">
+            <p className="text-[19px] font-bold text-orange-ink">{photoCount}</p>
+            <p className="mt-0.5 text-[10.5px] text-ink-4">张照片</p>
           </div>
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
-            <p className="text-[19px] font-bold text-[#8B63D9]">{yearInspirations.length}</p>
-            <p className="mt-0.5 text-[10.5px] text-[#A8928B]">个灵感</p>
+          <div className="rounded-[14px] bg-card-warm py-3">
+            <p className="text-[19px] font-bold text-purple-ink">{yearInspirations.length}</p>
+            <p className="mt-0.5 text-[10.5px] text-ink-4">个灵感</p>
           </div>
-          <div className="rounded-[14px] bg-[#FFF9F6] py-3">
-            <p className="text-[19px] font-bold text-[#4E9A6E]">{triedTips.length}</p>
-            <p className="mt-0.5 text-[10.5px] text-[#A8928B]">次尝试</p>
+          <div className="rounded-[14px] bg-card-warm py-3">
+            <p className="text-[19px] font-bold text-green-ink">{triedTips.length}</p>
+            <p className="mt-0.5 text-[10.5px] text-ink-4">次尝试</p>
           </div>
         </div>
 
         {/* 年度之最 */}
         {streak > 0 && (
-          <p className="mt-4 rounded-[12px] bg-[#FFF6EC] px-3.5 py-2.5 text-center text-[12.5px] leading-relaxed text-[#B0763B]">
+          <p className="mt-4 rounded-[12px] bg-orange-soft px-3.5 py-2.5 text-center text-[12.5px] leading-relaxed text-gold-ink">
             最厉害的一次：连续记录 <b>{streak}</b> 天没有断 ✨
           </p>
         )}
@@ -184,20 +184,20 @@ export function YearReview() {
         {/* 年度心情 */}
         {moodCount.length > 0 && (
           <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">这一年的心情</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">这一年的心情</h2>
             <div className="mt-2 space-y-1.5">
               {moodCount.slice(0, 4).map(([mood, count]) => {
                 const max = moodCount[0][1];
                 return (
                   <div key={mood} className="flex items-center gap-2">
-                    <span className="w-16 shrink-0 text-[12px] text-[#7A6A63]">{mood}</span>
-                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#F7EDE8]">
+                    <span className="w-16 shrink-0 text-[12px] text-ink-2">{mood}</span>
+                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border-soft">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88]"
                         style={{ width: `${(count / max) * 100}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-[11px] text-[#A8928B]">{count}</span>
+                    <span className="w-8 text-right text-[11px] text-ink-4">{count}</span>
                   </div>
                 );
               })}
@@ -208,12 +208,12 @@ export function YearReview() {
         {/* 年度关键词 */}
         {topTags.length > 0 && (
           <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">年度关键词</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">年度关键词</h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {topTags.map(([tag, count]) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-[#FEF0EE] px-3 py-1 text-[12px] text-[#D95570]"
+                  className="rounded-full bg-pink-soft px-3 py-1 text-[12px] text-pink-ink"
                 >
                   {tag} × {count}
                 </span>
@@ -225,30 +225,30 @@ export function YearReview() {
         {hasData && (
           <>
             {/* 逐月时间轴 */}
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">这一年，一个月一个月看</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">这一年，一个月一个月看</h2>
             <ol className="mt-3 space-y-0">
               {months.map((m) => (
                 <li key={m.name} className="relative flex gap-3 pb-4 last:pb-0">
                   {/* 时间轴线 */}
-                  <span className="absolute top-1.5 left-[5px] h-full w-px bg-[#F5DCE1] last:hidden" />
+                  <span className="absolute top-1.5 left-[5px] h-full w-px bg-border-strong last:hidden" />
                   <span
                     className={`relative z-10 mt-1 size-[11px] shrink-0 rounded-full border-2 ${
                       m.count > 0
-                        ? "border-[#E96882] bg-[#FFD3DE]"
-                        : "border-[#EBDCD5] bg-white"
+                        ? "border-[#E96882] bg-pink-soft-2"
+                        : "border-border-strong bg-white"
                     }`}
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <p
                         className={`text-[13px] font-semibold ${
-                          m.count > 0 ? "text-[#3B2E2A]" : "text-[#C9B8B2]"
+                          m.count > 0 ? "text-ink" : "text-ink-5"
                         }`}
                       >
                         {m.name}
                       </p>
                       {m.count > 0 && (
-                        <p className="shrink-0 text-[11px] text-[#A8928B]">
+                        <p className="shrink-0 text-[11px] text-ink-4">
                           {m.count} 条{m.topMood ? ` · ${m.topMood[0]}最多` : ""}
                           {m.inspCount > 0 ? ` · ${m.inspCount} 灵感` : ""}
                         </p>
@@ -272,7 +272,7 @@ export function YearReview() {
         {/* 照片长卷 */}
         {photos.length > 0 && (
           <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-[#3B2E2A]">{year} 的照片长卷</h2>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">{year} 的照片长卷</h2>
             <div className="mt-2 grid grid-cols-4 gap-1.5">
               {photos.map((src, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -288,7 +288,7 @@ export function YearReview() {
         )}
 
         {!hasData && (
-          <p className="mt-5 text-center text-[12.5px] text-[#C9B8B2]">
+          <p className="mt-5 text-center text-[12.5px] text-ink-5">
             {year} 年还很安静，慢慢记录，年底回来看会很感动
           </p>
         )}

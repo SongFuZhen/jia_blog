@@ -31,17 +31,17 @@ const categories: (BeautyCategory | "全部")[] = [
 ];
 
 const categoryColors: Record<BeautyCategory, string> = {
-  底妆: "bg-[#F2E9FE] text-[#8B5FD6]",
-  眉毛: "bg-[#F2E9FE] text-[#8B5FD6]",
-  眼妆: "bg-[#F2E9FE] text-[#8B5FD6]",
-  睫毛: "bg-[#F2E9FE] text-[#8B5FD6]",
-  腮红: "bg-[#FEF0EE] text-[#D95570]",
-  修容: "bg-[#FEF4EC] text-[#E07A3F]",
-  唇妆: "bg-[#FEF0EE] text-[#D95570]",
-  卸妆: "bg-[#E9F3EC] text-[#4E9A6E]",
-  护肤: "bg-[#FEF0EE] text-[#D95570]",
-  发型: "bg-[#E4F1FB] text-[#4E96DB]",
-  穿搭: "bg-[#E4F1FB] text-[#4E96DB]",
+  底妆: "bg-purple-soft text-purple-ink",
+  眉毛: "bg-purple-soft text-purple-ink",
+  眼妆: "bg-purple-soft text-purple-ink",
+  睫毛: "bg-purple-soft text-purple-ink",
+  腮红: "bg-pink-soft text-pink-ink",
+  修容: "bg-orange-soft text-orange-ink",
+  唇妆: "bg-pink-soft text-pink-ink",
+  卸妆: "bg-green-soft text-green-ink",
+  护肤: "bg-pink-soft text-pink-ink",
+  发型: "bg-blue-soft text-blue-ink",
+  穿搭: "bg-blue-soft text-blue-ink",
 };
 
 const wishStatuses = [
@@ -52,10 +52,10 @@ const wishStatuses = [
 ] as const;
 
 const wishStatusColors: Record<string, string> = {
-  want: "bg-[#FEF4EC] text-[#E07A3F]",
-  bought: "bg-[#F2E9FE] text-[#8B5FD6]",
-  used: "bg-[#E9F3EC] text-[#4E9A6E]",
-  notRecommend: "bg-[#FEF0EE] text-[#D95570]",
+  want: "bg-orange-soft text-orange-ink",
+  bought: "bg-purple-soft text-purple-ink",
+  used: "bg-green-soft text-green-ink",
+  notRecommend: "bg-pink-soft text-pink-ink",
 };
 
 export default function BeautyPage() {
@@ -110,15 +110,15 @@ export default function BeautyPage() {
       <PageHeader title="美妆手册" subtitle="变美的路上慢慢走" />
 
       {/* Tab 切换 */}
-      <div className="mt-4 flex gap-1.5 rounded-full bg-[#F7F0EC] p-1">
+      <div className="mt-4 flex gap-1.5 rounded-full bg-cream p-1">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`h-9 flex-1 rounded-full text-[13.5px] font-medium transition-colors ${
               tab === t.key
-                ? "bg-white text-[#E0697E] shadow-[var(--shadow-xs)]"
-                : "text-[#8A7A72]"
+                ? "bg-white text-[#E0697E] dark:bg-[#342A2E] shadow-[var(--shadow-xs)]"
+                : "text-ink-3"
             }`}
           >
             {t.label}
@@ -137,7 +137,7 @@ export default function BeautyPage() {
                 className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
                   category === c
                     ? "bg-[#F16D88] text-white"
-                    : "bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
+                    : "bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
                 }`}
               >
                 {c}
@@ -150,10 +150,10 @@ export default function BeautyPage() {
               <Link
                 key={tip.id}
                 href={`/beauty/${tip.id}`}
-                className="block rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
+                className="block rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-[15px] font-semibold text-[#2E2422]">
+                  <h3 className="text-[15px] font-semibold text-ink">
                     {tip.title}
                   </h3>
                   <span
@@ -163,17 +163,17 @@ export default function BeautyPage() {
                   </span>
                 </div>
                 {tip.scene && (
-                  <p className="mt-1 text-[12px] text-[#7A6A63]">
+                  <p className="mt-1 text-[12px] text-ink-2">
                     适合：{tip.scene}
                   </p>
                 )}
                 <div className="mt-2 flex items-center gap-3">
-                  <span className="inline-flex items-center gap-0.5 text-[11.5px] text-[#A8928B]">
+                  <span className="inline-flex items-center gap-0.5 text-[11.5px] text-ink-4">
                     {tip.rating} 分
                     <Star className="size-3 fill-[#FFC46B] text-[#FFC46B]" />
                   </span>
                   {tip.triedAt && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-[#E9F3EC] px-2 py-[2px] text-[10.5px] text-[#4E9A6E]">
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-green-soft px-2 py-[2px] text-[10.5px] text-green-ink">
                       <Check className="size-3" strokeWidth={2.4} />
                       试过 {tip.triedAt.slice(5)}
                     </span>
@@ -190,23 +190,23 @@ export default function BeautyPage() {
         <>
           {/* 本月常用 Top5 */}
           {monthlyTop.length > 0 && (
-            <div className="mt-4 rounded-[16px] bg-gradient-to-r from-[#F6ECFF] to-[#EFE0FC] p-4">
-              <p className="text-[13px] font-semibold text-[#7B4FC9]">
+            <div className="mt-4 rounded-[16px] bg-gradient-to-r from-purple-soft to-purple-soft p-4">
+              <p className="text-[13px] font-semibold text-purple-ink">
                 本月最常用
               </p>
               <ol className="mt-2 space-y-1">
                 {monthlyTop.map(({ product, count }, i) => (
                   <li
                     key={product!.id}
-                    className="flex items-center justify-between text-[12.5px] text-[#5C4B45]"
+                    className="flex items-center justify-between text-[12.5px] text-ink-2"
                   >
                     <span>
-                      <span className="mr-1.5 font-bold text-[#8B63D9]">
+                      <span className="mr-1.5 font-bold text-purple-ink">
                         Top{i + 1}
                       </span>
                       {product!.name}
                     </span>
-                    <span className="text-[11px] text-[#A8928B]">
+                    <span className="text-[11px] text-ink-4">
                       用了 {count} 次
                     </span>
                   </li>
@@ -216,7 +216,7 @@ export default function BeautyPage() {
           )}
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-[13px] text-[#A8928B]">
+            <p className="text-[13px] text-ink-4">
               我的产品 · {products.length} 件
             </p>
             <button
@@ -229,25 +229,25 @@ export default function BeautyPage() {
           </div>
 
           {showAddProduct && (
-            <div className="mt-3 space-y-2 rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+            <div className="mt-3 space-y-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
               <input
                 value={newProduct.name}
                 onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                 placeholder="产品名称（必填）"
-                className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+                className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
               />
               <div className="flex gap-2">
                 <input
                   value={newProduct.brand}
                   onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
                   placeholder="品牌"
-                  className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+                  className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
                 />
                 <input
                   value={newProduct.shade}
                   onChange={(e) => setNewProduct({ ...newProduct, shade: e.target.value })}
                   placeholder="色号"
-                  className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+                  className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -258,7 +258,7 @@ export default function BeautyPage() {
                         className={`size-5 ${
                           n <= newProduct.favor
                             ? "fill-[#FFC46B] text-[#FFC46B]"
-                            : "text-[#E8D5CE]"
+                            : "text-toggle-off"
                         }`}
                       />
                     </button>
@@ -290,14 +290,14 @@ export default function BeautyPage() {
             {products.map((p) => (
               <div
                 key={p.id}
-                className="rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]"
+                className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="text-[14.5px] font-semibold text-[#2E2422]">
+                    <h3 className="text-[14.5px] font-semibold text-ink">
                       {p.name}
                     </h3>
-                    <p className="mt-0.5 text-[11.5px] text-[#A8928B]">
+                    <p className="mt-0.5 text-[11.5px] text-ink-4">
                       {[p.brand, p.shade].filter(Boolean).join(" · ") || "未填品牌"}
                     </p>
                   </div>
@@ -306,18 +306,18 @@ export default function BeautyPage() {
                       <Star
                         key={n}
                         className={`size-3.5 ${
-                          n <= p.favor ? "fill-[#FFC46B] text-[#FFC46B]" : "text-[#E8D5CE]"
+                          n <= p.favor ? "fill-[#FFC46B] text-[#FFC46B]" : "text-toggle-off"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
                 {p.review && (
-                  <p className="mt-1.5 text-[12px] text-[#7A6A63]">{p.review}</p>
+                  <p className="mt-1.5 text-[12px] text-ink-2">{p.review}</p>
                 )}
                 <div className="mt-2.5 flex items-center justify-between">
                   {p.repurchase && (
-                    <span className="rounded-full bg-[#E9F3EC] px-2 py-[2px] text-[10.5px] text-[#4E9A6E]">
+                    <span className="rounded-full bg-green-soft px-2 py-[2px] text-[10.5px] text-green-ink">
                       愿意回购
                     </span>
                   )}
@@ -327,8 +327,8 @@ export default function BeautyPage() {
                       disabled={checkedToday.has(p.id)}
                       className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11.5px] font-medium transition-colors ${
                         checkedToday.has(p.id)
-                          ? "bg-[#E9F3EC] text-[#4E9A6E]"
-                          : "bg-[#FDECEC] text-[#E0697E] hover:bg-[#FBDDE2]"
+                          ? "bg-green-soft text-green-ink"
+                          : "bg-pink-soft text-[#E0697E] hover:bg-pink-hover"
                       }`}
                     >
                       <Check className="size-3" strokeWidth={2.4} />
@@ -338,7 +338,7 @@ export default function BeautyPage() {
                       onClick={() => {
                         if (window.confirm("确定把这件产品移出美妆柜吗？")) removeProduct(p.id);
                       }}
-                      className="text-[11.5px] text-[#C9A9AF] hover:text-[#E76F7B]"
+                      className="text-[11.5px] text-ink-5 hover:text-[#E76F7B]"
                     >
                       移出
                     </button>
@@ -354,7 +354,7 @@ export default function BeautyPage() {
       {tab === "wish" && (
         <>
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-[13px] text-[#A8928B]">
+            <p className="text-[13px] text-ink-4">
               想买 → 已购买 → 已使用 → 不推荐
             </p>
             <button
@@ -367,12 +367,12 @@ export default function BeautyPage() {
           </div>
 
           {showAddWish && (
-            <div className="mt-3 flex gap-2 rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+            <div className="mt-3 flex gap-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
               <input
                 value={newWish}
                 onChange={(e) => setNewWish(e.target.value)}
                 placeholder="想买什么呀？"
-                className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2 text-[12.5px] outline-none"
+                className="w-full rounded-[12px] bg-field px-3 py-2 text-[12.5px] outline-none"
                 onKeyDown={async (e) => {
                   if (e.key === "Enter" && newWish.trim()) {
                     await addWish({ name: newWish.trim(), status: "want", createdAt: new Date().toISOString() });
@@ -401,10 +401,10 @@ export default function BeautyPage() {
               return (
                 <div
                   key={w.id}
-                  className="rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]"
+                  className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-[14.5px] font-semibold text-[#2E2422]">
+                    <h3 className="text-[14.5px] font-semibold text-ink">
                       {w.name}
                     </h3>
                     <span
@@ -414,7 +414,7 @@ export default function BeautyPage() {
                     </span>
                   </div>
                   {w.note && (
-                    <p className="mt-1 text-[12px] text-[#7A6A63]">{w.note}</p>
+                    <p className="mt-1 text-[12px] text-ink-2">{w.note}</p>
                   )}
                   <div className="mt-2.5 flex items-center justify-between">
                     <div className="flex gap-1.5">
@@ -424,7 +424,7 @@ export default function BeautyPage() {
                           onClick={() =>
                             updateWish(w.id, { status: wishStatuses[statusIndex + 1].key })
                           }
-                          className="rounded-full bg-[#FDECEC] px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] transition-colors hover:bg-[#FBDDE2]"
+                          className="rounded-full bg-pink-soft px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] transition-colors hover:bg-pink-hover"
                         >
                           → {wishStatuses[statusIndex + 1].label}
                         </button>
@@ -432,7 +432,7 @@ export default function BeautyPage() {
                     </div>
                     <button
                       onClick={() => removeWish(w.id)}
-                      className="text-[11.5px] text-[#C9A9AF] hover:text-[#E76F7B]"
+                      className="text-[11.5px] text-ink-5 hover:text-[#E76F7B]"
                     >
                       删除
                     </button>

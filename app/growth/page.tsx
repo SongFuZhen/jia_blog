@@ -20,7 +20,7 @@ const initialSections: { title: string; tone: string; items: Item[] }[] = [
   },
   {
     title: "学习",
-    tone: "text-[#8B63D9]",
+    tone: "text-purple-ink",
     items: [
       { id: "s1", text: "每天背 20 个单词", done: true },
       { id: "s2", text: "看完一本摄影书", done: false },
@@ -29,7 +29,7 @@ const initialSections: { title: string; tone: string; items: Item[] }[] = [
   },
   {
     title: "生活",
-    tone: "text-[#4E9A6E]",
+    tone: "text-green-ink",
     items: [
       { id: "l1", text: "连续早起一周", done: true },
       { id: "l2", text: "整理一次房间", done: true },
@@ -90,13 +90,13 @@ export default function GrowthPage() {
       <PageHeader title="成长清单" subtitle="慢慢来，都会实现的" />
 
       {/* 成长时间线 */}
-      <section className="mt-5 rounded-[20px] bg-gradient-to-r from-[#FFF6EC] to-[#FDEFE0] p-4 shadow-[var(--shadow-soft-sm)]">
-        <p className="flex items-center gap-1.5 text-[14px] font-semibold text-[#B0763B]">
+      <section className="mt-5 rounded-[20px] bg-gradient-to-r from-orange-soft to-orange-soft p-4 shadow-[var(--shadow-soft-sm)]">
+        <p className="flex items-center gap-1.5 text-[14px] font-semibold text-gold-ink">
           <Star className="size-4 fill-[#F0A24B] text-[#F0A24B]" strokeWidth={1.8} />
           成长时间线 · 我的「第一次」
         </p>
         {firstTimes.length === 0 ? (
-          <p className="mt-2 text-[12px] text-[#C79A6B]">
+          <p className="mt-2 text-[12px] text-gold-ink">
             给记录加上「第一次」标签，就会自动出现在这里
           </p>
         ) : (
@@ -105,8 +105,8 @@ export default function GrowthPage() {
               <li key={r.id} className="flex items-start gap-2.5">
                 <span className="mt-1.5 size-2 shrink-0 rounded-full bg-[#F0A24B]" />
                 <div>
-                  <p className="text-[13px] font-medium text-[#5C4B45]">{r.title}</p>
-                  <p className="text-[11px] text-[#C79A6B]">{r.createdAt.slice(0, 10)}</p>
+                  <p className="text-[13px] font-medium text-ink-2">{r.title}</p>
+                  <p className="text-[11px] text-gold-ink">{r.createdAt.slice(0, 10)}</p>
                 </div>
               </li>
             ))}
@@ -115,9 +115,9 @@ export default function GrowthPage() {
       </section>
 
       {/* 总进度 */}
-      <div className="mt-5 rounded-[20px] bg-gradient-to-r from-[#FEEBEE] to-[#FBE5EC] p-4">
+      <div className="mt-5 rounded-[20px] bg-gradient-to-r from-pink-soft to-pink-soft-2 p-4">
         <div className="flex items-center justify-between">
-          <p className="flex items-center gap-1.5 text-[14.5px] font-semibold text-[#3B2E2A]">
+          <p className="flex items-center gap-1.5 text-[14.5px] font-semibold text-ink">
             <Sparkles className="size-4 text-[#D56983]" strokeWidth={1.8} />
             已完成 {done} / {total} 件小事
           </p>
@@ -138,7 +138,7 @@ export default function GrowthPage() {
         {sections.map((section) => (
           <section
             key={section.title}
-            className="rounded-[20px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]"
+            className="rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
           >
             <h2
               className={`text-[15px] font-bold ${section.tone}`}
@@ -150,13 +150,13 @@ export default function GrowthPage() {
                 <li key={item.id}>
                   <button
                     onClick={() => toggle(section.title, item.id)}
-                    className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-[#FFF8F5]"
+                    className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-card-hover"
                   >
                     <span
                       className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
                         item.done
                           ? "border-[#F16D88] bg-[#F16D88] text-white"
-                          : "border-[#E8D5CE] bg-white"
+                          : "border-toggle-off bg-white"
                       }`}
                     >
                       {item.done && <Check className="size-3" strokeWidth={3} />}
@@ -164,8 +164,8 @@ export default function GrowthPage() {
                     <span
                       className={`text-[14px] ${
                         item.done
-                          ? "text-[#C0ABA3] line-through"
-                          : "text-[#3B2E2A]"
+                          ? "text-ink-5 line-through"
+                          : "text-ink"
                       }`}
                     >
                       {item.text}

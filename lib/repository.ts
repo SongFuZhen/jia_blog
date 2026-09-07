@@ -190,4 +190,5 @@ export const privateDiaryRepo = createApiRepository("private-diary", seedPrivate
 export const settingsRepo = createApiSingleRepository<Settings>("settings", {
   nickname: "小佳佳",
   autoLock: true,
+  dark: false,
 });

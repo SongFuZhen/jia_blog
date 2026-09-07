@@ -19,14 +19,14 @@ const filters: (InspirationType | "全部")[] = [
 ];
 
 const typeStyles: Record<InspirationType, { icon: typeof Quote; tagClass: string; bg: string }> = {
-  妆容: { icon: ImageIcon, tagClass: "bg-[#F2E9FE] text-[#8B5FD6]", bg: "bg-gradient-to-br from-[#F6E7FB] to-[#EFE0FC]" },
-  穿搭: { icon: ImageIcon, tagClass: "bg-[#F2E9FE] text-[#8B5FD6]", bg: "bg-gradient-to-br from-[#EFE0FC] to-[#F6E7FB]" },
-  发型: { icon: ImageIcon, tagClass: "bg-[#E4F1FB] text-[#4E96DB]", bg: "bg-gradient-to-br from-[#E4F1FB] to-[#D5E9F9]" },
-  家居: { icon: ImageIcon, tagClass: "bg-[#E9F3EC] text-[#4E9A6E]", bg: "bg-gradient-to-br from-[#E7F3EB] to-[#D5EBDE]" },
-  美食: { icon: Camera, tagClass: "bg-[#FEF4EC] text-[#E07A3F]", bg: "bg-gradient-to-br from-[#FDEFE0] to-[#FBE4CC]" },
-  摄影: { icon: ImageIcon, tagClass: "bg-[#FEF0EE] text-[#D95570]", bg: "bg-gradient-to-br from-[#FFE4EA] to-[#FFD3DE]" },
-  文案: { icon: Quote, tagClass: "bg-[#F2E9FE] text-[#8B5FD6]", bg: "bg-gradient-to-br from-[#F6E7FB] to-[#EFE0FC]" },
-  笔记: { icon: Music, tagClass: "bg-[#E9F3EC] text-[#4E9A6E]", bg: "bg-gradient-to-br from-[#FFE9EE] to-[#FFDCE5]" },
+  妆容: { icon: ImageIcon, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft" },
+  穿搭: { icon: ImageIcon, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft" },
+  发型: { icon: ImageIcon, tagClass: "bg-blue-soft text-blue-ink", bg: "bg-gradient-to-br from-blue-soft to-blue-soft" },
+  家居: { icon: ImageIcon, tagClass: "bg-green-soft text-green-ink", bg: "bg-gradient-to-br from-green-soft to-green-soft" },
+  美食: { icon: Camera, tagClass: "bg-orange-soft text-orange-ink", bg: "bg-gradient-to-br from-orange-soft to-orange-soft" },
+  摄影: { icon: ImageIcon, tagClass: "bg-pink-soft text-pink-ink", bg: "bg-gradient-to-br from-pink-soft to-pink-soft-2" },
+  文案: { icon: Quote, tagClass: "bg-purple-soft text-purple-ink", bg: "bg-gradient-to-br from-purple-soft to-purple-soft" },
+  笔记: { icon: Music, tagClass: "bg-green-soft text-green-ink", bg: "bg-gradient-to-br from-pink-soft to-pink-soft-2" },
 };
 
 export default function InspirationPage() {
@@ -58,7 +58,7 @@ export default function InspirationPage() {
             className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
               filter === f
                 ? "bg-[#F16D88] text-white"
-                : "bg-white text-[#8A7A72] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
+                : "bg-white text-ink-3 dark:bg-[#2B2225] shadow-[var(--shadow-xs)] hover:text-[#F16D88]"
             }`}
           >
             {f}
@@ -69,7 +69,7 @@ export default function InspirationPage() {
       {/* 添加 */}
       <div className="mt-3">
         {showAdd ? (
-          <div className="space-y-2 rounded-[16px] bg-[#FEFCFB] p-4 shadow-[var(--shadow-soft-sm)]">
+          <div className="space-y-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
             <div className="flex flex-wrap gap-1.5">
               {filters.filter((f) => f !== "全部").map((t) => (
                 <button
@@ -77,8 +77,8 @@ export default function InspirationPage() {
                   onClick={() => setForm({ ...form, type: t as InspirationType })}
                   className={`rounded-full px-2.5 py-1 text-[11.5px] transition-colors ${
                     form.type === t
-                      ? "bg-[#FDECEC] font-medium text-[#E0697E]"
-                      : "bg-[#F7F0EC] text-[#8A7A72]"
+                      ? "bg-pink-soft font-medium text-[#E0697E]"
+                      : "bg-cream text-ink-3"
                   }`}
                 >
                   {t}
@@ -90,18 +90,18 @@ export default function InspirationPage() {
               onChange={(e) => setForm({ ...form, content: e.target.value })}
               rows={2}
               placeholder="记下这句文案 / 这个瞬间…"
-              className="w-full resize-none rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+              className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
             />
             <input
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
               placeholder="标签，空格分隔：眼妆 穿搭"
-              className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+              className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowAdd(false)}
-                className="rounded-full bg-[#F7F0EC] px-3.5 py-1.5 text-[12.5px] text-[#8A7A72] transition-colors hover:bg-[#FDECEC] hover:text-[#E0697E]"
+                className="rounded-full bg-cream px-3.5 py-1.5 text-[12.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
               >
                 取消
               </button>
@@ -127,7 +127,7 @@ export default function InspirationPage() {
         ) : (
           <button
             onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
           >
             <Plus className="size-3.5" strokeWidth={2} />
             收一条灵感
@@ -143,7 +143,7 @@ export default function InspirationPage() {
           return (
             <article
               key={it.id}
-              className="group break-inside-avoid overflow-hidden rounded-[16px] bg-[#FEFCFB] shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
+              className="group break-inside-avoid overflow-hidden rounded-[16px] bg-card shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft-md)]"
             >
               <div
                 className={`flex items-center justify-center bg-gradient-to-br ${style.bg} ${
@@ -151,11 +151,11 @@ export default function InspirationPage() {
                 }`}
               >
                 {isQuote ? (
-                  <p className="font-display text-center text-[14.5px] leading-6 text-[#5C4B45]">
+                  <p className="font-display text-center text-[14.5px] leading-6 text-ink-2">
                     “{it.content}”
                   </p>
                 ) : (
-                  <p className="px-3 text-center text-[13px] leading-relaxed text-[#5C4B45]">
+                  <p className="px-3 text-center text-[13px] leading-relaxed text-ink-2">
                     {it.content}
                   </p>
                 )}
@@ -168,14 +168,14 @@ export default function InspirationPage() {
                 </span>
                 <div className="flex items-center gap-2">
                   {it.tags.slice(0, 1).map((t) => (
-                    <span key={t} className="text-[10.5px] text-[#C0ABA3]">
+                    <span key={t} className="text-[10.5px] text-ink-5">
                       #{t}
                     </span>
                   ))}
                   <button
                     onClick={() => remove(it.id)}
                     aria-label="删除"
-                    className="text-[#E3CBCF] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#E76F7B]"
+                    className="text-ink-5 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#E76F7B]"
                   >
                     <Trash2 className="size-3.5" strokeWidth={1.8} />
                   </button>
@@ -187,7 +187,7 @@ export default function InspirationPage() {
       </div>
 
       {filtered.length === 0 && (
-        <p className="mt-8 text-center text-[13px] text-[#A8928B]">
+        <p className="mt-8 text-center text-[13px] text-ink-4">
           这个分类下还没有收藏
         </p>
       )}

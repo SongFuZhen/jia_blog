@@ -33,8 +33,8 @@ function NavItem({
       href={href}
       className={`flex flex-col items-center justify-center gap-0.5 rounded-2xl px-3.5 transition-all ${
         active
-          ? "bg-[#FDECEC] text-[#F16D88]"
-          : "text-[#8A7A72] hover:bg-[#FFF5F2] hover:text-[#F16D88]"
+          ? "bg-pink-soft text-[#F16D88]"
+          : "text-ink-3 hover:bg-card-hover hover:text-[#F16D88]"
       }`}
     >
       <Icon
@@ -54,7 +54,7 @@ export function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50">
       <div className="mx-auto w-full max-w-[430px] px-4 pb-4">
-        <div className="relative flex h-12 items-center justify-between rounded-[24px] border border-white/60 bg-white/65 px-2 shadow-[0_10px_30px_rgba(91,61,51,0.10)] backdrop-blur-xl">
+        <div className="relative flex h-12 items-center justify-between rounded-[24px] border border-white/60 bg-white/65 dark:border-[#3A2E31] dark:bg-[#241B1E]/75 px-2 shadow-[0_10px_30px_rgba(91,61,51,0.10)] backdrop-blur-xl">
           {navLeft.map((item) => (
             <NavItem
               key={item.href}

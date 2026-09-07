@@ -150,6 +150,34 @@
   --shadow-soft-sm: 0 4px 12px rgba(91, 61, 51, 0.06);
   --shadow-soft-md: 0 8px 24px rgba(91, 61, 51, 0.08);
   --shadow-soft-lg: 0 16px 40px rgba(91, 61, 51, 0.1);
+
+  /* ===== 语义化奶油色（浅色值） ===== */
+  --c-card: #fefcfb;
+  --c-card-warm: #fff9f6;
+  --c-card-hover: #fff8f5;
+  --c-field: #faf5f2;
+  --c-cream: #f7f0ec;
+  --c-pink-soft: #fdecec;
+  --c-pink-soft-2: #fbe5ec;
+  --c-pink-hover: #fbdde2;
+  --c-purple-soft: #f2e9fe;
+  --c-green-soft: #e9f3ec;
+  --c-blue-soft: #e4f1fb;
+  --c-orange-soft: #fff6ec;
+  --c-border-soft: #f6efec;
+  --c-border-strong: #ebdcd5;
+  --c-toggle-off: #e8d5ce;
+  --c-ink: #3b2e2a;
+  --c-ink-2: #5c4b45;
+  --c-ink-3: #8a7a72;
+  --c-ink-4: #a8928b;
+  --c-ink-5: #c0aba3;
+  --c-pink-ink: #d95570;
+  --c-purple-ink: #8b5fd6;
+  --c-green-ink: #4e9a6e;
+  --c-blue-ink: #4e96db;
+  --c-orange-ink: #e07a3f;
+  --c-gold-ink: #c79a6b;
 }
 
 /* ===== 品牌色阶（供 bg-primary-500 等使用） ===== */
@@ -180,6 +208,34 @@
   --color-surface-hover: #fff8f8;
   --color-surface-selected: #fff1f4;
   --color-surface-disabled: #f7f3f1;
+
+  /* 语义化奶油色（暗色模式随 .dark 切换） */
+  --color-card: var(--c-card);
+  --color-card-warm: var(--c-card-warm);
+  --color-card-hover: var(--c-card-hover);
+  --color-field: var(--c-field);
+  --color-cream: var(--c-cream);
+  --color-pink-soft: var(--c-pink-soft);
+  --color-pink-soft-2: var(--c-pink-soft-2);
+  --color-pink-hover: var(--c-pink-hover);
+  --color-purple-soft: var(--c-purple-soft);
+  --color-green-soft: var(--c-green-soft);
+  --color-blue-soft: var(--c-blue-soft);
+  --color-orange-soft: var(--c-orange-soft);
+  --color-border-soft: var(--c-border-soft);
+  --color-border-strong: var(--c-border-strong);
+  --color-toggle-off: var(--c-toggle-off);
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-ink-3: var(--c-ink-3);
+  --color-ink-4: var(--c-ink-4);
+  --color-ink-5: var(--c-ink-5);
+  --color-pink-ink: var(--c-pink-ink);
+  --color-purple-ink: var(--c-purple-ink);
+  --color-green-ink: var(--c-green-ink);
+  --color-blue-ink: var(--c-blue-ink);
+  --color-orange-ink: var(--c-orange-ink);
+  --color-gold-ink: var(--c-gold-ink);
 
   --color-border-soft: #f6efec;
   --color-border-active: #ffb8c6;
@@ -216,9 +272,43 @@
 }
 
 .dark {
-  /* 暗色模式暂不启用，保留浅色奶油基调 */
-  --background: #fff9f6;
-  --foreground: #332a28;
+  /* 暖黑可可暗色调，保留奶油粉的温柔感 */
+  --background: #191215;
+  --foreground: #f3e9e4;
+
+  /* ===== 语义化奶油色（暗色值） ===== */
+  --c-card: #231b1e;
+  --c-card-warm: #261e21;
+  --c-card-hover: #2b2226;
+  --c-field: #2a2124;
+  --c-cream: #2b2225;
+  --c-pink-soft: #3b252c;
+  --c-pink-soft-2: #32202a;
+  --c-pink-hover: #452a33;
+  --c-purple-soft: #312840;
+  --c-green-soft: #21332a;
+  --c-blue-soft: #20303e;
+  --c-orange-soft: #3b2f22;
+  --c-border-soft: #31282a;
+  --c-border-strong: #3b2f31;
+  --c-toggle-off: #4a3a40;
+  --c-ink: #f3e9e4;
+  --c-ink-2: #d9c8c0;
+  --c-ink-3: #b79e95;
+  --c-ink-4: #9e857e;
+  --c-ink-5: #7d6864;
+  --c-pink-ink: #f29aa8;
+  --c-purple-ink: #c3a8f5;
+  --c-green-ink: #7fc79b;
+  --c-blue-ink: #7fb8e8;
+  --c-orange-ink: #f2a868;
+  --c-gold-ink: #d9a968;
+
+  /* 暗色下阴影加重一点 */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-soft-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-soft-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-soft-lg: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
 @layer base {

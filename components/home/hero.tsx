@@ -17,7 +17,7 @@ export function Hero() {
       />
 
       {/* 今日问候：按星期变化 */}
-      <div className="absolute top-[8%] right-[5%] rounded-full bg-white/75 px-3.5 py-1.5 text-[11.5px] font-medium text-[#B08A80] shadow-[var(--shadow-xs)] backdrop-blur-sm">
+      <div className="absolute top-[8%] right-[5%] rounded-full bg-white/75 px-3.5 py-1.5 text-[11.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] backdrop-blur-sm">
         {greeting.label} · {greeting.text}
       </div>
 

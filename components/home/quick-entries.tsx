@@ -11,31 +11,31 @@ const entries = [
     href: "/diary",
     compose: "diary" as const,
     iconColor: "text-[#E0697E]",
-    bg: "bg-[#FDECEC]",
+    bg: "bg-pink-soft",
   },
   {
     title: "化妆技巧",
     icon: Brush,
     href: "/beauty",
     compose: null,
-    iconColor: "text-[#8B63D9]",
-    bg: "bg-[#F4ECFD]",
+    iconColor: "text-purple-ink",
+    bg: "bg-purple-soft",
   },
   {
     title: "灵感收藏",
     icon: ImageIcon,
     href: "/inspiration",
     compose: null,
-    iconColor: "text-[#F08A4B]",
-    bg: "bg-[#FDEFE8]",
+    iconColor: "text-orange-ink",
+    bg: "bg-orange-soft",
   },
   {
     title: "成长清单",
     icon: Sprout,
     href: "/growth",
     compose: null,
-    iconColor: "text-[#4E9A6E]",
-    bg: "bg-[#E9F3EC]",
+    iconColor: "text-green-ink",
+    bg: "bg-green-soft",
   },
 ];
 
@@ -44,7 +44,7 @@ export function QuickEntries() {
 
   return (
     <section className="relative z-10 -mt-[70px] px-6">
-      <div className="grid grid-cols-4 gap-2 rounded-[18px] bg-[#FEFCFB] px-2 pt-4 pb-3 shadow-[var(--shadow-soft-sm)]">
+      <div className="grid grid-cols-4 gap-2 rounded-[18px] bg-card px-2 pt-4 pb-3 shadow-[var(--shadow-soft-sm)]">
         {entries.map((item) =>
           item.compose ? (
             <button
@@ -57,7 +57,7 @@ export function QuickEntries() {
               >
                 <item.icon className={`size-[22px] ${item.iconColor}`} strokeWidth={1.8} />
               </span>
-              <span className="mt-2 text-[14px] font-semibold text-[#3B2E2A]">
+              <span className="mt-2 text-[14px] font-semibold text-ink">
                 {item.title}
               </span>
             </button>
@@ -72,7 +72,7 @@ export function QuickEntries() {
               >
                 <item.icon className={`size-[22px] ${item.iconColor}`} strokeWidth={1.8} />
               </span>
-              <span className="mt-2 text-[14px] font-semibold text-[#3B2E2A]">
+              <span className="mt-2 text-[14px] font-semibold text-ink">
                 {item.title}
               </span>
             </Link>

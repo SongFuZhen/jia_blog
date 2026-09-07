@@ -105,23 +105,23 @@ export function ComposeSheet() {
   return (
     <div className="fixed inset-0 z-[60]">
       <div
-        className="absolute inset-0 bg-[#3B2E2A]/30 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]"
         onClick={closeCompose}
       />
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[430px]">
-        <div className="max-h-[86vh] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-3 pb-6 shadow-[var(--shadow-soft-lg)]">
-          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[#EBDCD5]" />
+        <div className="max-h-[86vh] overflow-y-auto rounded-t-[28px] bg-white dark:bg-[#231B1E] px-5 pt-3 pb-6 shadow-[var(--shadow-soft-lg)]">
+          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border-strong" />
 
           {/* 类型切换 */}
-          <div className="flex gap-1.5 rounded-full bg-[#F7F0EC] p-1">
+          <div className="flex gap-1.5 rounded-full bg-cream p-1">
             {typeOptions.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setType(opt.value)}
                 className={`h-8 flex-1 rounded-full text-[13px] font-medium transition-colors ${
                   type === opt.value
-                    ? "bg-white text-[#E0697E] shadow-[var(--shadow-xs)]"
-                    : "text-[#8A7A72]"
+                    ? "bg-white text-[#E0697E] dark:bg-[#342A2E] shadow-[var(--shadow-xs)]"
+                    : "text-ink-3"
                 }`}
               >
                 {opt.label}
@@ -134,18 +134,18 @@ export function ComposeSheet() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="起个可爱的标题～"
-            className="mt-4 w-full rounded-[14px] bg-[#FAF5F2] px-3.5 py-2.5 text-[15px] font-medium text-[#3B2E2A] outline-none placeholder:text-[#C9B8B2]"
+            className="mt-4 w-full rounded-[14px] bg-field px-3.5 py-2.5 text-[15px] font-medium text-ink outline-none placeholder:text-ink-5"
           />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="今天发生了什么呀？"
             rows={4}
-            className="mt-2.5 w-full resize-none rounded-[14px] bg-[#FAF5F2] px-3.5 py-2.5 text-[13.5px] leading-relaxed text-[#3B2E2A] outline-none placeholder:text-[#C9B8B2]"
+            className="mt-2.5 w-full resize-none rounded-[14px] bg-field px-3.5 py-2.5 text-[13.5px] leading-relaxed text-ink outline-none placeholder:text-ink-5"
           />
 
           {/* 心情 */}
-          <p className="mt-4 text-[12.5px] font-medium text-[#8A7A72]">
+          <p className="mt-4 text-[12.5px] font-medium text-ink-3">
             现在的心情
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -155,8 +155,8 @@ export function ComposeSheet() {
                 onClick={() => setMood(mood === m ? null : m)}
                 className={`rounded-full px-3 py-1.5 text-[12.5px] transition-colors ${
                   mood === m
-                    ? "bg-[#FDECEC] text-[#E0697E] font-medium"
-                    : "bg-[#F7F0EC] text-[#8A7A72]"
+                    ? "bg-pink-soft text-[#E0697E] font-medium"
+                    : "bg-cream text-ink-3"
                 }`}
               >
                 {m}
@@ -165,7 +165,7 @@ export function ComposeSheet() {
           </div>
 
           {/* 天气 */}
-          <p className="mt-3.5 text-[12.5px] font-medium text-[#8A7A72]">
+          <p className="mt-3.5 text-[12.5px] font-medium text-ink-3">
             今天的天气（可跳过）
           </p>
           <div className="mt-2 flex gap-1.5">
@@ -175,8 +175,8 @@ export function ComposeSheet() {
                 onClick={() => setWeather(weather === w ? null : w)}
                 className={`rounded-full px-3 py-1.5 text-[12.5px] transition-colors ${
                   weather === w
-                    ? "bg-[#E4F1FB] text-[#4E96DB] font-medium"
-                    : "bg-[#F7F0EC] text-[#8A7A72]"
+                    ? "bg-blue-soft text-blue-ink font-medium"
+                    : "bg-cream text-ink-3"
                 }`}
               >
                 {w}
@@ -185,7 +185,7 @@ export function ComposeSheet() {
           </div>
 
           {/* 图片 */}
-          <p className="mt-3.5 text-[12.5px] font-medium text-[#8A7A72]">
+          <p className="mt-3.5 text-[12.5px] font-medium text-ink-3">
             贴几张照片（选填）
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -202,7 +202,7 @@ export function ComposeSheet() {
                     setImages((prev) => prev.filter((_, idx) => idx !== i))
                   }
                   aria-label="移除照片"
-                  className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-[#3B2E2A]/70 text-white"
+                  className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-ink/70 text-white"
                 >
                   <X className="size-3" strokeWidth={2.4} />
                 </button>
@@ -211,7 +211,7 @@ export function ComposeSheet() {
             {images.length < 6 && (
               <button
                 onClick={() => fileRef.current?.click()}
-                className="flex size-[64px] items-center justify-center rounded-[12px] bg-[#FAF5F2] text-[#C9B8B2] transition-colors hover:text-[#E0697E]"
+                className="flex size-[64px] items-center justify-center rounded-[12px] bg-field text-ink-5 transition-colors hover:text-[#E0697E]"
                 aria-label="添加照片"
               >
                 {busy ? (
@@ -236,7 +236,7 @@ export function ComposeSheet() {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="标签，空格分隔：日常 美食"
-            className="mt-3.5 w-full rounded-[14px] bg-[#FAF5F2] px-3.5 py-2.5 text-[13px] text-[#3B2E2A] outline-none placeholder:text-[#C9B8B2]"
+            className="mt-3.5 w-full rounded-[14px] bg-field px-3.5 py-2.5 text-[13px] text-ink outline-none placeholder:text-ink-5"
           />
 
           {/* 操作 */}
@@ -244,7 +244,7 @@ export function ComposeSheet() {
             <button
               onClick={() => save(true)}
               disabled={!canSave || busy}
-              className="h-11 flex-1 rounded-[14px] bg-[#F7F0EC] text-[14.5px] font-medium text-[#8A7A72] transition-colors hover:bg-[#FDECEC] hover:text-[#E0697E] disabled:opacity-50"
+              className="h-11 flex-1 rounded-[14px] bg-cream text-[14.5px] font-medium text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E] disabled:opacity-50"
             >
               存草稿
             </button>
