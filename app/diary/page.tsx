@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { Loading } from "@/components/loading";
 import { useRecordsStore } from "@/lib/stores/records";
 import type { LifeRecord, Mood } from "@/lib/types";
 
@@ -79,6 +80,7 @@ function calcStreak(dates: string[]): number {
 
 export default function DiaryPage() {
   const records = useRecordsStore((s) => s.records);
+  const hydrated = useRecordsStore((s) => s.hydrated);
   const hydrate = useRecordsStore((s) => s.hydrate);
   const [moodFilter, setMoodFilter] = useState<Mood | "全部">("全部");
 
@@ -159,9 +161,13 @@ export default function DiaryPage() {
 
       {/* 分组列表 */}
       {groups.length === 0 ? (
-        <p className="mt-10 text-center text-[13px] text-ink-4">
-          {moodFilter === "全部" ? "还没有记录，点下面的 ＋ 写下第一条吧" : "这个心情下还没有记录"}
-        </p>
+        !hydrated ? (
+          <Loading />
+        ) : (
+          <p className="mt-10 text-center text-[13px] text-ink-4">
+            {moodFilter === "全部" ? "还没有记录，点下面的 ＋ 写下第一条吧" : "这个心情下还没有记录"}
+          </p>
+        )
       ) : (
         groups.map(([month, list]) => (
           <section key={month} className="mt-5">

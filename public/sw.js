@@ -1,6 +1,10 @@
 /* 小佳佳的生活日记 Service Worker */
-const CACHE = "jia-blog-v1";
+const CACHE = "jia-blog-v2";
+const DATA_CACHE = "jia-blog-data-v2";
 const OFFLINE_URL = "/offline.html";
+
+// 私密集合不缓存（数据敏感，且需要凭证）
+const PRIVATE_PATHS = ["weight-logs", "period-logs", "private-diary"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -14,7 +18,11 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
+        Promise.all(
+          keys
+            .filter((k) => k !== CACHE && k !== DATA_CACHE)
+            .map((k) => caches.delete(k)),
+        ),
       )
       .then(() => self.clients.claim()),
   );
@@ -26,7 +34,26 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== location.origin) return;
-  // 数据接口永远直连网络，不缓存（数据新鲜度优先）
+
+  // 数据接口：公开集合 stale-while-revalidate（先回缓存秒开，后台刷新）；私密集合直连
+  if (url.pathname.startsWith("/api/db/")) {
+    if (PRIVATE_PATHS.some((p) => url.pathname.includes(p))) return;
+    event.respondWith(
+      caches.open(DATA_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        const network = fetch(request)
+          .then((res) => {
+            if (res.ok) cache.put(request, res.clone());
+            return res;
+          })
+          .catch(() => cached);
+        return cached || network;
+      }),
+    );
+    return;
+  }
+
+  // 其余 API（AI 等）永远直连，不缓存
   if (url.pathname.startsWith("/api/")) return;
 
   // 页面导航：网络优先，失败回退缓存 → 离线页

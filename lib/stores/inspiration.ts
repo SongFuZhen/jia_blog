@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { inspirationsRepo } from "@/lib/repository";
+import { genId, inspirationsRepo } from "@/lib/repository";
 import type { Inspiration } from "@/lib/types";
 
-type NewInspiration = Parameters<typeof inspirationsRepo.create>[0];
+type NewInspiration = Omit<Inspiration, "id"> & { id?: string };
 
 interface InspirationState {
   items: Inspiration[];
@@ -23,12 +23,25 @@ export const useInspirationStore = create<InspirationState>((set, get) => ({
   },
 
   add: async (data) => {
-    const item = await inspirationsRepo.create(data);
-    set((s) => ({ items: [item, ...s.items] }));
+    const item: Inspiration = { ...data, id: data.id ?? genId() } as Inspiration;
+    const prev = get().items;
+    set({ items: [item, ...prev] });
+    try {
+      await inspirationsRepo.create(item);
+    } catch (err) {
+      set({ items: prev });
+      throw err;
+    }
   },
 
   remove: async (id) => {
-    await inspirationsRepo.remove(id);
-    set((s) => ({ items: s.items.filter((i) => i.id !== id) }));
+    const prev = get().items;
+    set({ items: prev.filter((i) => i.id !== id) });
+    try {
+      await inspirationsRepo.remove(id);
+    } catch (err) {
+      set({ items: prev });
+      throw err;
+    }
   },
 }));

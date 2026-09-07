@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { NotebookPen } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { Loading } from "@/components/loading";
 import { useRecordsStore } from "@/lib/stores/records";
 import type { Mood } from "@/lib/types";
 
@@ -37,6 +38,7 @@ function formatDate(iso: string) {
 
 export default function DraftsPage() {
   const records = useRecordsStore((s) => s.records);
+  const hydrated = useRecordsStore((s) => s.hydrated);
   const hydrate = useRecordsStore((s) => s.hydrate);
 
   useEffect(() => {
@@ -49,7 +51,9 @@ export default function DraftsPage() {
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="我的草稿" subtitle="没写完的，慢慢补" />
 
-      {drafts.length === 0 ? (
+      {!hydrated ? (
+        <Loading />
+      ) : drafts.length === 0 ? (
         <div className="mt-8 flex flex-col items-center rounded-[20px] bg-card px-6 py-10 shadow-[var(--shadow-soft-sm)]">
           <span className="flex size-12 items-center justify-center rounded-full bg-pink-soft text-[#E0697E]">
             <NotebookPen className="size-6" strokeWidth={1.8} />

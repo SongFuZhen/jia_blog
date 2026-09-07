@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { recordsRepo } from "@/lib/repository";
+import { genId, recordsRepo } from "@/lib/repository";
 import type { LifeRecord } from "@/lib/types";
 
-type NewLifeRecord = Parameters<typeof recordsRepo.create>[0];
+type NewLifeRecord = Omit<LifeRecord, "id"> & { id?: string };
 
 function sortByCreatedDesc(records: LifeRecord[]): LifeRecord[] {
   return [...records].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -13,6 +13,7 @@ interface RecordsState {
   hydrated: boolean;
   /** 首次使用时从仓库读取（含 seed 初始化），组件挂载后调用 */
   hydrate: () => Promise<void>;
+  /** 乐观更新：先改界面，后台写库，失败回滚 */
   addRecord: (data: NewLifeRecord) => Promise<LifeRecord>;
   updateRecord: (
     id: string,
@@ -32,23 +33,48 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
   },
 
   addRecord: async (data) => {
-    const record = await recordsRepo.create(data);
-    set((s) => ({ records: sortByCreatedDesc([record, ...s.records]) }));
-    return record;
+    const record: LifeRecord = { ...data, id: data.id ?? genId() } as LifeRecord;
+    const prev = get().records;
+    set({ records: sortByCreatedDesc([record, ...prev]) });
+    try {
+      await recordsRepo.create(record);
+      return record;
+    } catch (err) {
+      set({ records: prev }); // 写库失败回滚
+      throw err;
+    }
   },
 
   updateRecord: async (id, patch) => {
-    const updated = await recordsRepo.update(id, patch);
-    if (!updated) return;
-    set((s) => ({
+    const prev = get().records;
+    set({
       records: sortByCreatedDesc(
-        s.records.map((r) => (r.id === id ? updated : r)),
+        prev.map((r) => (r.id === id ? { ...r, ...patch } : r)),
       ),
-    }));
+    });
+    try {
+      const updated = await recordsRepo.update(id, patch);
+      if (updated) {
+        set({
+          records: sortByCreatedDesc(
+            get().records.map((r) => (r.id === id ? updated : r)),
+          ),
+        });
+      }
+    } catch (err) {
+      set({ records: prev });
+      throw err;
+    }
   },
 
   removeRecord: async (id) => {
-    await recordsRepo.remove(id);
-    set((s) => ({ records: s.records.filter((r) => r.id !== id) }));
+    const prev = get().records;
+    set({ records: prev.filter((r) => r.id !== id) });
+    try {
+      await recordsRepo.remove(id);
+    } catch (err) {
+      set({ records: prev });
+      throw err;
+    }
   },
 }));

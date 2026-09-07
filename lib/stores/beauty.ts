@@ -1,14 +1,15 @@
 import { create } from "zustand";
 import {
   beautyTipsRepo,
+  genId,
   productsRepo,
   usageLogsRepo,
   wishesRepo,
 } from "@/lib/repository";
 import type { BeautyTip, Product, UsageLog, Wish } from "@/lib/types";
 
-type NewProduct = Parameters<typeof productsRepo.create>[0];
-type NewWish = Parameters<typeof wishesRepo.create>[0];
+type NewProduct = Omit<Product, "id"> & { id?: string };
+type NewWish = Omit<Wish, "id"> & { id?: string };
 
 interface BeautyState {
   tips: BeautyTip[];
@@ -28,7 +29,7 @@ interface BeautyState {
     patch: Partial<Omit<BeautyTip, "id">>,
   ) => Promise<void>;
 
-  addProduct: (data: NewProduct) => Promise<Product>;
+  addProduct: (data: NewProduct) => Promise<void>;
   updateProduct: (
     id: string,
     patch: Partial<Omit<Product, "id">>,
@@ -69,58 +70,114 @@ export const useBeautyStore = create<BeautyState>((set, get) => ({
   },
 
   updateTip: async (id, patch) => {
-    const updated = await beautyTipsRepo.update(id, patch);
-    if (!updated) return;
-    set((s) => ({
-      tips: s.tips.map((t) => (t.id === id ? updated : t)),
-    }));
+    const prev = get().tips;
+    set({ tips: prev.map((t) => (t.id === id ? { ...t, ...patch } : t)) });
+    try {
+      const updated = await beautyTipsRepo.update(id, patch);
+      if (updated) {
+        set({ tips: get().tips.map((t) => (t.id === id ? updated : t)) });
+      }
+    } catch (err) {
+      set({ tips: prev });
+      throw err;
+    }
   },
 
   addProduct: async (data) => {
-    const product = await productsRepo.create(data);
-    set((s) => ({ products: [product, ...s.products] }));
-    return product;
+    const product: Product = { ...data, id: data.id ?? genId() } as Product;
+    const prev = get().products;
+    set({ products: [product, ...prev] });
+    try {
+      await productsRepo.create(product);
+    } catch (err) {
+      set({ products: prev });
+      throw err;
+    }
   },
 
   updateProduct: async (id, patch) => {
-    const updated = await productsRepo.update(id, patch);
-    if (!updated) return;
-    set((s) => ({
-      products: s.products.map((p) => (p.id === id ? updated : p)),
-    }));
+    const prev = get().products;
+    set({ products: prev.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
+    try {
+      const updated = await productsRepo.update(id, patch);
+      if (updated) {
+        set({ products: get().products.map((p) => (p.id === id ? updated : p)) });
+      }
+    } catch (err) {
+      set({ products: prev });
+      throw err;
+    }
   },
 
   removeProduct: async (id) => {
-    await productsRepo.remove(id);
-    set((s) => ({
-      products: s.products.filter((p) => p.id !== id),
-      usageLogs: s.usageLogs.filter((u) => u.productId !== id),
-    }));
+    const prevProducts = get().products;
+    const prevLogs = get().usageLogs;
+    set({
+      products: prevProducts.filter((p) => p.id !== id),
+      usageLogs: prevLogs.filter((u) => u.productId !== id),
+    });
+    try {
+      await productsRepo.remove(id);
+      // 关联打卡记录后台清理，失败不影响界面
+      for (const log of prevLogs.filter((u) => u.productId === id)) {
+        usageLogsRepo.remove(log.id).catch(() => {});
+      }
+    } catch (err) {
+      set({ products: prevProducts, usageLogs: prevLogs });
+      throw err;
+    }
   },
 
   logUsage: async (productId, date) => {
-    const log = await usageLogsRepo.create({
+    const log: UsageLog = {
+      id: genId(),
       productId,
       date: date ?? new Date().toISOString().slice(0, 10),
-    });
-    set((s) => ({ usageLogs: [log, ...s.usageLogs] }));
+    };
+    const prev = get().usageLogs;
+    set({ usageLogs: [log, ...prev] });
+    try {
+      await usageLogsRepo.create(log);
+    } catch (err) {
+      set({ usageLogs: prev });
+      throw err;
+    }
   },
 
   addWish: async (data) => {
-    const wish = await wishesRepo.create(data);
-    set((s) => ({ wishes: [wish, ...s.wishes] }));
+    const wish: Wish = { ...data, id: data.id ?? genId() } as Wish;
+    const prev = get().wishes;
+    set({ wishes: [wish, ...prev] });
+    try {
+      await wishesRepo.create(wish);
+    } catch (err) {
+      set({ wishes: prev });
+      throw err;
+    }
   },
 
   updateWish: async (id, patch) => {
-    const updated = await wishesRepo.update(id, patch);
-    if (!updated) return;
-    set((s) => ({
-      wishes: s.wishes.map((w) => (w.id === id ? updated : w)),
-    }));
+    const prev = get().wishes;
+    set({ wishes: prev.map((w) => (w.id === id ? { ...w, ...patch } : w)) });
+    try {
+      const updated = await wishesRepo.update(id, patch);
+      if (updated) {
+        set({ wishes: get().wishes.map((w) => (w.id === id ? updated : w)) });
+      }
+    } catch (err) {
+      set({ wishes: prev });
+      throw err;
+    }
   },
 
   removeWish: async (id) => {
-    await wishesRepo.remove(id);
-    set((s) => ({ wishes: s.wishes.filter((w) => w.id !== id) }));
+    const prev = get().wishes;
+    set({ wishes: prev.filter((w) => w.id !== id) });
+    try {
+      await wishesRepo.remove(id);
+    } catch (err) {
+      set({ wishes: prev });
+      throw err;
+    }
   },
 }));

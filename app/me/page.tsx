@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -10,12 +13,9 @@ import {
   Settings,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
-
-const stats = [
-  { num: 128, label: "日记" },
-  { num: 56, label: "灵感" },
-  { num: 89, label: "收藏" },
-];
+import { useRecordsStore } from "@/lib/stores/records";
+import { useInspirationStore } from "@/lib/stores/inspiration";
+import { useBeautyStore } from "@/lib/stores/beauty";
 
 const menus = [
   { label: "我的草稿", icon: NotebookPen, href: "/drafts" },
@@ -25,9 +25,26 @@ const menus = [
   { label: "帮助与关于", icon: Info, href: "/settings" },
 ];
 
-export const metadata = { title: "我的 · 小佳佳的生活日记" };
-
 export default function MePage() {
+  const records = useRecordsStore((s) => s.records);
+  const recordsHydrate = useRecordsStore((s) => s.hydrate);
+  const inspirations = useInspirationStore((s) => s.items);
+  const inspHydrate = useInspirationStore((s) => s.hydrate);
+  const products = useBeautyStore((s) => s.products);
+  const beautyHydrate = useBeautyStore((s) => s.hydrate);
+
+  useEffect(() => {
+    recordsHydrate();
+    inspHydrate();
+    beautyHydrate();
+  }, [recordsHydrate, inspHydrate, beautyHydrate]);
+
+  const stats = [
+    { num: records.filter((r) => !r.draft).length, label: "日记" },
+    { num: inspirations.length, label: "灵感" },
+    { num: products.length, label: "美妆柜" },
+  ];
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="我的" />

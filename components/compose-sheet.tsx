@@ -86,18 +86,23 @@ export function ComposeSheet() {
       .filter(Boolean)
       .slice(0, 6);
 
-    await addRecord({
-      type,
-      title: title.trim() || "无标题",
-      content: content.trim(),
-      images,
-      mood,
-      weather: weather ?? undefined,
-      tags: tagList,
-      visibility: asDraft ? "仅自己" : "私人收藏",
-      ...(asDraft ? { draft: true } : {}),
-      createdAt: new Date().toISOString(),
-    });
+    try {
+      await addRecord({
+        type,
+        title: title.trim() || "无标题",
+        content: content.trim(),
+        images,
+        mood,
+        weather: weather ?? undefined,
+        tags: tagList,
+        visibility: asDraft ? "仅自己" : "私人收藏",
+        ...(asDraft ? { draft: true } : {}),
+        createdAt: new Date().toISOString(),
+      });
+    } catch {
+      window.alert("网络好像不太顺畅，保存失败了，再试一次～");
+      return;
+    }
     reset();
     closeCompose();
   }

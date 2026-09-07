@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check, Plus, Star } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { Loading } from "@/components/loading";
 import { useBeautyStore } from "@/lib/stores/beauty";
 import type { BeautyCategory } from "@/lib/types";
 
@@ -61,6 +62,7 @@ const wishStatusColors: Record<string, string> = {
 export default function BeautyPage() {
   const {
     tips,
+    hydrated,
     products,
     usageLogs,
     wishes,
@@ -145,8 +147,9 @@ export default function BeautyPage() {
             ))}
           </div>
 
+            {!hydrated && <Loading />}
           <div className="mt-4 space-y-3">
-            {filteredTips.map((tip) => (
+            {hydrated && filteredTips.map((tip) => (
               <Link
                 key={tip.id}
                 href={`/beauty/${tip.id}`}
@@ -287,7 +290,7 @@ export default function BeautyPage() {
           )}
 
           <div className="mt-3 space-y-3">
-            {products.map((p) => (
+            {hydrated && products.map((p) => (
               <div
                 key={p.id}
                 className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
@@ -396,7 +399,7 @@ export default function BeautyPage() {
           )}
 
           <div className="mt-3 space-y-3">
-            {wishes.map((w) => {
+            {hydrated && wishes.map((w) => {
               const statusIndex = wishStatuses.findIndex((s) => s.key === w.status);
               return (
                 <div

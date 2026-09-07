@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Camera, Image as ImageIcon, Music, Plus, Quote, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { Loading } from "@/components/loading";
 import { useInspirationStore } from "@/lib/stores/inspiration";
 import type { InspirationType } from "@/lib/types";
 
@@ -30,7 +31,7 @@ const typeStyles: Record<InspirationType, { icon: typeof Quote; tagClass: string
 };
 
 export default function InspirationPage() {
-  const { items, hydrate, add, remove } = useInspirationStore();
+  const { items, hydrated, hydrate, add, remove } = useInspirationStore();
   const [filter, setFilter] = useState<InspirationType | "全部">("全部");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<{ type: InspirationType; content: string; tags: string }>({
@@ -136,6 +137,8 @@ export default function InspirationPage() {
       </div>
 
       {/* 瀑布流卡片 */}
+      {!hydrated && <Loading />}
+      {hydrated && (
       <div className="mt-4 columns-2 gap-3 [&>*]:mb-3">
         {filtered.map((it) => {
           const style = typeStyles[it.type];
@@ -185,8 +188,9 @@ export default function InspirationPage() {
           );
         })}
       </div>
+      )}
 
-      {filtered.length === 0 && (
+      {hydrated && filtered.length === 0 && (
         <p className="mt-8 text-center text-[13px] text-ink-4">
           这个分类下还没有收藏
         </p>
