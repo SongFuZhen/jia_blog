@@ -16,7 +16,14 @@ export const metadata: Metadata = {
     title: "小佳佳",
   },
   icons: {
-    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    icon: [
+      // 浏览器标签页（传统 .ico，含 16/32/48）
+      { url: "/favicon.ico", sizes: "48x48" },
+      // 高分屏 / 一般场景
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    // iOS 桌面图标
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
