@@ -3,11 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { YearReview } from "@/components/review/year-review";
 import { useRecordsStore } from "@/lib/stores/records";
 import { useInspirationStore } from "@/lib/stores/inspiration";
 import { useBeautyStore } from "@/lib/stores/beauty";
 import { useSettingsStore } from "@/lib/stores/settings";
 import type { Mood } from "@/lib/types";
+
+type Mode = "month" | "year";
 
 export default function ReviewPage() {
   const { records, hydrate } = useRecordsStore();
@@ -16,6 +19,7 @@ export default function ReviewPage() {
   const { settings, hydrate: hydrateSettings } = useSettingsStore();
 
   const now = new Date();
+  const [mode, setMode] = useState<Mode>("month");
   const [month, setMonth] = useState(
     `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
   );
@@ -66,8 +70,34 @@ export default function ReviewPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
-      <PageHeader title="月度回顾" subtitle="原来这个月变了这么多" />
+      <PageHeader title="回顾" subtitle="原来这段时间变了这么多" />
 
+      {/* 月报 / 年报切换 */}
+      <div className="mt-4 flex gap-1.5 rounded-full bg-[#F7F0EC] p-1">
+        {(
+          [
+            { key: "month", label: "月报" },
+            { key: "year", label: "年报 · 我的这一年" },
+          ] as { key: Mode; label: string }[]
+        ).map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setMode(t.key)}
+            className={`h-9 flex-1 rounded-full text-[13.5px] font-medium transition-colors ${
+              mode === t.key
+                ? "bg-white text-[#E0697E] shadow-[var(--shadow-xs)]"
+                : "text-[#8A7A72]"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {mode === "year" && <YearReview />}
+
+      {mode === "month" && (
+        <>
       {/* 月份切换 */}
       <div className="mt-4 flex items-center justify-between rounded-full bg-white px-2 py-1.5 shadow-[var(--shadow-xs)]">
         <button
@@ -177,6 +207,8 @@ export default function ReviewPage() {
           </p>
         )}
       </div>
+        </>
+      )}
     </main>
   );
 }
