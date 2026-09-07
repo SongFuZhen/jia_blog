@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { verifyPrivatePassword } from "@/app/actions";
+import { setPrivateCredential } from "@/lib/repository";
 import { usePrivateStore } from "@/lib/stores/private";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { useAutoLock } from "@/lib/use-auto-lock";
@@ -89,7 +90,13 @@ export default function PrivatePage() {
     hydrateSettings();
   }, [hydrateSettings]);
 
-  useAutoLock(!locked && (settings.autoLock ?? true), lock);
+  /** 上锁：清凭证 + 清内存数据 */
+  const handleLock = useCallback(() => {
+    setPrivateCredential(null);
+    lock();
+  }, [lock]);
+
+  useAutoLock(!locked && (settings.autoLock ?? true), handleLock);
 
   // 解锁后加载数据
   useEffect(() => {
@@ -103,6 +110,7 @@ export default function PrivatePage() {
     const ok = await verifyPrivatePassword(pwd);
     setChecking(false);
     if (ok) {
+      setPrivateCredential(pwd);
       setPwd("");
       unlock();
     } else {
@@ -228,7 +236,7 @@ export default function PrivatePage() {
           </p>
         </div>
         <button
-          onClick={lock}
+          onClick={handleLock}
           className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-[12.5px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
         >
           <Lock className="size-3.5" strokeWidth={1.8} />

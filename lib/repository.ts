@@ -5,18 +5,8 @@
  * 后期接入 Neon（Postgres）时，只需把这些实现替换为 API 调用，
  * 接口签名不变，UI / store 零改动。
  */
-import type {
-  BeautyTip,
-  Inspiration,
-  LifeRecord,
-  PeriodLog,
-  PrivateDiary,
-  Product,
-  Settings,
-  UsageLog,
-  WeightLog,
-  Wish,
-} from "@/lib/types";
+import type { Settings } from "@/lib/types";
+import { PRIVATE_COLLECTIONS } from "@/lib/db-collections";
 import {
   seedBeautyTips,
   seedInspirations,
@@ -35,7 +25,7 @@ export interface Entity {
   id: string;
 }
 
-/** 集合仓库：接口式 CRUD，全部异步（为 API 化预留） */
+/** 集合仓库：接口式 CRUD，全部异步，当前实现为 Neon Postgres（经 /api/db） */
 export interface Repository<T extends Entity> {
   list(): Promise<T[]>;
   get(id: string): Promise<T | null>;
@@ -57,133 +47,147 @@ export function genId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/** localStorage 实现的集合仓库；首次访问时写入 seed 数据 */
-export function createLocalRepository<T extends Entity>(
+/* ---------- 私密集合访问凭证 ---------- */
+
+let privateCredential: string | null = null;
+
+/** 解锁私密空间后设置密码（请求私密集合时作为 x-private-key 头），上锁时清除 */
+export function setPrivateCredential(key: string | null) {
+  privateCredential = key;
+}
+
+function authHeaders(name: string): Record<string, string> {
+  return PRIVATE_COLLECTIONS.has(name) && privateCredential
+    ? { "x-private-key": privateCredential }
+    : {};
+}
+
+/* ---------- API 仓库（Neon Postgres） ---------- */
+
+async function api<T>(name: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`/api/db/${name}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(name),
+      ...init?.headers,
+    },
+  });
+  if (!res.ok) throw new Error(`数据库请求失败（${res.status}）`);
+  return res.json() as Promise<T>;
+}
+
+/** 读取迁移前的 localStorage 旧数据 */
+function readLocalCollection<T extends Entity>(name: string): T[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(`${STORAGE_PREFIX}:${name}`);
+    return raw ? (JSON.parse(raw) as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Neon Postgres 实现的集合仓库。
+ * 首次 list() 时：云端为空则自动迁移本机 localStorage 数据（无则播种 seed）。
+ */
+export function createApiRepository<T extends Entity>(
   name: string,
   seed: T[],
 ): Repository<T> {
-  const key = `${STORAGE_PREFIX}:${name}`;
   let cache: T[] | null = null;
 
-  const read = (): T[] => {
+  const ensure = async (): Promise<T[]> => {
     if (cache) return cache;
-    if (typeof window === "undefined") return seed;
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw === null) {
-        cache = seed.map((item) => ({ ...item }));
-        window.localStorage.setItem(key, JSON.stringify(cache));
-      } else {
-        cache = JSON.parse(raw) as T[];
+    const server = await api<T[]>(name);
+    if (server.length === 0) {
+      const local = readLocalCollection<T>(name);
+      const initial = local.length > 0 ? local : seed;
+      if (initial.length > 0) {
+        await api(name, {
+          method: "POST",
+          body: JSON.stringify({ items: initial }),
+        });
       }
-    } catch {
-      cache = seed.map((item) => ({ ...item }));
+      cache = initial;
+    } else {
+      cache = server;
     }
     return cache;
   };
 
   const write = (items: T[]) => {
     cache = items;
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(key, JSON.stringify(items));
-    }
   };
 
   return {
     async list() {
-      return read().map((item) => ({ ...item }));
+      const items = await ensure();
+      return items.map((item) => ({ ...item }));
     },
     async get(id) {
-      return read().find((item) => item.id === id) ?? null;
+      const items = await ensure();
+      return items.find((item) => item.id === id) ?? null;
     },
     async create(data) {
       const item = { ...data, id: data.id ?? genId() } as T;
-      write([item, ...read()]);
+      await api(name, { method: "POST", body: JSON.stringify(item) });
+      write([item, ...(cache ?? [])]);
       return { ...item };
     },
     async update(id, patch) {
-      const items = read();
-      const index = items.findIndex((item) => item.id === id);
-      if (index === -1) return null;
-      items[index] = { ...items[index], ...patch };
-      write(items);
-      return { ...items[index] };
+      await ensure();
+      const updated = await api<T>(`${name}?id=${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      });
+      write((cache ?? []).map((item) => (item.id === id ? updated : item)));
+      return { ...updated };
     },
     async remove(id) {
-      const items = read();
-      const next = items.filter((item) => item.id !== id);
-      if (next.length === items.length) return false;
-      write(next);
-      return true;
+      await ensure();
+      const res = await api<{ ok: boolean }>(
+        `${name}?id=${encodeURIComponent(id)}`,
+        { method: "DELETE" },
+      );
+      write((cache ?? []).filter((item) => item.id !== id));
+      return res.ok;
     },
   };
 }
 
-/** localStorage 实现的单对象仓库 */
-export function createLocalSingleRepository<T>(
+/** Neon Postgres 实现的单对象仓库（固定 id 的单行） */
+export function createApiSingleRepository<T extends object>(
   name: string,
   defaultValue: T,
 ): SingleRepository<T> {
-  const key = `${STORAGE_PREFIX}:${name}`;
-  let cache: T | null = null;
-
   return {
     async load() {
-      if (cache) return cache;
-      if (typeof window === "undefined") return defaultValue;
-      try {
-        const raw = window.localStorage.getItem(key);
-        cache = raw === null ? defaultValue : (JSON.parse(raw) as T);
-      } catch {
-        cache = defaultValue;
-      }
-      return cache;
+      const items = await api<(T & Entity)[]>(name);
+      return items.find((item) => item.id === "default") ?? defaultValue;
     },
     async save(value) {
-      cache = value;
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(value));
-      }
+      await api(name, {
+        method: "POST",
+        body: JSON.stringify({ ...value, id: "default" }),
+      });
     },
   };
 }
 
 /* ---------- 各模块仓库实例 ---------- */
 
-export const recordsRepo = createLocalRepository<LifeRecord>(
-  "records",
-  seedLifeRecords,
-);
-export const beautyTipsRepo = createLocalRepository<BeautyTip>(
-  "beauty-tips",
-  seedBeautyTips,
-);
-export const productsRepo = createLocalRepository<Product>(
-  "products",
-  seedProducts,
-);
-export const usageLogsRepo = createLocalRepository<UsageLog>(
-  "usage-logs",
-  seedUsageLogs,
-);
-export const wishesRepo = createLocalRepository<Wish>("wishes", seedWishes);
-export const inspirationsRepo = createLocalRepository<Inspiration>(
-  "inspirations",
-  seedInspirations,
-);
-export const weightLogsRepo = createLocalRepository<WeightLog>(
-  "weight-logs",
-  seedWeightLogs,
-);
-export const periodLogsRepo = createLocalRepository<PeriodLog>(
-  "period-logs",
-  seedPeriodLogs,
-);
-export const privateDiaryRepo = createLocalRepository<PrivateDiary>(
-  "private-diary",
-  seedPrivateDiaries,
-);
-export const settingsRepo = createLocalSingleRepository<Settings>(
-  "settings",
-  { nickname: "小佳佳", autoLock: true },
-);
+export const recordsRepo = createApiRepository("records", seedLifeRecords);
+export const beautyTipsRepo = createApiRepository("beauty-tips", seedBeautyTips);
+export const productsRepo = createApiRepository("products", seedProducts);
+export const usageLogsRepo = createApiRepository("usage-logs", seedUsageLogs);
+export const wishesRepo = createApiRepository("wishes", seedWishes);
+export const inspirationsRepo = createApiRepository("inspirations", seedInspirations);
+export const weightLogsRepo = createApiRepository("weight-logs", seedWeightLogs);
+export const periodLogsRepo = createApiRepository("period-logs", seedPeriodLogs);
+export const privateDiaryRepo = createApiRepository("private-diary", seedPrivateDiaries);
+export const settingsRepo = createApiSingleRepository<Settings>("settings", {
+  nickname: "小佳佳",
+  autoLock: true,
+});
