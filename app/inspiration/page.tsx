@@ -101,7 +101,7 @@ export default function InspirationPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowAdd(false)}
-                className="rounded-full bg-[#F7F0EC] px-4 py-1.5 text-[12.5px] text-[#8A7A72]"
+                className="rounded-full bg-[#F7F0EC] px-3.5 py-1.5 text-[12.5px] text-[#8A7A72] transition-colors hover:bg-[#FDECEC] hover:text-[#E0697E]"
               >
                 取消
               </button>
@@ -118,7 +118,7 @@ export default function InspirationPage() {
                   setShowAdd(false);
                 }}
                 disabled={!form.content.trim()}
-                className="rounded-full bg-[#E96882] px-4 py-1.5 text-[12.5px] font-medium text-white disabled:opacity-40"
+                className="rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983] disabled:opacity-40"
               >
                 收进口袋
               </button>

@@ -164,7 +164,7 @@ export default function TipDetailPage({
           <div className="mt-3 flex justify-end gap-2">
             <button
               onClick={() => setShowTried(false)}
-              className="rounded-full bg-[#F7F0EC] px-4 py-1.5 text-[12.5px] text-[#8A7A72]"
+              className="rounded-full bg-[#F7F0EC] px-3.5 py-1.5 text-[12.5px] text-[#8A7A72] transition-colors hover:bg-[#FDECEC] hover:text-[#E0697E]"
             >
               取消
             </button>
@@ -175,7 +175,7 @@ export default function TipDetailPage({
                 setShowTried(false);
                 setTimeout(() => setSaved(false), 1500);
               }}
-              className="rounded-full bg-[#E96882] px-4 py-1.5 text-[12.5px] font-medium text-white"
+              className="rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
             >
               {saved ? "记好啦 ✓" : "记下来"}
             </button>

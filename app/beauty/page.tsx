@@ -278,7 +278,7 @@ export default function BeautyPage() {
                     setNewProduct({ name: "", brand: "", shade: "", favor: 4 });
                     setShowAddProduct(false);
                   }}
-                  className="rounded-full bg-[#E96882] px-4 py-1.5 text-[12.5px] font-medium text-white"
+                  className="rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
                 >
                   收进柜子
                 </button>
@@ -388,7 +388,7 @@ export default function BeautyPage() {
                   setNewWish("");
                   setShowAddWish(false);
                 }}
-                className="h-[34px] shrink-0 self-center rounded-full bg-[#E96882] px-3.5 text-[12px] font-medium text-white transition-colors hover:bg-[#D56983]"
+                className="self-center shrink-0 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
               >
                 收下
               </button>
@@ -424,7 +424,7 @@ export default function BeautyPage() {
                           onClick={() =>
                             updateWish(w.id, { status: wishStatuses[statusIndex + 1].key })
                           }
-                          className="rounded-full bg-[#FDECEC] px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E]"
+                          className="rounded-full bg-[#FDECEC] px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] transition-colors hover:bg-[#FBDDE2]"
                         >
                           → {wishStatuses[statusIndex + 1].label}
                         </button>

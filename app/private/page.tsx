@@ -264,7 +264,7 @@ export default function PrivatePage() {
                 setWeightInput("");
               }}
               disabled={!weightInput}
-              className="rounded-full bg-[#FDECEC] px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] disabled:opacity-40"
+              className="rounded-full bg-[#FDECEC] px-3 py-1.5 text-[11.5px] font-medium text-[#E0697E] transition-colors hover:bg-[#FBDDE2] disabled:opacity-40"
             >
               记一笔
             </button>
@@ -336,7 +336,7 @@ export default function PrivatePage() {
               setPeriodFeeling("");
             }}
             disabled={!periodStart}
-            className="shrink-0 rounded-full bg-[#D56983] px-3 py-1.5 text-[11.5px] font-medium text-white disabled:opacity-40"
+            className="shrink-0 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983] disabled:opacity-40"
           >
             记录
           </button>
@@ -397,7 +397,7 @@ export default function PrivatePage() {
                 setDiaryMood(null);
               }}
               disabled={!diaryContent.trim()}
-              className="shrink-0 rounded-full bg-[#E96882] px-4 py-1.5 text-[12px] font-medium text-white disabled:opacity-40"
+              className="shrink-0 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983] disabled:opacity-40"
             >
               写下来
             </button>

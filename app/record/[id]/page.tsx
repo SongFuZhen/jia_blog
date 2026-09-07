@@ -195,7 +195,7 @@ export default function RecordPage({
           {editing && (
             <button
               onClick={saveEdit}
-              className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-2 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)]"
+              className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-2 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
             >
               <Check className="size-3.5" strokeWidth={2} />
               保存
@@ -227,7 +227,7 @@ export default function RecordPage({
             <button
               onClick={handleAiXhs}
               disabled={aiBusy}
-              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E] disabled:opacity-50"
             >
               <WandSparkles className="size-3.5" strokeWidth={1.8} />
               {aiBusy ? "生成中…" : "AI 生成"}
@@ -235,7 +235,7 @@ export default function RecordPage({
             {isAiText && (
               <button
                 onClick={() => setXhsOverride(null)}
-                className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)]"
+                className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
               >
                 看模板版
               </button>
@@ -246,7 +246,7 @@ export default function RecordPage({
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1500);
               }}
-              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)]"
+              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
             >
               <Copy className="size-3.5" strokeWidth={1.8} />
               {copied ? "复制好啦" : "复制文案"}
