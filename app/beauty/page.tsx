@@ -372,7 +372,7 @@ export default function BeautyPage() {
                 value={newWish}
                 onChange={(e) => setNewWish(e.target.value)}
                 placeholder="想买什么呀？"
-                className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] outline-none"
+                className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2 text-[12.5px] outline-none"
                 onKeyDown={async (e) => {
                   if (e.key === "Enter" && newWish.trim()) {
                     await addWish({ name: newWish.trim(), status: "want", createdAt: new Date().toISOString() });
@@ -388,7 +388,7 @@ export default function BeautyPage() {
                   setNewWish("");
                   setShowAddWish(false);
                 }}
-                className="shrink-0 rounded-full bg-[#E96882] px-4 py-1.5 text-[12.5px] font-medium text-white"
+                className="h-[34px] shrink-0 self-center rounded-full bg-[#E96882] px-3.5 text-[12px] font-medium text-white transition-colors hover:bg-[#D56983]"
               >
                 收下
               </button>
