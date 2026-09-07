@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { isDbCollection, PRIVATE_COLLECTIONS } from "@/lib/db-collections";
+import { serverEnv } from "@/lib/server-env";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ function getSql(): (
   ...params: unknown[]
 ) => Promise<Record<string, unknown>[]> {
   if (!_sql) {
-    const url = process.env.DATABASE_URL;
+    const url = serverEnv("DATABASE_URL");
     if (!url) {
       throw new Error("DATABASE_URL 未配置");
     }
@@ -29,7 +30,7 @@ function guard(req: NextRequest, name: string): NextResponse | null {
     return NextResponse.json({ error: "unknown collection" }, { status: 404 });
   }
   if (PRIVATE_COLLECTIONS.has(name)) {
-    const expected = process.env.PRIVATE_PASSWORD;
+    const expected = serverEnv("PRIVATE_PASSWORD");
     const key = req.headers.get("x-private-key");
     if (!expected || key !== expected) {
       return NextResponse.json({ error: "locked" }, { status: 401 });

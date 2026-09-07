@@ -1,5 +1,7 @@
 "use server";
 
+import { serverEnv } from "@/lib/server-env";
+
 /**
  * 私密空间密码校验（Server Action）
  * 密码只存在服务端环境变量 PRIVATE_PASSWORD 中，不会暴露给客户端。
@@ -7,16 +9,16 @@
  * 注意：MVP 阶段仅做校验，解锁状态保存在客户端；接入 Neon/账号体系后应改为 HttpOnly Cookie 会话。
  */
 export async function verifyPrivatePassword(pwd: string): Promise<boolean> {
-  const expected = process.env.PRIVATE_PASSWORD;
+  const expected = serverEnv("PRIVATE_PASSWORD");
   if (!expected) return false;
   return pwd === expected;
 }
 
 /* ==================== Agnes AI（P2-12/13） ==================== */
 
-const AI_BASE = process.env.AGNES_BASE_URL ?? "https://apihub.agnes-ai.com/v1";
-const AI_KEY = process.env.AGNES_API_KEY;
-const AI_MODEL = process.env.AGNES_CHAT_MODEL ?? "agnes-2.5-flash";
+const AI_BASE = serverEnv("AGNES_BASE_URL") ?? "https://apihub.agnes-ai.com/v1";
+const AI_KEY = serverEnv("AGNES_API_KEY");
+const AI_MODEL = serverEnv("AGNES_CHAT_MODEL") ?? "agnes-2.5-flash";
 
 /** AI 是否可用（配置了 key） */
 export async function aiAvailable(): Promise<boolean> {

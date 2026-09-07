@@ -11,7 +11,11 @@ const SIZES = [16, 32, 48, 64, 128, 256];
 
 const pngs = [];
 for (const size of SIZES) {
-  const buf = await sharp(SRC).resize(size, size).png().toBuffer();
+  const buf = await sharp(SRC)
+    .resize(size, size)
+    .toColourspace("srgba")
+    .png()
+    .toBuffer();
   pngs.push({ size, buf });
 }
 

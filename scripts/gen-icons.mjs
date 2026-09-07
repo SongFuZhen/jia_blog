@@ -48,7 +48,8 @@ await (await fitted(512)).png().toFile(`${OUT}/icon-512.png`);
 // iOS 桌面图标
 await (await fitted(180)).png().toFile(`${OUT}/apple-touch-icon.png`);
 
-// favicon 源
-await (await fitted(256)).png({ palette: true, quality: 90 }).toFile(`${OUT}/icon-256.png`);
+// favicon 源 + Next favicon 路由（RGBA，避免 Next 构建警告与 ICO 兼容问题）
+await (await fitted(256)).png({ compressionLevel: 9 }).toFile(`${OUT}/icon-256.png`);
+await (await fitted(256)).png({ compressionLevel: 9 }).toFile("app/icon.png");
 
 console.log("icons generated: 192 / 512 / maskable-512 / apple-touch-180 / 256");
