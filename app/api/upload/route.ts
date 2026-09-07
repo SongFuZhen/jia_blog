@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
   }
 
   let dataUrl: unknown;
-  let module: string | undefined;
+  let mod: string | undefined;
   try {
-    ({ dataUrl, module } = await req.json());
+    ({ dataUrl, mod } = await req.json());
   } catch {
     return NextResponse.json({ error: "请求体非法" }, { status: 400 });
   }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   );
 
   // 目录按功能块分类，目录不存在时图床自动创建
-  const folder = MODULE_FOLDERS[module ?? ""] ?? MODULE_FOLDERS.misc;
+  const folder = MODULE_FOLDERS[mod ?? ""] ?? MODULE_FOLDERS.misc;
 
   const res = await fetch(
     `${IMGBED_URL}/upload?uploadFolder=${encodeURIComponent(folder)}`,
