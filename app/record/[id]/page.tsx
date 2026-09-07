@@ -2,9 +2,18 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Copy, Sparkles, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Copy,
+  Loader2,
+  Sparkles,
+  Trash2,
+  WandSparkles,
+} from "lucide-react";
 import { useRecordsStore } from "@/lib/stores/records";
 import { generateXhsContent } from "@/lib/xiaohongshu";
+import { aiGenerateXhs, aiPolishDiary } from "@/app/actions";
 import type { Mood } from "@/lib/types";
 
 const moods: Mood[] = [
@@ -39,6 +48,14 @@ export default function RecordPage({
     mood: Mood | null;
     tags: string;
   } | null>(null);
+
+  // AI 状态（override 绑定记录 id，切换记录时自然失效）
+  const [xhsOverride, setXhsOverride] = useState<{
+    id: string;
+    text: string;
+  } | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     hydrate();
@@ -97,7 +114,55 @@ export default function RecordPage({
     router.push("/diary");
   }
 
-  const xhsText = record ? generateXhsContent(record) : "";
+  /** AI 润色：整理日记（编辑模式下改写表单内容，保存与否由用户决定） */
+  async function handlePolish() {
+    if (!record || !form || aiBusy) return;
+    setAiBusy(true);
+    setAiError(null);
+    try {
+      const result = await aiPolishDiary({
+        title: form.title,
+        content: form.content,
+        mood: form.mood,
+        tags: form.tags
+          .split(/[\s,，#]+/)
+          .map((t) => t.trim())
+          .filter(Boolean),
+      });
+      setForm({ ...form, title: result.title, content: result.content });
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI 润色失败了");
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  /** AI 生成小红书文案；失败回退模板版 */
+  async function handleAiXhs() {
+    if (!record || aiBusy) return;
+    setAiBusy(true);
+    setAiError(null);
+    try {
+      const text = await aiGenerateXhs({
+        title: record.title,
+        content: record.content,
+        mood: record.mood,
+        tags: record.tags,
+      });
+      setXhsOverride({ id: record.id, text });
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI 生成失败了");
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  const templateText = record ? generateXhsContent(record) : "";
+  const xhsText =
+    xhsOverride && record && xhsOverride.id === record.id
+      ? xhsOverride.text
+      : templateText;
+  const isAiText = Boolean(xhsOverride && record && xhsOverride.id === record.id);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
@@ -143,22 +208,50 @@ export default function RecordPage({
       {showXhs && (
         <div className="mt-4 rounded-[16px] bg-[#FFF6EC] p-4 shadow-[var(--shadow-soft-sm)]">
           <p className="text-[12px] font-medium text-[#C79A6B]">
-            小红书文案（已按模板生成）
+            小红书文案（{isAiText ? "AI 生成" : "模板生成"}）
           </p>
-          <pre className="font-display mt-2 text-[12.5px] leading-relaxed whitespace-pre-wrap text-[#5C4B45]">
-            {xhsText}
-          </pre>
-          <button
-            onClick={async () => {
-              await navigator.clipboard.writeText(xhsText);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            }}
-            className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)]"
-          >
-            <Copy className="size-3.5" strokeWidth={1.8} />
-            {copied ? "复制好啦" : "复制文案"}
-          </button>
+          {aiBusy && !isAiText ? (
+            <p className="mt-3 flex items-center gap-2 text-[12.5px] text-[#C79A6B]">
+              <Loader2 className="size-4 animate-spin" />
+              AI 正在写，稍等一下…
+            </p>
+          ) : (
+            <pre className="font-display mt-2 text-[12.5px] leading-relaxed whitespace-pre-wrap text-[#5C4B45]">
+              {xhsText}
+            </pre>
+          )}
+          {aiError && (
+            <p className="mt-2 text-[11.5px] text-[#E76F7B]">{aiError}，先用模板版吧</p>
+          )}
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            <button
+              onClick={handleAiXhs}
+              disabled={aiBusy}
+              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)] disabled:opacity-50"
+            >
+              <WandSparkles className="size-3.5" strokeWidth={1.8} />
+              {aiBusy ? "生成中…" : "AI 生成"}
+            </button>
+            {isAiText && (
+              <button
+                onClick={() => setXhsOverride(null)}
+                className="rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)]"
+              >
+                看模板版
+              </button>
+            )}
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(xhsText);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              }}
+              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#8A7A72] shadow-[var(--shadow-xs)]"
+            >
+              <Copy className="size-3.5" strokeWidth={1.8} />
+              {copied ? "复制好啦" : "复制文案"}
+            </button>
+          </div>
         </div>
       )}
 
@@ -198,6 +291,21 @@ export default function RecordPage({
               placeholder="标签，空格分隔"
               className="w-full rounded-[12px] bg-[#FAF5F2] px-3 py-2.5 text-[13px] text-[#3B2E2A] outline-none"
             />
+            {aiError && editing && (
+              <p className="text-[11.5px] text-[#E76F7B]">{aiError}</p>
+            )}
+            <button
+              onClick={handlePolish}
+              disabled={aiBusy || !form.content.trim()}
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-[12px] bg-[#FFF6EC] text-[13px] font-medium text-[#C79A6B] transition-colors hover:bg-[#FDEFE0] disabled:opacity-50"
+            >
+              {aiBusy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4" strokeWidth={1.8} />
+              )}
+              {aiBusy ? "AI 整理中…" : "AI 润色这篇日记"}
+            </button>
           </div>
         ) : (
           <>
