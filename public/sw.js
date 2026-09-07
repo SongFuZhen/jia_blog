@@ -7,8 +7,25 @@ const OFFLINE_URL = "/offline.html";
 const PRIVATE_PATHS = ["weight-logs", "period-logs", "private-diary"];
 
 self.addEventListener("install", (event) => {
+  // 预缓存固定资源：离线页 / 常用页面骨架 / 图标 / 固定图片
+  const PRECACHE = [
+    OFFLINE_URL,
+    "/",
+    "/diary",
+    "/me",
+    "/beauty",
+    "/icons/icon-192.png",
+    "/icons/icon-512.png",
+    "/images/hero.png",
+    "/images/footer.png",
+    "/images/envelope.png",
+  ];
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll([OFFLINE_URL])),
+    caches
+      .open(CACHE)
+      .then((cache) =>
+        Promise.all(PRECACHE.map((u) => cache.add(u).catch(() => {}))),
+      ),
   );
   self.skipWaiting();
 });

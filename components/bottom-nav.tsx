@@ -63,9 +63,12 @@ export function BottomNav() {
             />
           ))}
 
-          {/* 中央新建按钮：山丘造型，凸出 1/3，点击唤起快速记录编辑器 */}
+          {/* 中央新建按钮：山丘造型，凸出 1/3；按下时预热编辑器 chunk，弹层秒开 */}
           <button
             onClick={() => openCompose("diary")}
+            onPointerDown={() => {
+              import("@/components/compose-sheet").catch(() => {});
+            }}
             aria-label="新建记录"
             className="relative mx-1 flex size-[46px] shrink-0 -translate-y-[14px] items-center justify-center rounded-[50%_50%_46%_54%/64%_64%_36%_36%] border-2 border-white bg-gradient-to-b from-[#FF92A8] to-[#F16D88] text-white shadow-[0_6px_16px_rgba(242,111,134,0.42)] transition-all duration-300 ease-out hover:scale-105 active:scale-95"
           >
