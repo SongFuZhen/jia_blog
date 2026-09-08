@@ -5,6 +5,7 @@ import { Camera, Image as ImageIcon, Music, Plus, Quote, Trash2 } from "lucide-r
 import { PageHeader } from "@/components/page-header";
 import { Loading } from "@/components/loading";
 import { useInspirationStore } from "@/lib/stores/inspiration";
+import { useConfirm } from "@/lib/stores/confirm";
 import type { InspirationType } from "@/lib/types";
 
 const filters: (InspirationType | "全部")[] = [
@@ -32,6 +33,7 @@ const typeStyles: Record<InspirationType, { icon: typeof Quote; tagClass: string
 
 export default function InspirationPage() {
   const { items, hydrated, hydrate, add, remove } = useInspirationStore();
+  const confirm = useConfirm();
   const [filter, setFilter] = useState<InspirationType | "全部">("全部");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<{ type: InspirationType; content: string; tags: string }>({
@@ -128,7 +130,7 @@ export default function InspirationPage() {
         ) : (
           <button
             onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 dark:bg-[#2B2225] py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
           >
             <Plus className="size-3.5" strokeWidth={2} />
             收一条灵感
@@ -176,7 +178,10 @@ export default function InspirationPage() {
                     </span>
                   ))}
                   <button
-                    onClick={() => remove(it.id)}
+                    onClick={async () => {
+                      const ok = await confirm({ title: "删掉这条灵感？", confirmText: "删除", danger: true });
+                      if (ok) remove(it.id);
+                    }}
                     aria-label="删除"
                     className="text-ink-5 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#E76F7B]"
                   >

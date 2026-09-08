@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { useSettingsStore } from "@/lib/stores/settings";
+import { useConfirm } from "@/lib/stores/confirm";
 import { useBeautyStore } from "@/lib/stores/beauty";
 import { useRecordsStore } from "@/lib/stores/records";
 
@@ -27,6 +28,7 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
 
 export default function SettingsPage() {
   const { settings, hydrate, updateSettings } = useSettingsStore();
+  const confirm = useConfirm();
   const beautyHydrate = useBeautyStore((s) => s.hydrate);
   const recordsHydrate = useRecordsStore((s) => s.hydrate);
 
@@ -62,8 +64,14 @@ export default function SettingsPage() {
     setTimeout(() => setSavedFlash(false), 1500);
   }
 
-  function clearCache() {
-    if (!window.confirm("会清掉所有本地记录（含私密空间数据），确定吗？")) return;
+  async function clearCache() {
+    const ok = await confirm({
+      title: "清空所有数据？",
+      message: "会清掉这台设备上的全部记录（含私密空间数据），云端数据不受影响",
+      confirmText: "清空",
+      danger: true,
+    });
+    if (!ok) return;
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);

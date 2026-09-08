@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ConfirmDialogHost } from "@/components/confirm-dialog";
 import { BottomNav } from "@/components/bottom-nav";
 import { ComposeLazy } from "@/components/compose-lazy";
 import { PwaRegister } from "@/components/pwa-register";
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <ThemeSync />
+        <ConfirmDialogHost />
         <ComposeLazy />
         <BottomNav />
         <PwaRegister />

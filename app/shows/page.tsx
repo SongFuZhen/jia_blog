@@ -5,6 +5,7 @@ import { ExternalLink, ImagePlus, Loader2, Plus, Star, Trash2 } from "lucide-rea
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
 import { useShowStore } from "@/lib/stores/show";
+import { useConfirm } from "@/lib/stores/confirm";
 import { compressImage } from "@/lib/image";
 import { uploadImage } from "@/lib/upload";
 import type { ShowType } from "@/lib/types";
@@ -19,6 +20,7 @@ const showTypes: ShowType[] = ["演唱会", "Livehouse", "音乐节", "话剧", 
 
 export default function ShowsPage() {
   const { shows, hydrated, hydrate, add, update, remove } = useShowStore();
+  const confirm = useConfirm();
   const [filter, setFilter] = useState<(typeof statusFilters)[number]["key"]>("全部");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<{
@@ -384,8 +386,13 @@ export default function ShowsPage() {
                 )}
                 <span className="flex-1" />
                 <button
-                  onClick={() => {
-                    if (window.confirm("删掉这条演出记录吗？")) remove(s.id);
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "删掉这条演出记录？",
+                      confirmText: "删除",
+                      danger: true,
+                    });
+                    if (ok) remove(s.id);
                   }}
                   aria-label="删除"
                   className="text-ink-5 hover:text-[#E76F7B]"

@@ -5,6 +5,7 @@ import { Check, Plus, Sparkles, Star, X } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
 import { useGrowthStore } from "@/lib/stores/growth";
+import { useConfirm } from "@/lib/stores/confirm";
 import { useRecordsStore } from "@/lib/stores/records";
 
 export default function GrowthPage() {
@@ -14,6 +15,7 @@ export default function GrowthPage() {
   const toggle = useGrowthStore((s) => s.toggle);
   const addItem = useGrowthStore((s) => s.addItem);
   const removeItem = useGrowthStore((s) => s.removeItem);
+  const confirm = useConfirm();
 
   const records = useRecordsStore((s) => s.records);
   const hydrateRecords = useRecordsStore((s) => s.hydrate);
@@ -141,7 +143,10 @@ export default function GrowthPage() {
                       </span>
                     </button>
                     <button
-                      onClick={() => removeItem(section.title, item.id)}
+                      onClick={async () => {
+                        const ok = await confirm({ title: "删掉这件小事？", confirmText: "删除", danger: true });
+                        if (ok) removeItem(section.title, item.id);
+                      }}
                       aria-label="删除"
                       className="absolute top-2.5 right-1.5 text-ink-5 opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-[#E76F7B]"
                     >

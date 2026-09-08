@@ -58,7 +58,7 @@ export default function TipDetailPage({
         {!showTried && (
           <button
             onClick={() => setShowTried(true)}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 dark:bg-[#2B2225] py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
           >
             <NotebookPen className="size-3.5" strokeWidth={1.8} />
             我试过了

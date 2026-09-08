@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { verifyPrivatePassword } from "@/app/actions";
 import { setPrivateCredential } from "@/lib/repository";
+import { useConfirm } from "@/lib/stores/confirm";
 import { usePrivateStore } from "@/lib/stores/private";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { useAutoLock } from "@/lib/use-auto-lock";
@@ -78,6 +79,7 @@ export default function PrivatePage() {
     toggleSecret,
     removeSecret,
   } = usePrivateStore();
+  const confirm = useConfirm();
   const settings = useSettingsStore((s) => s.settings);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
 
@@ -254,7 +256,7 @@ export default function PrivatePage() {
         </div>
         <button
           onClick={handleLock}
-          className="flex items-center gap-1.5 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+          className="flex items-center gap-1.5 rounded-full bg-white px-3.5 dark:bg-[#2B2225] py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
         >
           <Lock className="size-3.5" strokeWidth={1.8} />
           上锁
@@ -443,8 +445,13 @@ export default function PrivatePage() {
                   </span>
                 )}
                 <button
-                  onClick={() => {
-                    if (window.confirm("删掉这段悄悄话吗？")) removeDiary(d.id);
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "删掉这段悄悄话？",
+                      confirmText: "删除",
+                      danger: true,
+                    });
+                    if (ok) removeDiary(d.id);
                   }}
                   aria-label="删除"
                   className="ml-auto text-ink-5 opacity-0 transition-opacity group-hover/diary:opacity-100 hover:text-[#E76F7B]"
@@ -505,8 +512,15 @@ export default function PrivatePage() {
                   {s.text}
                 </span>
               </button>
-              <button
-                onClick={() => removeSecret(s.id)}
+                <button
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "删掉这个心愿？",
+                      confirmText: "删除",
+                      danger: true,
+                    });
+                    if (ok) removeSecret(s.id);
+                  }}
                 aria-label="删除"
                 className="absolute top-2.5 right-1.5 text-ink-5 opacity-0 transition-opacity group-hover/secret:opacity-100 hover:text-[#E76F7B]"
               >

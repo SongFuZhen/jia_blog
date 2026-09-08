@@ -129,7 +129,7 @@ export function YearReview() {
   return (
     <div className="mt-4">
       {/* 年份切换 */}
-      <div className="flex items-center justify-between rounded-full bg-white px-2 py-1.5 shadow-[var(--shadow-xs)]">
+      <div className="flex items-center justify-between rounded-full bg-white dark:bg-[#2B2225] px-2 py-1.5 shadow-[var(--shadow-xs)]">
         <button
           onClick={() => setYear((y) => y - 1)}
           aria-label="上一年"

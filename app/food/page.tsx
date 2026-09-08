@@ -5,6 +5,7 @@ import { ExternalLink, ImagePlus, Loader2, Plus, Star, Trash2 } from "lucide-rea
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
 import { useFoodStore } from "@/lib/stores/food";
+import { useConfirm } from "@/lib/stores/confirm";
 import { compressImage } from "@/lib/image";
 import { uploadImage } from "@/lib/upload";
 import type { FoodPlatform } from "@/lib/types";
@@ -19,6 +20,7 @@ const platforms: (FoodPlatform | "无")[] = ["大众点评", "美团", "小红�
 
 export default function FoodPage() {
   const { foods, hydrated, hydrate, add, update, remove } = useFoodStore();
+  const confirm = useConfirm();
   const [filter, setFilter] = useState<(typeof statusFilters)[number]["key"]>("全部");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<{
@@ -406,8 +408,13 @@ export default function FoodPage() {
                   </span>
                 )}
                 <button
-                  onClick={() => {
-                    if (window.confirm("删掉这条美食记录吗？")) remove(f.id);
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "删掉这条美食记录？",
+                      confirmText: "删除",
+                      danger: true,
+                    });
+                    if (ok) remove(f.id);
                   }}
                   aria-label="删除"
                   className="text-ink-5 hover:text-[#E76F7B]"

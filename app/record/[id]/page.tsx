@@ -12,6 +12,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { useRecordsStore } from "@/lib/stores/records";
+import { useConfirm } from "@/lib/stores/confirm";
 import { generateXhsContent } from "@/lib/xiaohongshu";
 import { aiGenerateXhs, aiPolishDiary } from "@/app/actions";
 import type { Mood } from "@/lib/types";
@@ -38,6 +39,7 @@ export default function RecordPage({
   const hydrate = useRecordsStore((s) => s.hydrate);
   const updateRecord = useRecordsStore((s) => s.updateRecord);
   const removeRecord = useRecordsStore((s) => s.removeRecord);
+  const confirm = useConfirm();
 
   const [editing, setEditing] = useState(false);
   const [showXhs, setShowXhs] = useState(false);
@@ -109,7 +111,13 @@ export default function RecordPage({
 
   async function handleDelete() {
     if (!record) return;
-    if (!window.confirm("删掉这条记录就找不回来了，确定吗？")) return;
+    const ok = await confirm({
+      title: "删除这条记录？",
+      message: "删掉就找不回来了，想清楚哦",
+      confirmText: "删除",
+      danger: true,
+    });
+    if (!ok) return;
     await removeRecord(record.id);
     router.push("/diary");
   }
@@ -179,14 +187,14 @@ export default function RecordPage({
             <>
               <button
                 onClick={() => setShowXhs((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+                className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 dark:bg-[#2B2225] py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
               >
                 <Sparkles className="size-3.5" strokeWidth={1.8} />
                 小红书文案
               </button>
               <button
                 onClick={startEdit}
-                className="rounded-full bg-white px-3 dark:bg-[#2B2225].5 py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
+                className="rounded-full bg-white px-3.5 dark:bg-[#2B2225] py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
               >
                 编辑
               </button>

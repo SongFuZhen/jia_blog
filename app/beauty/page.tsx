@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, Plus, Star } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Loading } from "@/components/loading";
+import { useConfirm } from "@/lib/stores/confirm";
 import { useBeautyStore } from "@/lib/stores/beauty";
 import type { BeautyCategory } from "@/lib/types";
 
@@ -74,6 +75,7 @@ export default function BeautyPage() {
     updateWish,
     removeWish,
   } = useBeautyStore();
+  const confirm = useConfirm();
   const [tab, setTab] = useState<Tab>("tips");
   const [category, setCategory] = useState<BeautyCategory | "全部">("全部");
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -338,9 +340,15 @@ export default function BeautyPage() {
                       {checkedToday.has(p.id) ? "今天用过了" : "今日打卡"}
                     </button>
                     <button
-                      onClick={() => {
-                        if (window.confirm("确定把这件产品移出美妆柜吗？")) removeProduct(p.id);
-                      }}
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: "移出美妆柜？",
+                        message: "产品和使用打卡记录会一起删掉",
+                        confirmText: "移出",
+                        danger: true,
+                      });
+                      if (ok) removeProduct(p.id);
+                    }}
                       className="text-[11.5px] text-ink-5 hover:text-[#E76F7B]"
                     >
                       移出
@@ -434,7 +442,10 @@ export default function BeautyPage() {
                       )}
                     </div>
                     <button
-                      onClick={() => removeWish(w.id)}
+                      onClick={async () => {
+                        const ok = await confirm({ title: "删掉这条种草？", confirmText: "删除", danger: true });
+                        if (ok) removeWish(w.id);
+                      }}
                       className="text-[11.5px] text-ink-5 hover:text-[#E76F7B]"
                     >
                       删除
