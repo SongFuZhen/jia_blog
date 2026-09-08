@@ -15,6 +15,7 @@ export const DB_COLLECTIONS = [
   "settings",
   "growth-list",
   "foods",
+  "shows",
 ] as const;
 
 export type DbCollection = (typeof DB_COLLECTIONS)[number];

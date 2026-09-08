@@ -5,7 +5,7 @@
  */
 export async function uploadImage(
   dataUrl: string,
-  module: "records" | "beauty" | "inspiration" | "food" = "records",
+  module: "records" | "beauty" | "inspiration" | "food" | "shows" = "records",
 ): Promise<string> {
   const res = await fetch("/api/upload", {
     method: "POST",

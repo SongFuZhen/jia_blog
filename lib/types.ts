@@ -201,6 +201,34 @@ export interface Food {
   createdAt: string;
 }
 
+/** 演出记录（演唱会/Livehouse/音乐节/话剧等） */
+export type ShowType = "演唱会" | "Livehouse" | "音乐节" | "话剧" | "其他";
+export type ShowStatus = "want" | "visited";
+
+export interface Show {
+  id: string;
+  title: string;
+  artist?: string;
+  type: ShowType;
+  /** 场馆 */
+  venue?: string;
+  city?: string;
+  /** 大麦/猫眼等链接 */
+  link?: string;
+  /** 票价（元） */
+  price?: number;
+  note?: string;
+  image?: string;
+  status: ShowStatus;
+  rating?: number;
+  /** 回购：还会再看 */
+  repurchase?: boolean;
+  /** 演出日期 */
+  showAt?: string;
+  visitedAt?: string;
+  createdAt: string;
+}
+
 /** 我的（设置） */
 export interface Settings {
   nickname: string;
