@@ -4,7 +4,7 @@ const DATA_CACHE = "jia-blog-data-v2";
 const OFFLINE_URL = "/offline.html";
 
 // 私密集合不缓存（数据敏感，且需要凭证）
-const PRIVATE_PATHS = ["weight-logs", "period-logs", "private-diary"];
+const PRIVATE_PATHS = ["weight-logs", "period-logs", "private-diary", "secret-list"];
 
 self.addEventListener("install", (event) => {
   // 预缓存固定资源：离线页 / 常用页面骨架 / 图标 / 固定图片

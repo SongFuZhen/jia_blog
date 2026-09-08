@@ -2,10 +2,16 @@ import { create } from "zustand";
 import {
   genId,
   privateDiaryRepo,
+  secretItemsRepo,
   weightLogsRepo,
   periodLogsRepo,
 } from "@/lib/repository";
-import type { PeriodLog, PrivateDiary, WeightLog } from "@/lib/types";
+import type {
+  PeriodLog,
+  PrivateDiary,
+  SecretItem,
+  WeightLog,
+} from "@/lib/types";
 
 type NewWeightLog = Omit<WeightLog, "id"> & { id?: string };
 type NewPrivateDiary = Omit<PrivateDiary, "id"> & { id?: string };
@@ -16,6 +22,7 @@ interface PrivateState {
   weightLogs: WeightLog[];
   periodLogs: PeriodLog[];
   diaries: PrivateDiary[];
+  secrets: SecretItem[];
   hydrated: boolean;
   unlock: () => void;
   /** 上锁并清空内存数据 */
@@ -24,6 +31,10 @@ interface PrivateState {
   addWeightLog: (data: NewWeightLog) => Promise<void>;
   addPeriodLog: (data: Omit<PeriodLog, "id">) => Promise<void>;
   addDiary: (data: NewPrivateDiary) => Promise<void>;
+  removeDiary: (id: string) => Promise<void>;
+  addSecret: (text: string) => Promise<void>;
+  toggleSecret: (id: string) => Promise<void>;
+  removeSecret: (id: string) => Promise<void>;
 }
 
 export const usePrivateStore = create<PrivateState>((set, get) => ({
@@ -31,25 +42,35 @@ export const usePrivateStore = create<PrivateState>((set, get) => ({
   weightLogs: [],
   periodLogs: [],
   diaries: [],
+  secrets: [],
   hydrated: false,
 
   unlock: () => set({ locked: false }),
   /** 上锁并清空内存中的私密数据 */
   lock: () =>
-    set({ locked: true, weightLogs: [], periodLogs: [], diaries: [], hydrated: false }),
+    set({
+      locked: true,
+      weightLogs: [],
+      periodLogs: [],
+      diaries: [],
+      secrets: [],
+      hydrated: false,
+    }),
 
   /** 仅在解锁后才允许 hydrate，避免私密数据提前进内存 */
   hydrate: async () => {
     if (get().hydrated || get().locked) return;
-    const [weightLogs, periodLogs, diaries] = await Promise.all([
+    const [weightLogs, periodLogs, diaries, secrets] = await Promise.all([
       weightLogsRepo.list(),
       periodLogsRepo.list(),
       privateDiaryRepo.list(),
+      secretItemsRepo.list(),
     ]);
     set({
       weightLogs: [...weightLogs].sort((a, b) => a.date.localeCompare(b.date)),
       periodLogs: [...periodLogs].sort((a, b) => b.start.localeCompare(a.start)),
       diaries,
+      secrets,
       hydrated: true,
     });
   },
@@ -90,6 +111,58 @@ export const usePrivateStore = create<PrivateState>((set, get) => ({
       await privateDiaryRepo.create(diary);
     } catch (err) {
       set({ diaries: prev });
+      throw err;
+    }
+  },
+
+  removeDiary: async (id) => {
+    const prev = get().diaries;
+    set({ diaries: prev.filter((d) => d.id !== id) });
+    try {
+      await privateDiaryRepo.remove(id);
+    } catch (err) {
+      set({ diaries: prev });
+      throw err;
+    }
+  },
+
+  addSecret: async (text) => {
+    const item: SecretItem = {
+      id: genId(),
+      text,
+      done: false,
+      createdAt: new Date().toISOString(),
+    };
+    const prev = get().secrets;
+    set({ secrets: [...prev, item] });
+    try {
+      await secretItemsRepo.create(item);
+    } catch (err) {
+      set({ secrets: prev });
+      throw err;
+    }
+  },
+
+  toggleSecret: async (id) => {
+    const prev = get().secrets;
+    const target = prev.find((s) => s.id === id);
+    if (!target) return;
+    set({ secrets: prev.map((s) => (s.id === id ? { ...s, done: !s.done } : s)) });
+    try {
+      await secretItemsRepo.update(id, { done: !target.done });
+    } catch (err) {
+      set({ secrets: prev });
+      throw err;
+    }
+  },
+
+  removeSecret: async (id) => {
+    const prev = get().secrets;
+    set({ secrets: prev.filter((s) => s.id !== id) });
+    try {
+      await secretItemsRepo.remove(id);
+    } catch (err) {
+      set({ secrets: prev });
       throw err;
     }
   },

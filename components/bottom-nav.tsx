@@ -31,18 +31,30 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center justify-center gap-0.5 rounded-2xl px-3.5 transition-all ${
+      className={`relative flex flex-col items-center justify-center gap-0.5 rounded-[18px] px-3.5 py-1 transition-all duration-300 ${
         active
-          ? "bg-pink-soft text-[#F16D88]"
+          ? "bg-gradient-to-b from-pink-soft to-pink-soft-2 text-[#F16D88] shadow-[0_4px_14px_rgba(242,111,134,0.22)]"
           : "text-ink-3 hover:bg-card-hover hover:text-[#F16D88]"
       }`}
     >
       <Icon
-        className="size-[19px]"
+        className={`size-[19px] transition-transform duration-300 ${
+          active ? "scale-110 -translate-y-px" : ""
+        }`}
         strokeWidth={active ? 2.1 : 1.8}
         fill={active && fill ? "currentColor" : "none"}
       />
-      <span className="text-[10.5px] font-medium">{label}</span>
+      <span
+        className={`text-[10.5px] ${active ? "font-semibold" : "font-medium"}`}
+      >
+        {label}
+      </span>
+      {/* 选中指示小圆点 */}
+      <span
+        className={`absolute bottom-[3px] size-1 rounded-full bg-[#F16D88] transition-all duration-300 ${
+          active ? "scale-100 opacity-100" : "scale-0 opacity-0"
+        }`}
+      />
     </Link>
   );
 }

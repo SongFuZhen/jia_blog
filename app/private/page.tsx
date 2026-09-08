@@ -14,7 +14,9 @@ import {
   ListChecks,
   Loader2,
   Lock,
+  Plus,
   Scale,
+  Trash2,
   Unlock,
 } from "lucide-react";
 import type { Mood } from "@/lib/types";
@@ -63,6 +65,7 @@ export default function PrivatePage() {
     weightLogs,
     periodLogs,
     diaries,
+    secrets,
     hydrated,
     unlock,
     lock,
@@ -70,6 +73,10 @@ export default function PrivatePage() {
     addWeightLog,
     addPeriodLog,
     addDiary,
+    removeDiary,
+    addSecret,
+    toggleSecret,
+    removeSecret,
   } = usePrivateStore();
   const settings = useSettingsStore((s) => s.settings);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
@@ -85,6 +92,16 @@ export default function PrivatePage() {
   const [periodFeeling, setPeriodFeeling] = useState("");
   const [diaryContent, setDiaryContent] = useState("");
   const [diaryMood, setDiaryMood] = useState<Mood | null>(null);
+  const [addingSecret, setAddingSecret] = useState(false);
+  const [secretText, setSecretText] = useState("");
+
+  async function handleAddSecret() {
+    if (!secretText.trim()) return;
+    await addSecret(secretText.trim());
+    setSecretText("");
+    setAddingSecret(false);
+  }
+
 
   useEffect(() => {
     hydrateSettings();
@@ -416,13 +433,26 @@ export default function PrivatePage() {
           {diaries.map((d) => (
             <div
               key={d.id}
-              className="rounded-[12px] bg-card-warm px-3.5 py-2.5"
+              className="group/diary relative rounded-[12px] bg-card-warm px-3.5 py-2.5"
             >
-              <p className="text-[11px] text-ink-5">
-                {d.date}
-                {d.mood && ` · ${d.mood}`}
-              </p>
-              <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-2">
+              <div className="flex items-center gap-2">
+                <p className="text-[11px] text-ink-5">{d.date}</p>
+                {d.mood && (
+                  <span className="rounded-full bg-pink-soft px-2 py-[2px] text-[10px] leading-none text-[#E0697E]">
+                    {d.mood}
+                  </span>
+                )}
+                <button
+                  onClick={() => {
+                    if (window.confirm("删掉这段悄悄话吗？")) removeDiary(d.id);
+                  }}
+                  aria-label="删除"
+                  className="ml-auto text-ink-5 opacity-0 transition-opacity group-hover/diary:opacity-100 hover:text-[#E76F7B]"
+                >
+                  <Trash2 className="size-3.5" strokeWidth={1.8} />
+                </button>
+              </div>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-ink-2">
                 {d.content}
               </p>
             </div>
@@ -435,22 +465,95 @@ export default function PrivatePage() {
         </div>
       </section>
 
-      {/* 小秘密清单（占位提醒） */}
+      {/* 小秘密清单 */}
       <section className="mt-3 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
-        <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-full bg-pink-soft text-[#E0697E]">
-            <ListChecks className="size-4" strokeWidth={1.8} />
-          </span>
-          <h2 className="text-[14.5px] font-semibold text-ink">小秘密清单</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-full bg-pink-soft text-[#E0697E]">
+              <ListChecks className="size-4" strokeWidth={1.8} />
+            </span>
+            <h2 className="text-[14.5px] font-semibold text-ink">小秘密清单</h2>
+          </div>
+          {secrets.length > 0 && (
+            <p className="text-[11px] text-ink-5">
+              完成 {secrets.filter((s) => s.done).length} / {secrets.length}
+            </p>
+          )}
         </div>
-        <div className="mt-3 space-y-2">
-          {["想去看一次海", "学会盘头发", "攒钱买那支口红"].map((t) => (
-            <div key={t} className="flex items-center gap-2">
-              <Heart className="size-3.5 fill-[#F5B8C4] text-[#F5B8C4]" strokeWidth={1.8} />
-              <span className="text-[12.5px] text-ink-2">{t}</span>
-            </div>
+
+        <ul className="mt-3 space-y-1">
+          {secrets.map((s) => (
+            <li key={s.id} className="group/secret relative">
+              <button
+                onClick={() => toggleSecret(s.id)}
+                className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-card-hover"
+              >
+                <span
+                  className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                    s.done
+                      ? "border-[#D56983] bg-[#D56983] text-white"
+                      : "border-toggle-off bg-white dark:bg-card"
+                  }`}
+                >
+                  {s.done && <Heart className="size-2.5 fill-white text-white" />}
+                </span>
+                <span
+                  className={`text-[13px] ${
+                    s.done ? "text-ink-5 line-through" : "text-ink"
+                  }`}
+                >
+                  {s.text}
+                </span>
+              </button>
+              <button
+                onClick={() => removeSecret(s.id)}
+                aria-label="删除"
+                className="absolute top-2.5 right-1.5 text-ink-5 opacity-0 transition-opacity group-hover/secret:opacity-100 hover:text-[#E76F7B]"
+              >
+                <Trash2 className="size-3.5" strokeWidth={1.8} />
+              </button>
+            </li>
           ))}
-        </div>
+          {hydrated && secrets.length === 0 && (
+            <li className="py-2 text-center text-[12px] text-ink-5">
+              还没有小秘密，许一个吧
+            </li>
+          )}
+        </ul>
+
+        {addingSecret ? (
+          <div className="mt-2 flex gap-2">
+            <input
+              value={secretText}
+              onChange={(e) => setSecretText(e.target.value)}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter") await handleAddSecret();
+                if (e.key === "Escape") setAddingSecret(false);
+              }}
+              autoFocus
+              placeholder="想去做 / 想要的小心愿"
+              className="w-full rounded-[10px] bg-field px-3 py-2 text-[12.5px] text-ink outline-none"
+            />
+            <button
+              onClick={handleAddSecret}
+              disabled={!secretText.trim()}
+              className="shrink-0 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12px] font-medium text-white disabled:opacity-40"
+            >
+              收下
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setAddingSecret(true);
+              setSecretText("");
+            }}
+            className="mt-2 inline-flex items-center gap-1 rounded-full bg-field px-3 py-1.5 text-[11.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+            加一个心愿
+          </button>
+        )}
       </section>
     </main>
   );

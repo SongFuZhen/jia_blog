@@ -229,6 +229,14 @@ export interface Show {
   createdAt: string;
 }
 
+/** 私密空间：小秘密清单 */
+export interface SecretItem {
+  id: string;
+  text: string;
+  done: boolean;
+  createdAt: string;
+}
+
 /** 我的（设置） */
 export interface Settings {
   nickname: string;

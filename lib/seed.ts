@@ -11,6 +11,7 @@ import type {
   LifeRecord,
   PeriodLog,
   PrivateDiary,
+  SecretItem,
   Product,
   UsageLog,
   WeightLog,
@@ -310,8 +311,7 @@ export const seedPeriodLogs: PeriodLog[] = [
   },
 ];
 
-export const seedPrivateDiaries: PrivateDiary[] = [
-  {
+export const seedPrivateDiaries: PrivateDiary[] = [  {
     id: "seed-pdiary-01",
     date: "2026-08-30",
     content: "今天化了新妆心情很好，想把这个状态一直保持下去。",
@@ -419,4 +419,10 @@ export const seedShows: Show[] = [
     visitedAt: "2026-08-16",
     createdAt: "2026-07-20T12:00:00",
   },
+];
+
+export const seedSecretItems: SecretItem[] = [
+  { id: "seed-secret-01", text: "想去看一次海", done: false, createdAt: "2026-08-01T12:00:00" },
+  { id: "seed-secret-02", text: "学会盘头发", done: false, createdAt: "2026-08-01T12:00:01" },
+  { id: "seed-secret-03", text: "攒钱买那支口红", done: false, createdAt: "2026-08-01T12:00:02" },
 ];

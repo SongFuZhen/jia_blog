@@ -12,6 +12,7 @@ export const DB_COLLECTIONS = [
   "weight-logs",
   "period-logs",
   "private-diary",
+  "secret-list",
   "settings",
   "growth-list",
   "foods",
@@ -25,6 +26,7 @@ export const PRIVATE_COLLECTIONS: ReadonlySet<string> = new Set([
   "weight-logs",
   "period-logs",
   "private-diary",
+  "secret-list",
 ]);
 
 export function isDbCollection(name: string): name is DbCollection {
