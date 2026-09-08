@@ -237,6 +237,25 @@ export interface SecretItem {
   createdAt: string;
 }
 
+/** 界面文案库（问候语/小惊喜/纪念日），可在文案编辑页修改 */
+export interface GreetingDay {
+  /** 显示的星期名：周一…周日 */
+  label: string;
+  /** 该星期的候选问候语，按日期确定性随机选一条 */
+  texts: string[];
+}
+export interface Anniversary {
+  /** 月-日，如 10-07 */
+  monthDay: string;
+  label: string;
+}
+export interface CopyLibrary {
+  /** 7 项，下标 0=周日 … 6=周六 */
+  greetings: GreetingDay[];
+  surprises: string[];
+  anniversaries: Anniversary[];
+}
+
 /** 我的（设置） */
 export interface Settings {
   nickname: string;

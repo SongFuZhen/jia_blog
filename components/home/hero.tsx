@@ -1,10 +1,8 @@
 import Image from "next/image";
 import { Heart } from "lucide-react";
-import { getGreeting } from "@/lib/surprises";
+import { GreetingPill } from "@/components/home/greeting-pill";
 
 export function Hero() {
-  const greeting = getGreeting();
-
   return (
     <section className="relative">
       <Image
@@ -16,10 +14,8 @@ export function Hero() {
         className="w-full"
       />
 
-      {/* 今日问候：按星期变化 */}
-      <div className="absolute top-[8%] right-[5%] rounded-full bg-white/75 px-3.5 py-1.5 text-[11.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] backdrop-blur-sm">
-        {greeting.label} · {greeting.text}
-      </div>
+      {/* 今日问候：文案来自文案库（/copy 可编辑） */}
+      <GreetingPill />
 
       {/* 抽离出来的手写文案（随屏幕宽度流式缩放） */}
       <div className="absolute top-[24%] left-[5%]">

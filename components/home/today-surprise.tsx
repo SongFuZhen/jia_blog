@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Gift } from "lucide-react";
 import { useRecordsStore } from "@/lib/stores/records";
+import { useCopyStore } from "@/lib/stores/copy";
 import { getSurprise } from "@/lib/surprises";
 import type { Mood } from "@/lib/types";
 
@@ -10,12 +11,16 @@ import type { Mood } from "@/lib/types";
 export function TodaySurprise() {
   const records = useRecordsStore((s) => s.records);
   const hydrate = useRecordsStore((s) => s.hydrate);
-  // getSurprise 按东八区日期确定性取值，服务端与客户端一致，无需 effect 重算
-  const [surprise] = useState(() => getSurprise());
+  const library = useCopyStore((s) => s.library);
+  const copyHydrate = useCopyStore((s) => s.hydrate);
 
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+    copyHydrate();
+  }, [hydrate, copyHydrate]);
+
+  // 纯函数计算：文案库与日期确定后结果确定（东八区），无水合风险
+  const surprise = useMemo(() => getSurprise(library), [library]);
 
   const now = new Date();
   const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;

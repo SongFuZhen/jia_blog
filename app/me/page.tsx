@@ -12,6 +12,7 @@ import {
   Lock,
   Mic2,
   NotebookPen,
+  PenLine,
   Settings,
   UtensilsCrossed,
 } from "lucide-react";
@@ -28,6 +29,7 @@ const menus = [
   { label: "我的收藏", icon: Bookmark, href: "/inspiration" },
   { label: "回顾 · 月报年报", icon: BarChart3, href: "/review" },
   { label: "设置", icon: Settings, href: "/settings" },
+  { label: "文案编辑", icon: PenLine, href: "/copy" },
   { label: "帮助与关于", icon: Info, href: "/settings" },
 ];
 

@@ -20,8 +20,10 @@ import type {
   WeightLog,
   PeriodLog,
   PrivateDiary,
+  CopyLibrary,
 } from "@/lib/types";
 import { PRIVATE_COLLECTIONS } from "@/lib/db-collections";
+import { DEFAULT_COPY_LIBRARY } from "@/lib/surprises";
 
 export interface Entity {
   id: string;
@@ -207,3 +209,7 @@ export const growthRepo = createApiSingleRepository<GrowthSection[]>(
 );
 export const foodsRepo = createApiRepository<Food>("foods");
 export const showsRepo = createApiRepository<Show>("shows");
+export const copyRepo = createApiSingleRepository<CopyLibrary>(
+  "copy-library",
+  DEFAULT_COPY_LIBRARY,
+);

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_COPY_LIBRARY,
+  cnNow,
   getGreeting,
   getSurprise,
-  greetingsByWeekday,
   pickByDate,
-  surprises,
 } from "./surprises";
 
 describe("pickByDate", () => {
@@ -42,26 +42,32 @@ describe("pickByDate", () => {
 describe("pickByDate 的实际使用", () => {
   it("getGreeting：星期 label 与问候语按东八区日期取值", () => {
     // 2026-09-07 是周一
-    const g = getGreeting(new Date("2026-09-07T12:00:00+08:00"));
+    const g = getGreeting(DEFAULT_COPY_LIBRARY, new Date("2026-09-07T12:00:00+08:00"));
     expect(g.label).toBe("周一");
-    expect(greetingsByWeekday[1].slice(1)).toContain(g.text);
+    expect(DEFAULT_COPY_LIBRARY.greetings[1].texts).toContain(g.text);
   });
 
   it("getGreeting：同一天多次调用结果一致", () => {
-    const a = getGreeting(new Date("2026-09-07T00:30:00+08:00"));
-    const b = getGreeting(new Date("2026-09-07T23:30:00+08:00"));
+    const a = getGreeting(DEFAULT_COPY_LIBRARY, new Date("2026-09-07T00:30:00+08:00"));
+    const b = getGreeting(DEFAULT_COPY_LIBRARY, new Date("2026-09-07T23:30:00+08:00"));
     expect(a).toEqual(b);
   });
 
   it("getSurprise：普通日期返回文案库里的句子", () => {
-    const s = getSurprise(new Date("2026-09-07T12:00:00+08:00"));
+    const s = getSurprise(DEFAULT_COPY_LIBRARY, new Date("2026-09-07T12:00:00+08:00"));
     expect(s.isAnniversary).toBe(false);
-    expect(surprises).toContain(s.text);
+    expect(DEFAULT_COPY_LIBRARY.surprises).toContain(s.text);
   });
 
   it("getSurprise：命中纪念日（10-07）时返回纪念语文案", () => {
-    const s = getSurprise(new Date("2026-10-07T12:00:00+08:00"));
+    const s = getSurprise(DEFAULT_COPY_LIBRARY, new Date("2026-10-07T12:00:00+08:00"));
     expect(s.isAnniversary).toBe(true);
     expect(s.text).toContain("在一起纪念日");
+  });
+
+  it("cnNow：东八区日期与星期计算正确", () => {
+    const cn = cnNow(new Date("2026-09-07T12:00:00+08:00"));
+    expect(cn.monthDay).toBe("09-07");
+    expect(cn.weekday).toBe(1); // 周一
   });
 });
