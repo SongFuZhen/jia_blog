@@ -168,6 +168,7 @@ export const secretItemsRepo = createApiRepository<SecretItem>("secret-list");
 export const settingsRepo = createApiSingleRepository<Settings>("settings", {
   nickname: "小佳佳",
   autoLock: true,
+  remind: true,
   dark: false,
 });
 export const growthRepo = createApiSingleRepository<GrowthSection[]>(

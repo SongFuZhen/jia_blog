@@ -32,7 +32,6 @@ export default function SettingsPage() {
   const beautyHydrate = useBeautyStore((s) => s.hydrate);
   const recordsHydrate = useRecordsStore((s) => s.hydrate);
 
-  const [remind, setRemind] = useState(true);
   const [nickname, setNickname] = useState("");
   const [targetWeight, setTargetWeight] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
@@ -144,7 +143,10 @@ export default function SettingsPage() {
               每晚八点，轻轻提醒一下
             </p>
           </div>
-          <Toggle on={remind} onClick={() => setRemind(!remind)} />
+          <Toggle
+            on={settings.remind ?? true}
+            onClick={() => updateSettings({ remind: !(settings.remind ?? true) })}
+          />
         </div>
         <div className="flex items-center justify-between border-t border-border-soft px-4 py-3.5">
           <div>

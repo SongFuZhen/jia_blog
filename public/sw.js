@@ -1,6 +1,6 @@
 /* 小佳佳的生活日记 Service Worker */
-const CACHE = "jia-blog-v2";
-const DATA_CACHE = "jia-blog-data-v2";
+const CACHE = "jia-blog-v3";
+const DATA_CACHE = "jia-blog-data-v3";
 const OFFLINE_URL = "/offline.html";
 
 // 私密集合不缓存（数据敏感，且需要凭证）
@@ -52,19 +52,20 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== location.origin) return;
 
-  // 数据接口：公开集合 stale-while-revalidate（先回缓存秒开，后台刷新）；私密集合直连
+  // 数据接口：公开集合网络优先（保证读到最新保存的内容），离线回退缓存；私密集合直连
   if (url.pathname.startsWith("/api/db/")) {
     if (PRIVATE_PATHS.some((p) => url.pathname.includes(p))) return;
     event.respondWith(
       caches.open(DATA_CACHE).then(async (cache) => {
-        const cached = await cache.match(request);
-        const network = fetch(request)
-          .then((res) => {
-            if (res.ok) cache.put(request, res.clone());
-            return res;
-          })
-          .catch(() => cached);
-        return cached || network;
+        try {
+          const fresh = await fetch(request);
+          if (fresh.ok) cache.put(request, fresh.clone());
+          return fresh;
+        } catch {
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          throw new Error("离线且无缓存");
+        }
       }),
     );
     return;
