@@ -1,5 +1,5 @@
 /**
- * 图片压缩：手机照片（常见 3-8MB）→ 目标 80KB 以内（几十 KB）。
+ * 图片压缩：目标 80KB 以内（几十 KB）。
  * 策略：逐级降尺寸（1280 → 960 → 720）× 逐级降质量（0.7 → 0.35），
  * 第一个达标的结果直接返回；全部尝试后返回能压到的最小结果。
  * 用 HTMLImageElement 解码，浏览器会自动应用 EXIF 旋转信息。
@@ -14,22 +14,18 @@ const EDGES = [1280, 960, 720];
 /** 质量逐级下降 */
 const QUALITIES = [0.7, 0.55, 0.45, 0.35];
 
-async function loadImage(file: File): Promise<HTMLImageElement> {
-  const url = URL.createObjectURL(file);
-  try {
-    const img = new Image();
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error("图片读取失败"));
-      img.src = url;
-    });
-    return img;
-  } finally {
-    URL.revokeObjectURL(url);
-  }
+export async function loadImage(src: string): Promise<HTMLImageElement> {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error("图片读取失败"));
+    img.src = src;
+  });
+  return img;
 }
 
-/** dataURL 的 base64 部分换算成字节数（去掉 data:image/jpeg;base64, 前缀） */
+/** dataURL 的 base64 部分换算成字节数 */
 function dataUrlBytes(dataUrl: string): number {
   const base64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
   return Math.round(base64.length * 0.75);
@@ -53,6 +49,24 @@ function drawToDataUrl(
   return canvas.toDataURL("image/jpeg", quality);
 }
 
+/** 对已加载的图片做迭代压缩，返回 ≤ 目标体积的 JPEG dataURL */
+export function compressLoadedImage(img: HTMLImageElement): string {
+  let best = drawToDataUrl(img, EDGES[EDGES.length - 1], QUALITIES[QUALITIES.length - 1]);
+  for (const edge of EDGES) {
+    for (const quality of QUALITIES) {
+      const dataUrl = drawToDataUrl(img, edge, quality);
+      best = dataUrl;
+      if (dataUrlBytes(dataUrl) <= TARGET_BYTES) return dataUrl;
+    }
+  }
+  return best;
+}
+
+export async function compressDataUrl(dataUrl: string): Promise<string> {
+  const img = await loadImage(dataUrl);
+  return compressLoadedImage(img);
+}
+
 export async function compressImage(file: File): Promise<string> {
   // 原图已经足够小，直接原样转存
   if (file.size <= TARGET_BYTES) {
@@ -63,18 +77,11 @@ export async function compressImage(file: File): Promise<string> {
       reader.readAsDataURL(file);
     });
   }
-
-  const img = await loadImage(file);
-  let best = drawToDataUrl(img, EDGES[EDGES.length - 1], QUALITIES[QUALITIES.length - 1]);
-
-  for (const edge of EDGES) {
-    for (const quality of QUALITIES) {
-      const dataUrl = drawToDataUrl(img, edge, quality);
-      best = dataUrl; // 越往后越小，始终记住最小结果兜底
-      if (dataUrlBytes(dataUrl) <= TARGET_BYTES) {
-        return dataUrl;
-      }
-    }
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImage(url);
+    return compressLoadedImage(img);
+  } finally {
+    URL.revokeObjectURL(url);
   }
-  return best;
 }

@@ -21,6 +21,17 @@ export type RecordType = "diary" | "photo" | "idea";
 /** 可见范围工作流：仅自己 → 私人收藏 → 准备分享 → 已发布 */
 export type Visibility = "仅自己" | "私人收藏" | "准备分享" | "已发布";
 
+/** 单张图片的元数据（供时光轴/回顾报告使用），按 url 与 images 元素关联 */
+export interface ImageMeta {
+  url: string;
+  /** 拍摄时间（EXIF DateTimeOriginal，缺失则用上传时间） */
+  takenAt?: string;
+  /** 地点名（用户填写或水印使用） */
+  location?: string;
+  lat?: number;
+  lng?: number;
+}
+
 /** 日常记录（日记/照片/想法共用） */
 export interface LifeRecord {
   id: string;
@@ -28,6 +39,8 @@ export interface LifeRecord {
   title: string;
   content: string;
   images: string[];
+  /** 图片元数据（可选，与 images 按 url 关联） */
+  imageMeta?: ImageMeta[];
   mood: Mood | null;
   weather?: string;
   location?: string;

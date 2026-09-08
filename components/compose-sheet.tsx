@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2, Pencil, X } from "lucide-react";
 import { useComposeStore } from "@/lib/stores/ui";
 import { useRecordsStore } from "@/lib/stores/records";
-import { compressImage } from "@/lib/image";
+import { compressDataUrl, compressImage } from "@/lib/image";
 import { uploadImage } from "@/lib/upload";
-import type { Mood, RecordType } from "@/lib/types";
+import { parseExif } from "@/lib/exif";
+import { ImageEditor } from "@/components/image-editor";
+import type { ImageMeta, Mood, RecordType } from "@/lib/types";
 
 const typeOptions: { value: RecordType; label: string }[] = [
   { value: "diary", label: "写日记" },
@@ -40,7 +42,10 @@ export function ComposeSheet() {
   const [weather, setWeather] = useState<string | null>(null);
   const [tags, setTags] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [metas, setMetas] = useState<ImageMeta[]>([]);
   const [busy, setBusy] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
@@ -54,6 +59,7 @@ export function ComposeSheet() {
     setWeather(null);
     setTags("");
     setImages([]);
+    setMetas([]);
   }
 
   async function handlePickImages(files: FileList | null) {
@@ -62,19 +68,54 @@ export function ComposeSheet() {
     try {
       const picked = Array.from(files).slice(0, 6 - images.length);
       for (const file of picked) {
+        // EXIF（拍摄时间/GPS）要在压缩前提取，压缩会丢掉这些信息
+        const exif = await parseExif(file);
         // 压缩 → 上传图床换外链；失败则回退 base64 直存
         const compressed = await compressImage(file);
         let src = compressed;
         try {
-          src = await uploadImage(compressed);
+          src = await uploadImage(compressed, "records");
         } catch {
           // 图床不可用时静默回退，记录依然可保存
         }
         setImages((prev) => (prev.length >= 6 ? prev : [...prev, src]));
+        setMetas((prev) => [
+          ...prev,
+          {
+            url: src,
+            takenAt: exif.takenAt ?? new Date().toISOString(),
+            lat: exif.lat,
+            lng: exif.lng,
+          },
+        ]);
       }
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  /** 编辑完成：合成图 → 压缩 → 重新上传替换外链，并更新元数据 */
+  async function handleEditDone(dataUrl: string, location: string | undefined) {
+    if (editIndex === null) return;
+    setSavingEdit(true);
+    try {
+      const compressed = await compressDataUrl(dataUrl);
+      let newUrl = compressed;
+      try {
+        newUrl = await uploadImage(compressed, "records");
+      } catch {
+        // 上传失败时回退 base64，编辑结果不丢
+      }
+      setImages((prev) => prev.map((u, i) => (i === editIndex ? newUrl : u)));
+      setMetas((prev) =>
+        prev.map((m, i) =>
+          i === editIndex ? { ...m, url: newUrl, location: location ?? m.location } : m,
+        ),
+      );
+      setEditIndex(null);
+    } finally {
+      setSavingEdit(false);
     }
   }
 
@@ -92,6 +133,9 @@ export function ComposeSheet() {
         title: title.trim() || "无标题",
         content: content.trim(),
         images,
+        imageMeta: images
+          .map((u) => metas.find((m) => m.url === u))
+          .filter((m): m is ImageMeta => Boolean(m)),
         mood,
         weather: weather ?? undefined,
         tags: tagList,
@@ -203,9 +247,17 @@ export function ComposeSheet() {
                   className="size-[64px] rounded-[12px] object-cover"
                 />
                 <button
-                  onClick={() =>
-                    setImages((prev) => prev.filter((_, idx) => idx !== i))
-                  }
+                  onClick={() => setEditIndex(i)}
+                  aria-label="编辑照片"
+                  className="absolute bottom-1 right-1 flex size-5 items-center justify-center rounded-full bg-ink/70 text-white"
+                >
+                  <Pencil className="size-2.5" strokeWidth={2.2} />
+                </button>
+                <button
+                  onClick={() => {
+                    setImages((prev) => prev.filter((_, idx) => idx !== i));
+                    setMetas((prev) => prev.filter((_, idx) => idx !== i));
+                  }}
                   aria-label="移除照片"
                   className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-ink/70 text-white"
                 >
@@ -263,6 +315,25 @@ export function ComposeSheet() {
           </div>
         </div>
       </div>
+
+      {/* 图片编辑器 */}
+      {editIndex !== null && images[editIndex] && (
+        <ImageEditor
+          src={images[editIndex]}
+          takenAt={metas.find((m) => m.url === images[editIndex])?.takenAt}
+          location={metas.find((m) => m.url === images[editIndex])?.location}
+          onCancel={() => setEditIndex(null)}
+          onDone={handleEditDone}
+        />
+      )}
+      {savingEdit && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60">
+          <div className="flex items-center gap-2 rounded-full bg-white px-5 py-3 text-[13px] text-ink">
+            <Loader2 className="size-4 animate-spin" />
+            正在处理图片…
+          </div>
+        </div>
+      )}
     </div>
   );
 }

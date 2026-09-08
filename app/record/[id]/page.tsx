@@ -321,15 +321,27 @@ export default function RecordPage({
             </p>
             {record.images.length > 0 && (
               <div className="mt-3 grid grid-cols-2 gap-2">
-                {record.images.map((src, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={i}
-                    src={src}
-                    alt={`照片 ${i + 1}`}
-                    className="aspect-square w-full rounded-[12px] object-cover"
-                  />
-                ))}
+                {record.images.map((src, i) => {
+                  const meta = record.imageMeta?.find((m) => m.url === src);
+                  return (
+                    <div key={i}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={`照片 ${i + 1}`}
+                        className="aspect-square w-full rounded-[12px] object-cover"
+                      />
+                      {meta && (meta.takenAt || meta.location) && (
+                        <p className="mt-1 text-[10.5px] leading-tight text-ink-5">
+                          {meta.takenAt &&
+                            `${meta.takenAt.slice(0, 10)} ${meta.takenAt.slice(11, 16)}`}
+                          {meta.takenAt && meta.location ? " · " : ""}
+                          {meta.location}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
             <p className="mt-3 text-[13.5px] leading-relaxed whitespace-pre-wrap text-ink-2">
