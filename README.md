@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 小佳佳的生活日记
 
-## Getting Started
+奶油系私人生活记录站：日记记录 · 美妆成长 · 灵感收藏 · 私密健康空间。
 
-First, run the development server:
+基于 Next.js (App Router) + Tailwind CSS + Zustand + Neon Postgres，支持 PWA 安装到主屏幕。
+
+## 本地开发
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:14007
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+常用脚本：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| 命令 | 说明 |
+| --- | --- |
+| `npm run dev` | 开发服务器（端口 14007） |
+| `npm run build` | 生产构建 |
+| `npm run lint` | ESLint 检查 |
+| `npm test` | 单元测试（vitest） |
+| `node scripts/gen-icons.mjs` | 重新生成 PWA 全尺寸图标 |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+环境变量（`.env.local`，参考仓库内配置说明）：
 
-## Learn More
+- `DATABASE_URL` — Neon Postgres 连接串
+- `PRIVATE_PASSWORD` — 私密空间密码
+- `AGNES_API_KEY` — AI 整理日记/生成小红书文案
+- `IMGBED_API_TOKEN` — 图床上传
 
-To learn more about Next.js, take a look at the following resources:
+## 贡献
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+批量修改代码前请先阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)——里面有 sed 批量替换的踩坑记录与提交前验证清单。
