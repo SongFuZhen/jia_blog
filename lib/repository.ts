@@ -23,8 +23,6 @@ import type {
 } from "@/lib/types";
 import { PRIVATE_COLLECTIONS } from "@/lib/db-collections";
 
-const STORAGE_PREFIX = "jia-blog";
-
 export interface Entity {
   id: string;
 }
