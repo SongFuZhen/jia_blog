@@ -5,23 +5,23 @@
  * 后期接入 Neon（Postgres）时，只需把这些实现替换为 API 调用，
  * 接口签名不变，UI / store 零改动。
  */
-import type { Settings, GrowthSection, Food, Show, SecretItem } from "@/lib/types";
+import type {
+  Settings,
+  GrowthSection,
+  Food,
+  Show,
+  SecretItem,
+  LifeRecord,
+  BeautyTip,
+  Product,
+  UsageLog,
+  Wish,
+  Inspiration,
+  WeightLog,
+  PeriodLog,
+  PrivateDiary,
+} from "@/lib/types";
 import { PRIVATE_COLLECTIONS } from "@/lib/db-collections";
-import {
-  seedBeautyTips,
-  seedFoods,
-  seedGrowthSections,
-  seedInspirations,
-  seedLifeRecords,
-  seedPeriodLogs,
-  seedPrivateDiaries,
-  seedProducts,
-  seedSecretItems,
-  seedShows,
-  seedUsageLogs,
-  seedWeightLogs,
-  seedWishes,
-} from "@/lib/seed";
 
 const STORAGE_PREFIX = "jia-blog";
 
@@ -81,43 +81,18 @@ async function api<T>(name: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** 读取迁移前的 localStorage 旧数据 */
-function readLocalCollection<T extends Entity>(name: string): T[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(`${STORAGE_PREFIX}:${name}`);
-    return raw ? (JSON.parse(raw) as T[]) : [];
-  } catch {
-    return [];
-  }
-}
-
 /**
  * Neon Postgres 实现的集合仓库。
- * 首次 list() 时：云端为空则自动迁移本机 localStorage 数据（无则播种 seed）。
+ * 数据以云端为唯一来源；localStorage 迁移期已结束，不再自动播种/回流。
  */
 export function createApiRepository<T extends Entity>(
   name: string,
-  seed: T[],
 ): Repository<T> {
   let cache: T[] | null = null;
 
   const ensure = async (): Promise<T[]> => {
     if (cache) return cache;
-    const server = await api<T[]>(name);
-    if (server.length === 0) {
-      const local = readLocalCollection<T>(name);
-      const initial = local.length > 0 ? local : seed;
-      if (initial.length > 0) {
-        await api(name, {
-          method: "POST",
-          body: JSON.stringify({ items: initial }),
-        });
-      }
-      cache = initial;
-    } else {
-      cache = server;
-    }
+    cache = await api<T[]>(name);
     return cache;
   };
 
@@ -182,19 +157,16 @@ export function createApiSingleRepository<T extends object>(
 
 /* ---------- 各模块仓库实例 ---------- */
 
-export const recordsRepo = createApiRepository("records", seedLifeRecords);
-export const beautyTipsRepo = createApiRepository("beauty-tips", seedBeautyTips);
-export const productsRepo = createApiRepository("products", seedProducts);
-export const usageLogsRepo = createApiRepository("usage-logs", seedUsageLogs);
-export const wishesRepo = createApiRepository("wishes", seedWishes);
-export const inspirationsRepo = createApiRepository("inspirations", seedInspirations);
-export const weightLogsRepo = createApiRepository("weight-logs", seedWeightLogs);
-export const periodLogsRepo = createApiRepository("period-logs", seedPeriodLogs);
-export const privateDiaryRepo = createApiRepository("private-diary", seedPrivateDiaries);
-export const secretItemsRepo = createApiRepository<SecretItem>(
-  "secret-list",
-  seedSecretItems,
-);
+export const recordsRepo = createApiRepository<LifeRecord>("records");
+export const beautyTipsRepo = createApiRepository<BeautyTip>("beauty-tips");
+export const productsRepo = createApiRepository<Product>("products");
+export const usageLogsRepo = createApiRepository<UsageLog>("usage-logs");
+export const wishesRepo = createApiRepository<Wish>("wishes");
+export const inspirationsRepo = createApiRepository<Inspiration>("inspirations");
+export const weightLogsRepo = createApiRepository<WeightLog>("weight-logs");
+export const periodLogsRepo = createApiRepository<PeriodLog>("period-logs");
+export const privateDiaryRepo = createApiRepository<PrivateDiary>("private-diary");
+export const secretItemsRepo = createApiRepository<SecretItem>("secret-list");
 export const settingsRepo = createApiSingleRepository<Settings>("settings", {
   nickname: "小佳佳",
   autoLock: true,
@@ -202,7 +174,37 @@ export const settingsRepo = createApiSingleRepository<Settings>("settings", {
 });
 export const growthRepo = createApiSingleRepository<GrowthSection[]>(
   "growth-list",
-  seedGrowthSections,
+  [
+    {
+      title: "变美",
+      tone: "text-[#E0697E]",
+      items: [
+        { id: "b1", text: "坚持防晒 30 天", done: true },
+        { id: "b2", text: "学会三个新发型", done: true },
+        { id: "b3", text: "戒掉奶茶两周", done: false },
+        { id: "b4", text: "找到本命口红", done: false },
+      ],
+    },
+    {
+      title: "学习",
+      tone: "text-[#8B63D9]",
+      items: [
+        { id: "s1", text: "每天背 20 个单词", done: true },
+        { id: "s2", text: "看完一本摄影书", done: false },
+        { id: "s3", text: "学会做 PPT 动画", done: false },
+      ],
+    },
+    {
+      title: "生活",
+      tone: "text-[#4E9A6E]",
+      items: [
+        { id: "l1", text: "连续早起一周", done: true },
+        { id: "l2", text: "整理一次房间", done: true },
+        { id: "l3", text: "去野餐一次", done: false },
+        { id: "l4", text: "看一次日出", done: false },
+      ],
+    },
+  ],
 );
-export const foodsRepo = createApiRepository<Food>("foods", seedFoods);
-export const showsRepo = createApiRepository<Show>("shows", seedShows);
+export const foodsRepo = createApiRepository<Food>("foods");
+export const showsRepo = createApiRepository<Show>("shows");
