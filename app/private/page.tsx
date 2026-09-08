@@ -306,18 +306,18 @@ export default function PrivatePage() {
         </div>
         <div className="mt-3 flex items-end justify-between">
           <p className="text-[26px] leading-none font-bold text-ink">
-            {latestWeight ? latestWeight.weight : "--"}
+            {latestWeight ? latestWeight.weight.toFixed(2) : "--"}
             <span className="ml-1 text-[13.5px] font-medium text-ink-4">kg</span>
           </p>
           {remain !== null && (
             <p className="text-[12px] text-ink-4">
-              距目标还差 <span className="text-[#E0697E]">{remain.toFixed(1)} kg</span>
+              距目标还差 <span className="text-[#E0697E]">{remain.toFixed(2)} kg</span>
             </p>
           )}
         </div>
         <WeightTrend logs={weightLogs} />
         <p className="mt-1 text-[11px] text-ink-5">
-          目标 {target} kg · 认识自己的身体，而不是要求自己变成某个数字
+          目标 {target.toFixed(2)} kg · 认识自己的身体，而不是要求自己变成某个数字
         </p>
       </section>
 

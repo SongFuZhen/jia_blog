@@ -51,7 +51,7 @@ export default function SettingsPage() {
   ) {
     setSyncedSettings(settings);
     setNickname(settings.nickname);
-    setTargetWeight(settings.targetWeight ? String(settings.targetWeight) : "");
+    setTargetWeight(settings.targetWeight ? settings.targetWeight.toFixed(2) : "");
   }
 
   async function saveProfile() {
