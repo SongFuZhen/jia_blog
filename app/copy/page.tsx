@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Eye, Gift, Plus, X } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
 import { useCopyStore } from "@/lib/stores/copy";
+import { getGreeting, getSurprise } from "@/lib/surprises";
 import type { CopyLibrary } from "@/lib/types";
 
 export default function CopyPage() {
@@ -58,11 +59,57 @@ export default function CopyPage() {
     setTimeout(() => setSavedFlash(false), 1500);
   }
 
+  // 实时预览：用草稿数据计算今天在首页的实际显示效果
+  const greeting = getGreeting(draft, new Date());
+  const surprise = getSurprise(draft, new Date());
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <header className="flex items-center justify-between pt-9">
         <PageHeader title="文案编辑" subtitle="网站上的话，你来定" />
       </header>
+
+      {/* 实时预览（吸顶，展示今天在首页的实际效果） */}
+      <div className="sticky top-2 z-20 mt-4 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-md)]">
+        <p className="mb-3 flex items-center gap-1.5 text-[11.5px] font-medium text-ink-4">
+          <Eye className="size-3.5" strokeWidth={1.8} />
+          实时预览 · 今天在首页的效果
+        </p>
+        {/* 首页问候胶囊 */}
+        <div className="flex justify-end">
+          <div className="rounded-full bg-cream px-3.5 py-1.5 text-[11.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)]">
+            {greeting.label} · {greeting.text}
+          </div>
+        </div>
+        {/* 小惊喜卡片 */}
+        <div
+          className={`mt-2 flex items-center gap-3 rounded-[16px] p-3 ${
+            surprise.isAnniversary
+              ? "bg-gradient-to-r from-pink-soft to-pink-soft-2"
+              : "bg-gradient-to-r from-orange-soft to-orange-soft-2"
+          }`}
+        >
+          <span
+            className={`flex size-8 shrink-0 items-center justify-center rounded-full text-white ${
+              surprise.isAnniversary ? "bg-[#D56983]" : "bg-[#F0A24B]"
+            }`}
+          >
+            <Gift className="size-4" strokeWidth={1.8} />
+          </span>
+          <div className="min-w-0">
+            <p
+              className={`text-[10.5px] font-medium ${
+                surprise.isAnniversary ? "text-[#D56983]" : "text-gold-ink"
+              }`}
+            >
+              {surprise.isAnniversary ? "纪念日快乐" : "今日小惊喜"}
+            </p>
+            <p className="font-display truncate text-[13px] leading-snug text-ink-2">
+              {surprise.text}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* 保存按钮 */}
       <div className="mt-4 flex justify-end">
