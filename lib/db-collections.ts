@@ -14,6 +14,7 @@ export const DB_COLLECTIONS = [
   "private-diary",
   "settings",
   "growth-list",
+  "foods",
 ] as const;
 
 export type DbCollection = (typeof DB_COLLECTIONS)[number];

@@ -175,6 +175,28 @@ export interface GrowthSection {
   items: GrowthItem[];
 }
 
+/** 美食记录（收藏餐厅/美食，来源多为大众点评/美团） */
+export type FoodPlatform = "大众点评" | "美团" | "小红书" | "其他";
+export type FoodStatus = "want" | "visited";
+
+export interface Food {
+  id: string;
+  name: string;
+  /** 来源平台 */
+  platform?: FoodPlatform;
+  /** 点评/美团等链接 */
+  link?: string;
+  /** 位置（商圈/地址） */
+  location?: string;
+  note?: string;
+  image?: string;
+  status: FoodStatus;
+  /** 吃后评分 1-5 */
+  rating?: number;
+  visitedAt?: string;
+  createdAt: string;
+}
+
 /** 我的（设置） */
 export interface Settings {
   nickname: string;

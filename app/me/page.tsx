@@ -12,6 +12,7 @@ import {
   Lock,
   NotebookPen,
   Settings,
+  UtensilsCrossed,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { useRecordsStore } from "@/lib/stores/records";
@@ -21,6 +22,7 @@ import { useBeautyStore } from "@/lib/stores/beauty";
 const menus = [
   { label: "我的草稿", icon: NotebookPen, href: "/drafts" },
   { label: "时光轴", icon: History, href: "/timeline" },
+  { label: "美食记录", icon: UtensilsCrossed, href: "/food" },
   { label: "我的收藏", icon: Bookmark, href: "/inspiration" },
   { label: "回顾 · 月报年报", icon: BarChart3, href: "/review" },
   { label: "设置", icon: Settings, href: "/settings" },

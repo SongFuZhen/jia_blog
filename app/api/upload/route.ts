@@ -15,6 +15,7 @@ const MODULE_FOLDERS: Record<string, string> = {
   records: "jia/records",
   beauty: "jia/beauty",
   inspiration: "jia/inspiration",
+  food: "jia/food",
   misc: "jia/misc",
 };
 

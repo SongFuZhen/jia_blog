@@ -5,10 +5,11 @@
  * 后期接入 Neon（Postgres）时，只需把这些实现替换为 API 调用，
  * 接口签名不变，UI / store 零改动。
  */
-import type { Settings, GrowthSection } from "@/lib/types";
+import type { Settings, GrowthSection, Food } from "@/lib/types";
 import { PRIVATE_COLLECTIONS } from "@/lib/db-collections";
 import {
   seedBeautyTips,
+  seedFoods,
   seedGrowthSections,
   seedInspirations,
   seedLifeRecords,
@@ -197,3 +198,4 @@ export const growthRepo = createApiSingleRepository<GrowthSection[]>(
   "growth-list",
   seedGrowthSections,
 );
+export const foodsRepo = createApiRepository<Food>("foods", seedFoods);

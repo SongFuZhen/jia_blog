@@ -4,6 +4,7 @@
  */
 import type {
   BeautyTip,
+  Food,
   GrowthSection,
   Inspiration,
   LifeRecord,
@@ -333,8 +334,7 @@ export const seedWishes: Wish[] = [
   },
 ];
 
-export const seedGrowthSections: GrowthSection[] = [
-  {
+export const seedGrowthSections: GrowthSection[] = [  {
     title: "变美",
     tone: "text-[#E0697E]",
     items: [
@@ -362,5 +362,29 @@ export const seedGrowthSections: GrowthSection[] = [
       { id: "l3", text: "去野餐一次", done: false },
       { id: "l4", text: "看一次日出", done: false },
     ],
+  },
+];
+
+export const seedFoods: Food[] = [
+  {
+    id: "seed-food-01",
+    name: "那家排队两小时的川菜馆",
+    platform: "大众点评",
+    link: "",
+    location: "市中心万象城",
+    note: "收藏了好久，据说毛血旺一绝",
+    status: "want",
+    createdAt: "2026-08-28T12:00:00",
+  },
+  {
+    id: "seed-food-02",
+    name: "公司楼下的日式咖喱",
+    platform: "美团",
+    location: "写字楼 B1",
+    note: "每周五的快乐源泉",
+    status: "visited",
+    rating: 5,
+    visitedAt: "2026-09-04",
+    createdAt: "2026-08-15T12:00:00",
   },
 ];
