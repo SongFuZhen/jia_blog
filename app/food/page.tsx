@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, ImagePlus, Loader2, Plus, Star, Trash2 } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
