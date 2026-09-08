@@ -26,12 +26,14 @@ export default function FoodPage() {
     platform: FoodPlatform | "无";
     link: string;
     location: string;
+    price: string;
     note: string;
   }>({
     name: "",
     platform: "大众点评",
     link: "",
     location: "",
+    price: "",
     note: "",
   });
   const [image, setImage] = useState<string | undefined>(undefined);
@@ -42,6 +44,43 @@ export default function FoodPage() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  // 统计
+  const stats = useMemo(() => {
+    const want = foods.filter((f) => f.status === "want").length;
+    const visited = foods.filter((f) => f.status === "visited");
+    const rated = visited.filter((f) => f.rating);
+    const avgRating = rated.length
+      ? (rated.reduce((s, f) => s + (f.rating ?? 0), 0) / rated.length).toFixed(1)
+      : null;
+    const priced = visited.filter((f) => f.price);
+    const avgPrice = priced.length
+      ? Math.round(priced.reduce((s, f) => s + (f.price ?? 0), 0) / priced.length)
+      : null;
+    const repurchase = visited.filter((f) => f.repurchase).length;
+    const now = new Date();
+    const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const thisMonth = visited.filter((f) => f.visitedAt?.startsWith(monthPrefix)).length;
+
+    const platformMap = new Map<string, number>();
+    for (const f of foods) {
+      if (f.platform) platformMap.set(f.platform, (platformMap.get(f.platform) ?? 0) + 1);
+    }
+    const platforms = [...platformMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const maxPlatform = platforms[0]?.[1] ?? 1;
+
+    return {
+      want,
+      visitedCount: visited.length,
+      avgRating,
+      avgPrice,
+      repurchase,
+      thisMonth,
+      platforms,
+      maxPlatform,
+      total: foods.length,
+    };
+  }, [foods]);
 
   const filtered =
     filter === "全部" ? foods : foods.filter((f) => f.status === filter);
@@ -73,12 +112,13 @@ export default function FoodPage() {
         platform: form.platform === "无" ? undefined : form.platform,
         link: form.link.trim() || undefined,
         location: form.location.trim() || undefined,
+        price: parseFloat(form.price) || undefined,
         note: form.note.trim() || undefined,
         image,
         status: "want",
         createdAt: new Date().toISOString(),
       });
-      setForm({ name: "", platform: "大众点评", link: "", location: "", note: "" });
+      setForm({ name: "", platform: "大众点评", link: "", location: "", price: "", note: "" });
       setImage(undefined);
       setShowAdd(false);
     } catch {
@@ -91,6 +131,56 @@ export default function FoodPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="美食记录" subtitle="把好吃的都记下来" />
+
+      {/* 统计 */}
+      {foods.length > 0 && (
+        <div className="mt-4 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="rounded-[12px] bg-card-warm py-2.5">
+              <p className="text-[17px] font-bold text-[#E0697E]">{stats.total}</p>
+              <p className="text-[10.5px] text-ink-4">收藏</p>
+            </div>
+            <div className="rounded-[12px] bg-card-warm py-2.5">
+              <p className="text-[17px] font-bold text-orange-ink">{stats.want}</p>
+              <p className="text-[10.5px] text-ink-4">想吃</p>
+            </div>
+            <div className="rounded-[12px] bg-card-warm py-2.5">
+              <p className="text-[17px] font-bold text-green-ink">{stats.visitedCount}</p>
+              <p className="text-[10.5px] text-ink-4">吃过了</p>
+            </div>
+            <div className="rounded-[12px] bg-card-warm py-2.5">
+              <p className="text-[17px] font-bold text-[#FFC46B]">
+                {stats.avgRating ?? "--"}
+              </p>
+              <p className="text-[10.5px] text-ink-4">平均评分</p>
+            </div>
+          </div>
+
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[11.5px] text-ink-3">
+              本月吃了 <b className="text-[#E0697E]">{stats.thisMonth}</b> 顿
+              {stats.avgPrice !== null && (
+                <>
+                  {" · "}吃过的店人均 ¥{stats.avgPrice}
+                  {" · "}回购 {stats.repurchase} 家
+                </>
+              )}
+            </p>
+            {stats.platforms.map(([name, count]) => (
+              <div key={name} className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-[11px] text-ink-3">{name}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-pink-soft">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88]"
+                    style={{ width: `${(count / stats.maxPlatform) * 100}%` }}
+                  />
+                </div>
+                <span className="w-5 text-right text-[10.5px] text-ink-4">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 筛选 */}
       <div className="mt-4 flex gap-2">
@@ -153,6 +243,13 @@ export default function FoodPage() {
               onChange={(e) => setForm({ ...form, location: e.target.value })}
               placeholder="位置：商圈 / 地址"
               className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] text-ink outline-none"
+            />
+            <input
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value.replace(/[^\d.]/g, "") })}
+              placeholder="人均 ¥"
+              inputMode="decimal"
+              className="w-[88px] shrink-0 rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] text-ink outline-none"
             />
             <button
               onClick={() => fileRef.current?.click()}
@@ -235,6 +332,7 @@ export default function FoodPage() {
                   <p className="mt-0.5 text-[11.5px] text-ink-4">
                     {f.platform && `${f.platform} · `}
                     {f.location}
+                    {f.price ? ` · ¥${f.price}/人` : ""}
                   </p>
                   {f.note && (
                     <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-2">
@@ -289,6 +387,18 @@ export default function FoodPage() {
                   >
                     {f.status === "want" ? "吃过了！" : "还想吃"}
                   </button>
+                  {f.status === "visited" && (
+                    <button
+                      onClick={() => update(f.id, { repurchase: !f.repurchase })}
+                      className={`rounded-full px-3 py-1.5 text-[11.5px] font-medium transition-colors ${
+                        f.repurchase
+                          ? "bg-[#FFF1E0] text-[#E8853D]"
+                          : "bg-cream text-ink-3"
+                      }`}
+                    >
+                      {f.repurchase ? "🧡 会再去" : "还会再去吗"}
+                    </button>
+                  )}
                 </div>
                 {f.status === "visited" && f.visitedAt && (
                   <span className="text-[10.5px] text-ink-5">

@@ -188,11 +188,15 @@ export interface Food {
   link?: string;
   /** 位置（商圈/地址） */
   location?: string;
+  /** 人均价格（元） */
+  price?: number;
   note?: string;
   image?: string;
   status: FoodStatus;
   /** 吃后评分 1-5 */
   rating?: number;
+  /** 回购：会再去吃 */
+  repurchase?: boolean;
   visitedAt?: string;
   createdAt: string;
 }
