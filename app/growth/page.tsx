@@ -1,52 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Sparkles, Star } from "lucide-react";
+import { Check, Plus, Sparkles, Star, X } from "lucide-react";
+import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
+import { useGrowthStore } from "@/lib/stores/growth";
 import { useRecordsStore } from "@/lib/stores/records";
 
-type Item = { id: string; text: string; done: boolean };
-
-const initialSections: { title: string; tone: string; items: Item[] }[] = [
-  {
-    title: "变美",
-    tone: "text-[#E0697E]",
-    items: [
-      { id: "b1", text: "坚持防晒 30 天", done: true },
-      { id: "b2", text: "学会三个新发型", done: true },
-      { id: "b3", text: "戒掉奶茶两周", done: false },
-      { id: "b4", text: "找到本命口红", done: false },
-    ],
-  },
-  {
-    title: "学习",
-    tone: "text-purple-ink",
-    items: [
-      { id: "s1", text: "每天背 20 个单词", done: true },
-      { id: "s2", text: "看完一本摄影书", done: false },
-      { id: "s3", text: "学会做 PPT 动画", done: false },
-    ],
-  },
-  {
-    title: "生活",
-    tone: "text-green-ink",
-    items: [
-      { id: "l1", text: "连续早起一周", done: true },
-      { id: "l2", text: "整理一次房间", done: true },
-      { id: "l3", text: "去野餐一次", done: false },
-      { id: "l4", text: "看一次日出", done: false },
-    ],
-  },
-];
-
 export default function GrowthPage() {
-  const [sections, setSections] = useState(initialSections);
+  const sections = useGrowthStore((s) => s.sections);
+  const hydrated = useGrowthStore((s) => s.hydrated);
+  const hydrate = useGrowthStore((s) => s.hydrate);
+  const toggle = useGrowthStore((s) => s.toggle);
+  const addItem = useGrowthStore((s) => s.addItem);
+  const removeItem = useGrowthStore((s) => s.removeItem);
+
   const records = useRecordsStore((s) => s.records);
   const hydrateRecords = useRecordsStore((s) => s.hydrate);
 
+  const [addingSection, setAddingSection] = useState<string | null>(null);
+  const [newText, setNewText] = useState("");
+
   useEffect(() => {
+    hydrate();
     hydrateRecords();
-  }, [hydrateRecords]);
+  }, [hydrate, hydrateRecords]);
 
   // 成长时间线：自动提取带「第一次」的记录
   const firstTimes = useMemo(
@@ -68,19 +46,11 @@ export default function GrowthPage() {
     return { total: all.length, done: all.filter((i) => i.done).length };
   }, [sections]);
 
-  function toggle(sectionTitle: string, id: string) {
-    setSections((prev) =>
-      prev.map((s) =>
-        s.title !== sectionTitle
-          ? s
-          : {
-              ...s,
-              items: s.items.map((i) =>
-                i.id === id ? { ...i, done: !i.done } : i,
-              ),
-            },
-      ),
-    );
+  async function handleAdd(sectionTitle: string) {
+    if (!newText.trim()) return;
+    await addItem(sectionTitle, newText.trim());
+    setNewText("");
+    setAddingSection(null);
   }
 
   const percent = total ? Math.round((done / total) * 100) : 0;
@@ -125,7 +95,7 @@ export default function GrowthPage() {
             {percent}%
           </span>
         </div>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/70">
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/70 dark:bg-black/30">
           <div
             className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88] transition-all"
             style={{ width: `${percent}%` }}
@@ -135,47 +105,89 @@ export default function GrowthPage() {
 
       {/* 分区清单 */}
       <div className="mt-4 space-y-3">
-        {sections.map((section) => (
-          <section
-            key={section.title}
-            className="rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
-          >
-            <h2
-              className={`text-[15px] font-bold ${section.tone}`}
+        {!hydrated ? (
+          <Loading />
+        ) : (
+          sections.map((section) => (
+            <section
+              key={section.title}
+              className="rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
             >
-              {section.title}
-            </h2>
-            <ul className="mt-2.5 space-y-1">
-              {section.items.map((item) => (
-                <li key={item.id}>
+              <h2 className={`text-[15px] font-bold ${section.tone}`}>
+                {section.title}
+              </h2>
+              <ul className="mt-2.5 space-y-1">
+                {section.items.map((item) => (
+                  <li key={item.id} className="group/item relative">
+                    <button
+                      onClick={() => toggle(section.title, item.id)}
+                      className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-card-hover"
+                    >
+                      <span
+                        className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                          item.done
+                            ? "border-[#F16D88] bg-[#F16D88] text-white"
+                            : "border-toggle-off bg-white dark:bg-card"
+                        }`}
+                      >
+                        {item.done && <Check className="size-3" strokeWidth={3} />}
+                      </span>
+                      <span
+                        className={`text-[14px] ${
+                          item.done ? "text-ink-5 line-through" : "text-ink"
+                        }`}
+                      >
+                        {item.text}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => removeItem(section.title, item.id)}
+                      aria-label="删除"
+                      className="absolute top-2.5 right-1.5 text-ink-5 opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-[#E76F7B]"
+                    >
+                      <X className="size-3.5" strokeWidth={1.8} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              {/* 手动添加 */}
+              {addingSection === section.title ? (
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={newText}
+                    onChange={(e) => setNewText(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter") await handleAdd(section.title);
+                      if (e.key === "Escape") setAddingSection(null);
+                    }}
+                    autoFocus
+                    placeholder={`想在「${section.title}」加什么？`}
+                    className="w-full rounded-[10px] bg-field px-3 py-2 text-[12.5px] text-ink outline-none"
+                  />
                   <button
-                    onClick={() => toggle(section.title, item.id)}
-                    className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-card-hover"
+                    onClick={() => handleAdd(section.title)}
+                    disabled={!newText.trim()}
+                    className="shrink-0 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12px] font-medium text-white disabled:opacity-40"
                   >
-                    <span
-                      className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                        item.done
-                          ? "border-[#F16D88] bg-[#F16D88] text-white"
-                          : "border-toggle-off bg-white"
-                      }`}
-                    >
-                      {item.done && <Check className="size-3" strokeWidth={3} />}
-                    </span>
-                    <span
-                      className={`text-[14px] ${
-                        item.done
-                          ? "text-ink-5 line-through"
-                          : "text-ink"
-                      }`}
-                    >
-                      {item.text}
-                    </span>
+                    收下
                   </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setAddingSection(section.title);
+                    setNewText("");
+                  }}
+                  className="mt-2 inline-flex items-center gap-1 rounded-full bg-field px-3 py-1.5 text-[11.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
+                >
+                  <Plus className="size-3.5" strokeWidth={2} />
+                  加一件小事
+                </button>
+              )}
+            </section>
+          ))
+        )}
       </div>
     </main>
   );

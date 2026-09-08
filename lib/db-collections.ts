@@ -13,6 +13,7 @@ export const DB_COLLECTIONS = [
   "period-logs",
   "private-diary",
   "settings",
+  "growth-list",
 ] as const;
 
 export type DbCollection = (typeof DB_COLLECTIONS)[number];

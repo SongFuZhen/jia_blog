@@ -4,6 +4,7 @@
  */
 import type {
   BeautyTip,
+  GrowthSection,
   Inspiration,
   LifeRecord,
   PeriodLog,
@@ -329,5 +330,37 @@ export const seedWishes: Wish[] = [
     note: "攒到工资就买",
     status: "want",
     createdAt: "2026-08-20T12:00:00",
+  },
+];
+
+export const seedGrowthSections: GrowthSection[] = [
+  {
+    title: "变美",
+    tone: "text-[#E0697E]",
+    items: [
+      { id: "b1", text: "坚持防晒 30 天", done: true },
+      { id: "b2", text: "学会三个新发型", done: true },
+      { id: "b3", text: "戒掉奶茶两周", done: false },
+      { id: "b4", text: "找到本命口红", done: false },
+    ],
+  },
+  {
+    title: "学习",
+    tone: "text-[#8B63D9]",
+    items: [
+      { id: "s1", text: "每天背 20 个单词", done: true },
+      { id: "s2", text: "看完一本摄影书", done: false },
+      { id: "s3", text: "学会做 PPT 动画", done: false },
+    ],
+  },
+  {
+    title: "生活",
+    tone: "text-[#4E9A6E]",
+    items: [
+      { id: "l1", text: "连续早起一周", done: true },
+      { id: "l2", text: "整理一次房间", done: true },
+      { id: "l3", text: "去野餐一次", done: false },
+      { id: "l4", text: "看一次日出", done: false },
+    ],
   },
 ];

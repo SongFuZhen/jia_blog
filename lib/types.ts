@@ -163,6 +163,18 @@ export interface PrivateDiary {
   mood?: Mood;
 }
 
+/** 成长清单 */
+export interface GrowthItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+export interface GrowthSection {
+  title: string;
+  tone: string;
+  items: GrowthItem[];
+}
+
 /** 我的（设置） */
 export interface Settings {
   nickname: string;

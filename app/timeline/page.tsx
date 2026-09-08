@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Camera, MapPin, Star } from "lucide-react";
 import { Loading } from "@/components/loading";
@@ -9,6 +9,15 @@ import { useRecordsStore } from "@/lib/stores/records";
 import type { ImageMeta, LifeRecord } from "@/lib/types";
 
 type ItemKind = "photo" | "milestone" | "record";
+
+type TypeFilter = "全部" | "photo" | "milestone" | "record";
+
+const typeFilters: { key: TypeFilter; label: string }[] = [
+  { key: "全部", label: "全部" },
+  { key: "photo", label: "📷 照片" },
+  { key: "milestone", label: "⭐ 第一次" },
+  { key: "record", label: "✍️ 记录" },
+];
 
 interface TimelineItem {
   /** 排序用的时刻：照片取拍摄时间，里程碑取记录时间 */
@@ -46,6 +55,8 @@ export default function TimelinePage() {
   const records = useRecordsStore((s) => s.records);
   const hydrated = useRecordsStore((s) => s.hydrated);
   const hydrate = useRecordsStore((s) => s.hydrate);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("全部");
+  const [yearFilter, setYearFilter] = useState<string>("全部");
 
   useEffect(() => {
     hydrate();
@@ -78,16 +89,31 @@ export default function TimelinePage() {
     return list.sort((a, b) => b.date.localeCompare(a.date));
   }, [records]);
 
+  // 可选年份（倒序）
+  const years = useMemo(
+    () => [...new Set(items.map((i) => i.date.slice(0, 4)))].sort().reverse(),
+    [items],
+  );
+
+  const filtered = useMemo(() => {
+    return items.filter((it) => {
+      if (yearFilter !== "全部" && !it.date.startsWith(yearFilter)) return false;
+      if (typeFilter === "全部") return true;
+      if (typeFilter === "milestone") return isMilestone(it.record);
+      return it.kind === typeFilter;
+    });
+  }, [items, yearFilter, typeFilter]);
+
   const groups = useMemo(() => {
     const map = new Map<string, TimelineItem[]>();
-    for (const it of items) {
+    for (const it of filtered) {
       const key = it.date.slice(0, 7);
       const arr = map.get(key) ?? [];
       arr.push(it);
       map.set(key, arr);
     }
     return [...map.entries()];
-  }, [items]);
+  }, [filtered]);
 
   const photoCount = items.filter((i) => i.kind === "photo").length;
   const milestoneCount = items.filter((i) => isMilestone(i.record)).length;
@@ -111,6 +137,47 @@ export default function TimelinePage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* 筛选：类型 + 年份 */}
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {typeFilters.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTypeFilter(t.key)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+              typeFilter === t.key
+                ? "bg-[#F16D88] text-white"
+                : "bg-white text-ink-3 shadow-[var(--shadow-xs)] dark:bg-card hover:text-[#F16D88]"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+        <span className="mx-1 w-px shrink-0 self-stretch bg-border-strong" />
+        <button
+          onClick={() => setYearFilter("全部")}
+          className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+            yearFilter === "全部"
+              ? "bg-ink text-background"
+              : "bg-white text-ink-3 shadow-[var(--shadow-xs)] dark:bg-card hover:text-[#F16D88]"
+          }`}
+        >
+          全部年份
+        </button>
+        {years.map((y) => (
+          <button
+            key={y}
+            onClick={() => setYearFilter(y)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+              yearFilter === y
+                ? "bg-ink text-background"
+                : "bg-white text-ink-3 shadow-[var(--shadow-xs)] dark:bg-card hover:text-[#F16D88]"
+            }`}
+          >
+            {y}
+          </button>
+        ))}
       </div>
 
       {!hydrated ? (
