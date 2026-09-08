@@ -55,9 +55,10 @@ export default function SettingsPage() {
   }
 
   async function saveProfile() {
+    const weight = parseFloat(targetWeight);
     await updateSettings({
       nickname: nickname.trim() || "小佳佳",
-      targetWeight: parseFloat(targetWeight) || undefined,
+      targetWeight: weight ? Math.round(weight * 100) / 100 : undefined,
     });
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1500);
@@ -117,11 +118,18 @@ export default function SettingsPage() {
           />
         </div>
         <div>
-          <p className="text-[12.5px] font-medium text-ink-3">体重目标（kg）</p>
+          <p className="text-[12.5px] font-medium text-ink-3">体重目标（kg，最多两位小数）</p>
           <input
             value={targetWeight}
-            onChange={(e) => setTargetWeight(e.target.value.replace(/[^\d.]/g, ""))}
-            placeholder="49.9"
+            onChange={(e) =>
+              setTargetWeight(
+                e.target.value
+                  .replace(/[^\d.]/g, "")
+                  .replace(/(\..*)\./g, "$1")
+                  .replace(/(\.\d{2})\d+$/, "$1"),
+              )
+            }
+            placeholder="49.90"
             inputMode="decimal"
             className="mt-1.5 w-full rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] outline-none"
           />

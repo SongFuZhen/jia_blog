@@ -275,8 +275,15 @@ export default function PrivatePage() {
           <div className="flex items-center gap-2">
             <input
               value={weightInput}
-              onChange={(e) => setWeightInput(e.target.value.replace(/[^\d.]/g, ""))}
-              placeholder="今天 52.3"
+              onChange={(e) =>
+                setWeightInput(
+                  e.target.value
+                    .replace(/[^\d.]/g, "")
+                    .replace(/(\..*)\./g, "$1")
+                    .replace(/(\.\d{2})\d+$/, "$1"),
+                )
+              }
+              placeholder="今天 52.30"
               inputMode="decimal"
               className="w-[88px] rounded-[10px] bg-field px-2.5 py-1.5 text-right text-[12.5px] outline-none placeholder:text-ink-5"
             />
