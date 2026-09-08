@@ -7,6 +7,7 @@ import {
   Bookmark,
   Cat,
   ChevronRight,
+  History,
   Info,
   Lock,
   NotebookPen,
@@ -19,6 +20,7 @@ import { useBeautyStore } from "@/lib/stores/beauty";
 
 const menus = [
   { label: "我的草稿", icon: NotebookPen, href: "/drafts" },
+  { label: "时光轴", icon: History, href: "/timeline" },
   { label: "我的收藏", icon: Bookmark, href: "/inspiration" },
   { label: "回顾 · 月报年报", icon: BarChart3, href: "/review" },
   { label: "设置", icon: Settings, href: "/settings" },
