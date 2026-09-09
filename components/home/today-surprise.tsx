@@ -4,23 +4,43 @@ import { useEffect, useMemo } from "react";
 import { Gift } from "lucide-react";
 import { useRecordsStore } from "@/lib/stores/records";
 import { useCopyStore } from "@/lib/stores/copy";
+import { useImportantDaysStore } from "@/lib/stores/important-days";
 import { getSurprise } from "@/lib/surprises";
+import { toSolarMonthDay } from "@/lib/important-days";
+import { TodayTasks } from "@/components/home/today-tasks";
 import type { Mood } from "@/lib/types";
 
-/** 今日小惊喜 + 本月心情统计 */
+/** 今日小惊喜 + 今日待办 + 本月心情统计 */
 export function TodaySurprise() {
   const records = useRecordsStore((s) => s.records);
   const hydrate = useRecordsStore((s) => s.hydrate);
   const library = useCopyStore((s) => s.library);
   const copyHydrate = useCopyStore((s) => s.hydrate);
+  const impDays = useImportantDaysStore((s) => s.days);
+  const impHydrate = useImportantDaysStore((s) => s.hydrate);
 
   useEffect(() => {
     hydrate();
     copyHydrate();
-  }, [hydrate, copyHydrate]);
+    impHydrate();
+  }, [hydrate, copyHydrate, impHydrate]);
+
+  // 重要日子（含农历）换算成本年阳历 monthDay，供首页惊喜匹配
+  const anniversaries = useMemo(() => {
+    const y = new Date().getFullYear();
+    const list: { monthDay: string; label: string }[] = [];
+    for (const d of impDays) {
+      const r = toSolarMonthDay(d, y);
+      if (r) list.push(r);
+    }
+    return list;
+  }, [impDays]);
 
   // 纯函数计算：文案库与日期确定后结果确定（东八区），无水合风险
-  const surprise = useMemo(() => getSurprise(library), [library]);
+  const surprise = useMemo(
+    () => getSurprise(library, new Date(), anniversaries),
+    [library, anniversaries],
+  );
 
   const now = new Date();
   const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -60,6 +80,9 @@ export function TodaySurprise() {
           </p>
         </div>
       </div>
+
+      {/* 今日待办（与惊喜同一张区块，来自「慢慢变好」） */}
+      <TodayTasks />
 
       {/* 本月心情统计（有数据才显示） */}
       {monthRecords.length > 0 && (

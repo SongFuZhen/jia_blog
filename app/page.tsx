@@ -4,6 +4,7 @@ import { PrivateCard } from "@/components/home/private-card";
 import { QuickEntries } from "@/components/home/quick-entries";
 import { RecentPosts } from "@/components/home/recent-posts";
 import { TodaySurprise } from "@/components/home/today-surprise";
+import { UpcomingDays } from "@/components/home/upcoming-days";
 
 export default function Home() {
   return (
@@ -14,9 +15,13 @@ export default function Home() {
         {/* 快捷入口轻微压在 Hero 上，与设计稿一致 */}
         <QuickEntries />
 
-        <PrivateCard />
-
+        {/* 今日小惊喜 + 今日待办，与快捷入口同一组 */}
         <TodaySurprise />
+
+        <UpcomingDays />
+
+        {/* 专属私密空间 */}
+        <PrivateCard />
 
         <RecentPosts />
 
