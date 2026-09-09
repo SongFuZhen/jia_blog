@@ -168,6 +168,12 @@ export interface GrowthItem {
   id: string;
   text: string;
   done: boolean;
+  /** 循环任务：勾选完成后自动生成一条新的待办副本，让习惯一直转下去 */
+  repeat?: boolean;
+  /** 循环任务已完成的次数（每完成一次 +1，随副本传递下去） */
+  cycleCount?: number;
+  /** 截止日期 YYYY-MM-DD（循环任务的新副本会继承同一截止日） */
+  due?: string;
 }
 export interface GrowthSection {
   title: string;
@@ -175,8 +181,8 @@ export interface GrowthSection {
   items: GrowthItem[];
 }
 
-/** 美食记录（收藏餐厅/美食，来源多为大众点评/美团） */
-export type FoodPlatform = "大众点评" | "美团" | "小红书" | "其他";
+/** 美食记录（收藏餐厅/美食，来源多为美团/小红书等） */
+export type FoodPlatform = "美团" | "小红书" | "其他" | "抖音";
 export type FoodStatus = "want" | "visited";
 
 export interface Food {
@@ -188,6 +194,8 @@ export interface Food {
   link?: string;
   /** 位置（商圈/地址） */
   location?: string;
+  /** 电话 */
+  phone?: string;
   /** 人均价格（元） */
   price?: number;
   note?: string;
@@ -198,12 +206,33 @@ export interface Food {
   /** 回购：会再去吃 */
   repurchase?: boolean;
   visitedAt?: string;
+  /** 多次就餐记录（吃一次记一条） */
+  visits?: FoodVisit[];
+  createdAt: string;
+}
+
+/** 一次就餐记录（同一家店可吃多次，跟日记可联合） */
+export interface FoodVisit {
+  id: string;
+  /** 就餐日期 YYYY-MM-DD */
+  date: string;
+  /** 就餐人数 */
+  people?: number;
+  /** 这顿总花费（元） */
+  cost?: number;
+  /** 感想 */
+  feeling?: string;
+  /** 图片 */
+  images?: string[];
+  /** 这顿评分 1-5（可选） */
+  rating?: number;
+  /** 联合日记：关联的 LifeRecord id */
+  diaryId?: string;
   createdAt: string;
 }
 
 /** 演出记录（演唱会/Livehouse/音乐节/话剧等） */
 export type ShowType = "演唱会" | "Livehouse" | "音乐节" | "话剧" | "其他";
-export type ShowStatus = "want" | "visited";
 
 export interface Show {
   id: string;
@@ -215,17 +244,17 @@ export interface Show {
   city?: string;
   /** 大麦/猫眼等链接 */
   link?: string;
-  /** 票价（元） */
+  /** 票价（元，单价/人均） */
   price?: number;
+  /** 同行人数（用于计算总花费） */
+  people?: number;
   note?: string;
   image?: string;
-  status: ShowStatus;
   rating?: number;
   /** 回购：还会再看 */
   repurchase?: boolean;
   /** 演出日期 */
   showAt?: string;
-  visitedAt?: string;
   createdAt: string;
 }
 

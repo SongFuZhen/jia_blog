@@ -92,15 +92,54 @@ export async function PATCH(
   if (!id) return NextResponse.json({ error: "missing id" }, { status: 400 });
 
   const patch = await req.json();
+
+  // 就餐记录（visits）用增量操作，避免客户端缓存覆盖服务端已有的条目
+  const rows0 = await getSql()`SELECT data FROM jia.collections WHERE name = ${name} AND id = ${id}`;
+  if (rows0.length === 0) {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
+  const base: Record<string, unknown> =
+    (rows0[0].data as Record<string, unknown>) ?? {};
+  let visits = Array.isArray(base.visits) ? (base.visits as Record<string, unknown>[]) : [];
+  let usedDelta = false;
+  if (patch.addVisit) {
+    visits = [...visits, patch.addVisit];
+    usedDelta = true;
+  }
+  if (patch.updateVisit) {
+    visits = visits.map((v: Record<string, unknown>) =>
+      v.id === patch.updateVisit.id ? { ...v, ...patch.updateVisit.changes } : v,
+    );
+    usedDelta = true;
+  }
+  if (patch.removeVisitId) {
+    visits = visits.filter((v: Record<string, unknown>) => v.id !== patch.removeVisitId);
+    usedDelta = true;
+  }
+
+  const rest = { ...patch };
+  delete rest.addVisit;
+  delete rest.updateVisit;
+  delete rest.removeVisitId;
+
+  // 图片保护：PATCH 携带的图片为 undefined（调用方未提供图片）时，
+  // 不要覆盖服务端已有的图片，避免陈旧缓存整体回写把图片抹掉。
+  // 显式传 null 仍视为「清空图片」，不受保护。
+  if (rest.image === undefined) {
+    rest.image = base.image as string | undefined;
+  }
+
+  // usedDelta 时以服务端 visits 为准；否则保持原浅合并行为
+  const finalData = usedDelta
+    ? { ...base, ...rest, visits }
+    : { ...base, ...rest };
+
   const rows = await getSql()`
     UPDATE jia.collections
-    SET data = data || ${JSON.stringify(patch)}::jsonb, updated_at = now()
+    SET data = ${JSON.stringify(finalData)}::jsonb, updated_at = now()
     WHERE name = ${name} AND id = ${id}
     RETURNING data
   `;
-  if (rows.length === 0) {
-    return NextResponse.json({ error: "not found" }, { status: 404 });
-  }
   return NextResponse.json(rows[0].data);
 }
 

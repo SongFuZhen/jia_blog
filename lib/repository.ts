@@ -22,6 +22,7 @@ import type {
   PrivateDiary,
   CopyLibrary,
 } from "@/lib/types";
+import type { ImportantDay } from "@/lib/important-days";
 import { PRIVATE_COLLECTIONS } from "@/lib/db-collections";
 import { DEFAULT_COPY_LIBRARY } from "@/lib/surprises";
 
@@ -143,13 +144,28 @@ export function createApiSingleRepository<T extends object>(
 ): SingleRepository<T> {
   return {
     async load() {
-      const items = await api<(T & Entity)[]>(name);
-      return items.find((item) => item.id === "default") ?? defaultValue;
+      const items = await api<(T & { id: string; value?: T })[]>(name);
+      const item = items.find((x) => x.id === "default");
+      if (!item) return defaultValue;
+      // 新格式：值存在 value 字段
+      if (item.value !== undefined) return item.value;
+      // 兼容旧数据：数组被展开成 { 0:.., 1:.., id } 的形式
+      const keys = Object.keys(item).filter((k) => k !== "id");
+      const isIndexed = keys.length > 0 && keys.every((k) => /^\d+$/.test(k));
+      if (isIndexed) {
+        return keys
+          .sort((a, b) => Number(a) - Number(b))
+          .map((k) => (item as unknown as Record<string, T>)[k]) as unknown as T;
+      }
+      // 兼容旧对象型数据（值直接存在 data 上，附带多余 id）
+      const rest = { ...item };
+      delete (rest as Record<string, unknown>).id;
+      return rest as unknown as T;
     },
     async save(value) {
       await api(name, {
         method: "POST",
-        body: JSON.stringify({ ...value, id: "default" }),
+        body: JSON.stringify({ id: "default", value }),
       });
     },
   };
@@ -213,3 +229,4 @@ export const copyRepo = createApiSingleRepository<CopyLibrary>(
   "copy-library",
   DEFAULT_COPY_LIBRARY,
 );
+export const importantDaysRepo = createApiRepository<ImportantDay>("important-days");

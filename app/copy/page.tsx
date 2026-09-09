@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Eye, Gift, Plus, X } from "lucide-react";
+import { Check, Eye, Gift } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
 import { useCopyStore } from "@/lib/stores/copy";
@@ -155,76 +155,6 @@ export default function CopyPage() {
           rows={Math.max(4, draft.surprises.length)}
           className="mt-2 w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] leading-relaxed text-ink outline-none"
         />
-      </section>
-
-      {/* 纪念日 */}
-      <section className="mt-3 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
-        <p className="text-[14px] font-semibold text-ink">纪念日</p>
-        <p className="mt-0.5 text-[11.5px] text-ink-4">
-          命中日期时，首页会显示纪念日惊喜
-        </p>
-        <div className="mt-3 space-y-2">
-          {draft.anniversaries.map((a, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <input
-                value={a.monthDay}
-                onChange={(e) =>
-                  setDraft((d) => {
-                    if (!d) return d;
-                    const anniversaries = d.anniversaries.map((x, xi) =>
-                      xi === i ? { ...x, monthDay: e.target.value } : x,
-                    );
-                    return { ...d, anniversaries };
-                  })
-                }
-                placeholder="10-07"
-                maxLength={5}
-                className="w-[84px] shrink-0 rounded-[10px] bg-field px-3 py-2 text-[12.5px] text-ink outline-none"
-              />
-              <input
-                value={a.label}
-                onChange={(e) =>
-                  setDraft((d) => {
-                    if (!d) return d;
-                    const anniversaries = d.anniversaries.map((x, xi) =>
-                      xi === i ? { ...x, label: e.target.value } : x,
-                    );
-                    return { ...d, anniversaries };
-                  })
-                }
-                placeholder="名称，如：在一起纪念日"
-                className="min-w-0 flex-1 rounded-[10px] bg-field px-3 py-2 text-[12.5px] text-ink outline-none"
-              />
-              <button
-                onClick={() =>
-                  setDraft((d) => {
-                    if (!d) return d;
-                    return { ...d, anniversaries: d.anniversaries.filter((_, xi) => xi !== i) };
-                  })
-                }
-                aria-label="删除纪念日"
-                className="shrink-0 text-ink-5 hover:text-[#E76F7B]"
-              >
-                <X className="size-4" strokeWidth={1.8} />
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={() =>
-              setDraft((d) => {
-                if (!d) return d;
-                return {
-                  ...d,
-                  anniversaries: [...d.anniversaries, { monthDay: "", label: "" }],
-                };
-              })
-            }
-            className="inline-flex items-center gap-1 rounded-full bg-field px-3 py-1.5 text-[11.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
-          >
-            <Plus className="size-3.5" strokeWidth={2} />
-            加一个纪念日
-          </button>
-        </div>
       </section>
     </main>
   );
