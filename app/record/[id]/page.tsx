@@ -1,20 +1,24 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Check,
   Copy,
+  ImagePlus,
   Loader2,
   Sparkles,
   Trash2,
   WandSparkles,
 } from "lucide-react";
 import { useRecordsStore } from "@/lib/stores/records";
+import { useFoodStore } from "@/lib/stores/food";
 import { useConfirm } from "@/lib/stores/confirm";
 import { generateXhsContent } from "@/lib/xiaohongshu";
 import { aiGenerateXhs, aiPolishDiary } from "@/app/actions";
+import { compressImage } from "@/lib/image";
+import { uploadImage } from "@/lib/upload";
 import type { Mood } from "@/lib/types";
 
 const moods: Mood[] = [
@@ -27,6 +31,27 @@ const moods: Mood[] = [
   "好困",
   "有成就感",
 ];
+
+/** 选择图片：压缩后上传图床，失败回退 base64 */
+async function pickImages(files: FileList | null): Promise<string[]> {
+  if (!files || files.length === 0) return [];
+  const urls: string[] = [];
+  for (const file of Array.from(files)) {
+    try {
+      const compressed = await compressImage(file);
+      let url = compressed;
+      try {
+        url = await uploadImage(compressed, "records");
+      } catch {
+        // 图床不可用回退 base64
+      }
+      urls.push(url);
+    } catch {
+      // 单张失败忽略
+    }
+  }
+  return urls;
+}
 
 export default function RecordPage({
   params,
@@ -49,7 +74,13 @@ export default function RecordPage({
     content: string;
     mood: Mood | null;
     tags: string;
+    images: string[];
   } | null>(null);
+
+  // 图片编辑（与美食就餐照片关联：改日记照片会同步到关联的就餐记录）
+  const [imgBusy, setImgBusy] = useState(false);
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
+  const imgFileRef = useRef<HTMLInputElement>(null);
 
   // AI 状态（override 绑定记录 id，切换记录时自然失效）
   const [xhsOverride, setXhsOverride] = useState<{
@@ -91,21 +122,43 @@ export default function RecordPage({
       content: record.content,
       mood: record.mood,
       tags: record.tags.join(" "),
+      images: [...record.images],
     });
     setEditing(true);
   }
 
   async function saveEdit() {
     if (!record || !form) return;
+    const tags = form.tags
+      .split(/[\s,，#]+/)
+      .map((t) => t.trim())
+      .filter(Boolean);
     await updateRecord(record.id, {
       title: form.title.trim() || "无标题",
       content: form.content.trim(),
       mood: form.mood,
-      tags: form.tags
-        .split(/[\s,，#]+/)
-        .map((t) => t.trim())
-        .filter(Boolean),
+      tags,
+      images: form.images,
     });
+    // 与美食就餐照片关联：找到关联就餐记录，同步图片，避免两边不一致
+    try {
+      const foodsState = useFoodStore.getState();
+      await foodsState.hydrate();
+      for (const f of foodsState.foods) {
+        const v = (f.visits ?? []).find((vis) => vis.diaryId === record.id);
+        if (v) {
+          await foodsState.update(f.id, {
+            updateVisit: {
+              id: v.id,
+              changes: { images: form.images.length ? form.images : undefined },
+            },
+          });
+          break;
+        }
+      }
+    } catch {
+      // 同步就餐照片失败不影响日记保存
+    }
     setEditing(false);
   }
 
@@ -278,6 +331,79 @@ export default function RecordPage({
               rows={6}
               className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] leading-relaxed text-ink outline-none"
             />
+            {/* 图片编辑：增 / 删 / 改，并同步到关联的美食就餐照片 */}
+            <div>
+              <p className="mb-1.5 px-1 text-[11.5px] text-ink-4">照片（与美食记录共用）</p>
+              <div className="grid grid-cols-3 gap-2">
+                {form.images.map((src, i) => (
+                  <div key={i} className="group relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={`照片 ${i + 1}`}
+                      className="aspect-square w-full rounded-[12px] object-cover"
+                    />
+                    <button
+                      onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })}
+                      aria-label="删除照片"
+                      className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/55 text-white hover:bg-black/75"
+                    >
+                      <Trash2 className="size-3.5" strokeWidth={2} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setReplacingIndex(i);
+                        imgFileRef.current?.click();
+                      }}
+                      className="absolute bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-full bg-black/55 px-2 py-[3px] text-[10.5px] text-white active:opacity-70"
+                    >
+                      <ImagePlus className="size-3" strokeWidth={2} />
+                      替换
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    setReplacingIndex(null);
+                    imgFileRef.current?.click();
+                  }}
+                  className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-[12px] border border-dashed border-[#E8C3CC] text-ink-4 transition-colors hover:bg-pink-soft/40 hover:text-[#E0697E]"
+                >
+                  {imgBusy ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <ImagePlus className="size-5" strokeWidth={1.8} />
+                  )}
+                  <span className="text-[10.5px]">加照片</span>
+                </button>
+              </div>
+              <input
+                ref={imgFileRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={async (e) => {
+                  const files = e.target.files;
+                  if (!files || files.length === 0) return;
+                  setImgBusy(true);
+                  try {
+                    const urls = await pickImages(files);
+                    if (replacingIndex != null) {
+                      const next = [...form.images];
+                      if (urls[0]) next[replacingIndex] = urls[0];
+                      setForm({ ...form, images: next });
+                    } else {
+                      setForm({ ...form, images: [...form.images, ...urls] });
+                    }
+                  } finally {
+                    setImgBusy(false);
+                    setReplacingIndex(null);
+                    if (imgFileRef.current) imgFileRef.current.value = "";
+                  }
+                }}
+              />
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {moods.map((m) => (
                 <button

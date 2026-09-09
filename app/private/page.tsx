@@ -461,7 +461,7 @@ export default function PrivatePage() {
                     if (ok) removeDiary(d.id);
                   }}
                   aria-label="删除"
-                  className="ml-auto text-ink-5 opacity-0 transition-opacity group-hover/diary:opacity-100 hover:text-[#E76F7B]"
+                  className="ml-auto shrink-0 text-ink-5 active:opacity-60"
                 >
                   <Trash2 className="size-3.5" strokeWidth={1.8} />
                 </button>
@@ -529,7 +529,7 @@ export default function PrivatePage() {
                     if (ok) removeSecret(s.id);
                   }}
                 aria-label="删除"
-                className="absolute top-2.5 right-1.5 text-ink-5 opacity-0 transition-opacity group-hover/secret:opacity-100 hover:text-[#E76F7B]"
+                className="absolute top-2.5 right-1.5 text-ink-5 active:opacity-60"
               >
                 <Trash2 className="size-3.5" strokeWidth={1.8} />
               </button>

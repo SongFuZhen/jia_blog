@@ -183,7 +183,7 @@ export default function InspirationPage() {
                       if (ok) remove(it.id);
                     }}
                     aria-label="删除"
-                    className="text-ink-5 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#E76F7B]"
+                    className="text-ink-5 active:opacity-60"
                   >
                     <Trash2 className="size-3.5" strokeWidth={1.8} />
                   </button>
