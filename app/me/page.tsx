@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   BarChart3,
   Bookmark,
+  CalendarDays,
   Cat,
   ChevronRight,
   History,
@@ -30,6 +31,7 @@ const menus = [
   { label: "回顾 · 月报年报", icon: BarChart3, href: "/review" },
   { label: "设置", icon: Settings, href: "/settings" },
   { label: "文案编辑", icon: PenLine, href: "/copy" },
+  { label: "重要日子", icon: CalendarDays, href: "/important-days" },
   { label: "帮助与关于", icon: Info, href: "/settings" },
 ];
 

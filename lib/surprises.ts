@@ -119,9 +119,13 @@ function greetingsFallbackLabel(weekday: number): string {
 }
 
 /** 今日小惊喜：纪念日优先，否则从文案库挑一条 */
-export function getSurprise(library: CopyLibrary, now = new Date()) {
+export function getSurprise(
+  library: CopyLibrary,
+  now = new Date(),
+  anniversaries: { monthDay: string; label: string }[] = library.anniversaries,
+) {
   const cn = cnNow(now);
-  const hit = library.anniversaries.find((a) => a.monthDay === cn.monthDay);
+  const hit = anniversaries.find((a) => a.monthDay === cn.monthDay);
   if (hit)
     return { text: `今天是我们的${hit.label}，纪念一下呀 ♡`, isAnniversary: true };
   const pool = library.surprises.length

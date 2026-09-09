@@ -6,6 +6,7 @@ import { Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Loading } from "@/components/loading";
 import { useRecordsStore } from "@/lib/stores/records";
+import { UpcomingDaysCard } from "@/components/upcoming-days-card";
 import type { LifeRecord, Mood } from "@/lib/types";
 
 type MoodTone = "pink" | "green" | "orange" | "purple";
@@ -57,6 +58,21 @@ const monthNames = [
 ];
 
 /** 连续记录天数：从最近一条往前数连续的自然日 */
+/** 中文年份信息：干支（如乙巳）、生肖（如蛇） */
+const TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+const DI_ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const ZODIAC = ["鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"];
+
+function yearInfo(year: number): { zodiac: string; ganzhi: string } {
+  const stem = TIAN_GAN[(((year - 4) % 10) + 10) % 10];
+  const branchIdx = (((year - 4) % 12) + 12) % 12;
+  const branch = DI_ZHI[branchIdx];
+  return {
+    zodiac: `${ZODIAC[branchIdx]}年`,
+    ganzhi: `${stem}${branch}年`,
+  };
+}
+
 function fmtLocalDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
@@ -142,6 +158,11 @@ export default function DiaryPage() {
         </div>
       </div>
 
+      {/* 未来一个月的重要日子（传统节日 + 生日 + 纪念日） */}
+      <div className="mt-3">
+        <UpcomingDaysCard />
+      </div>
+
       {/* 心情筛选 */}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {allMoods.map((m) => (
@@ -169,10 +190,17 @@ export default function DiaryPage() {
           </p>
         )
       ) : (
-        groups.map(([month, list]) => (
+        groups.map(([month, list]) => {
+          const year = month.slice(0, 4);
+          const monthLabel = monthNames[Number(month.slice(5, 7)) - 1];
+          const yInfo = yearInfo(Number(year));
+          return (
           <section key={month} className="mt-5">
-            <h2 className="px-1 text-[13px] font-semibold text-ink-3">
-              {monthNames[Number(month.slice(5, 7)) - 1]}
+            <h2 className="flex flex-wrap items-baseline gap-x-2 px-1 text-[13px] font-semibold text-ink-3">
+              <span>{monthLabel}</span>
+              <span className="text-[12px] font-normal text-ink-4">
+                {year}年 · {yInfo.ganzhi} · {yInfo.zodiac}
+              </span>
             </h2>
             <div className="mt-2.5 space-y-3">
               {list.map((e) => {
@@ -185,7 +213,7 @@ export default function DiaryPage() {
                   >
                     <div className="flex w-[44px] shrink-0 flex-col items-center justify-center rounded-[12px] bg-pink-soft py-2">
                       <span className="text-[15px] leading-none font-bold text-[#E0697E]">
-                        {e.createdAt.slice(5, 10)}
+                        {e.createdAt.slice(8, 10)}
                       </span>
                       <span className="mt-1 text-[11px] text-ink-4">
                         {weekdays[d.getDay()]}
@@ -209,12 +237,21 @@ export default function DiaryPage() {
                         {e.content}
                       </p>
                     </div>
+                    {e.images?.[0] && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={e.images[0]}
+                        alt=""
+                        className="size-[44px] shrink-0 self-center rounded-[12px] object-cover"
+                      />
+                    )}
                   </Link>
                 );
               })}
             </div>
           </section>
-        ))
+          );
+        })
       )}
     </main>
   );
