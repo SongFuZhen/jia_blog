@@ -105,7 +105,9 @@ export class XfyunIat {
     const ctx = new AudioContext({ sampleRate: 16000 });
     this.ctx = ctx;
     const source = ctx.createMediaStreamSource(this.stream);
-    const processor = ctx.createScriptProcessor(FRAME, 1, 1);
+    // 注意：ScriptProcessor 的 bufferSize 必须是 256~16384 的 2 的幂
+    // （640 不是），这里用 4096，内部仍按 640 样本分帧发给讯飞
+    const processor = ctx.createScriptProcessor(4096, 1, 1);
     this.source = source;
     this.processor = processor;
     processor.onaudioprocess = (ev) => {
