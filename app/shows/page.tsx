@@ -347,24 +347,30 @@ export default function ShowsPage() {
               onChange={(e) => setForm({ ...form, showAt: e.target.value })}
               className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] text-ink outline-none"
             />
-            <input
-              value={form.price}
-              onChange={(e) =>
-                setForm({ ...form, price: e.target.value.replace(/[^\d.]/g, "") })
-              }
-              placeholder="单价 ¥"
-              inputMode="decimal"
-              className="w-[88px] shrink-0 rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] text-ink outline-none"
-            />
-            <input
-              value={form.people}
-              onChange={(e) =>
-                setForm({ ...form, people: e.target.value.replace(/[^\d]/g, "") })
-              }
-              placeholder="人数"
-              inputMode="numeric"
-              className="w-[76px] shrink-0 rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] text-ink outline-none"
-            />
+            <div className="relative w-[96px] shrink-0">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[12.5px] text-ink/50">¥</span>
+              <input
+                value={form.price}
+                onChange={(e) =>
+                  setForm({ ...form, price: e.target.value.replace(/[^\d.]/g, "") })
+                }
+                placeholder="单价"
+                inputMode="decimal"
+                className="w-full rounded-[12px] bg-field py-2.5 pl-6 pr-2 text-[12.5px] text-ink outline-none"
+              />
+            </div>
+            <div className="relative w-[84px] shrink-0">
+              <input
+                value={form.people}
+                onChange={(e) =>
+                  setForm({ ...form, people: e.target.value.replace(/[^\d]/g, "") })
+                }
+                placeholder="人数"
+                inputMode="numeric"
+                className="w-full rounded-[12px] bg-field py-2.5 pl-3 pr-6 text-[12.5px] text-ink outline-none"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[12.5px] text-ink/50">人</span>
+            </div>
           </div>
           <input
             value={form.link}

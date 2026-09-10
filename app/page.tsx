@@ -3,6 +3,7 @@ import { Hero } from "@/components/home/hero";
 import { PrivateCard } from "@/components/home/private-card";
 import { QuickEntries } from "@/components/home/quick-entries";
 import { TodaySurprise } from "@/components/home/today-surprise";
+import { UpcomingDays } from "@/components/home/upcoming-days";
 
 export default function Home() {
   return (
@@ -18,6 +19,9 @@ export default function Home() {
 
         {/* 专属私密空间 */}
         <PrivateCard />
+
+        {/* 未来一个月的重要日子（传统节日 + 生日 + 纪念日） */}
+        <UpcomingDays />
 
         {/* 页脚手写标语（取自设计稿） */}
         <footer className="mt-6 pb-2 flex justify-center">
