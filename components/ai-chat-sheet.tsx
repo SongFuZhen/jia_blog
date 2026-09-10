@@ -1,53 +1,109 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { Check, Mic, X } from "lucide-react";
+import { Mic, X } from "lucide-react";
 import { XfyunIat } from "@/lib/xfyun-speech";
-import { useRecordsStore } from "@/lib/stores/records";
+import { XfyunSpark, type SparkMessage } from "@/lib/xfyun-spark";
 
-export function VoiceMemoSheet({
+const SYSTEM_PROMPT =
+  "你是小佳佳的生活助理，语气温柔可爱，像她的好朋友。用简体中文，简短回复，适当用 emoji。";
+
+type Msg = { id: string; role: "user" | "assistant"; content: string };
+
+function uid() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+export function AiChatSheet({
   open,
   onClose,
 }: {
   open: boolean;
   onClose: () => void;
 }) {
-  const [draft, setDraft] = useState(""); // 实时转写预览
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [recording, setRecording] = useState(false);
-  const [saved, setSaved] = useState<string | null>(null); // 最近一次保存的内容
+  const [draft, setDraft] = useState(""); // 实时识别预览
+  const [busy, setBusy] = useState(false); // AI 思考/流式回复中
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false); // 保存中
 
   const iatRef = useRef<XfyunIat | null>(null);
-  const finalRef = useRef("");
-  const addRecord = useRecordsStore((s) => s.addRecord);
+  const sparkRef = useRef<XfyunSpark | null>(null);
+  const finalRef = useRef(""); // 识别最终文本
+  const messagesRef = useRef<Msg[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // 每次打开新会话，并直接进入「听」的状态
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // 每次打开都是新会话，并直接进入「听」的状态，点开就能说
   useEffect(() => {
     if (open) {
+      setMessages([]);
       setDraft("");
       setError(null);
-      setSaved(null);
+      setBusy(false);
       setRecording(false);
       startRecording();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // 滚到底
   useEffect(() => {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [draft, saved, recording]);
+  }, [messages, draft, busy]);
 
-  // 关闭时释放麦克风
+  // 关闭时释放资源
   useEffect(() => {
     if (!open) {
       iatRef.current?.stop();
       iatRef.current = null;
+      sparkRef.current?.close();
+      sparkRef.current = null;
     }
   }, [open]);
+
+  function send(text: string) {
+    const history: SparkMessage[] = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...messagesRef.current.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+      { role: "user", content: text },
+    ];
+
+    const aiId = uid();
+    setMessages((prev) => [
+      ...prev,
+      { id: uid(), role: "user", content: text },
+      { id: aiId, role: "assistant", content: "" },
+    ]);
+    setBusy(true);
+
+    const spark = new XfyunSpark();
+    sparkRef.current = spark;
+    spark.chat(history, {
+      onDelta: (d) =>
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, content: m.content + d } : m)),
+        ),
+      onDone: () => setBusy(false),
+      onError: (m) => {
+        setBusy(false);
+        setMessages((prev) =>
+          prev.map((mm) =>
+            mm.id === aiId
+              ? { ...mm, content: mm.content || `（${m}）` }
+              : mm,
+          ),
+        );
+      },
+    });
+  }
 
   function startRecording() {
     setError(null);
@@ -68,41 +124,18 @@ export function VoiceMemoSheet({
     });
   }
 
-  async function stopAndSave() {
+  function stopAndSend() {
     iatRef.current?.stop();
     iatRef.current = null;
     setRecording(false);
     const text = finalRef.current.trim();
     setDraft("");
-    if (!text) {
-      setError("没听清，再说一遍～");
-      return;
-    }
-    setBusy(true);
-    try {
-      const title = text.split(/[。！？\n]/)[0].slice(0, 20) || "语音速记";
-      await addRecord({
-        type: "diary",
-        title,
-        content: text,
-        images: [],
-        mood: null,
-        tags: [],
-        visibility: "私人收藏",
-        draft: false,
-        createdAt: new Date().toISOString(),
-      });
-      setSaved(text);
-    } catch {
-      setError("保存失败了，网络好像不太顺，再试一次～");
-    } finally {
-      setBusy(false);
-    }
+    if (text) send(text);
   }
 
   function toggleMic() {
     if (busy) return;
-    if (recording) stopAndSave();
+    if (recording) stopAndSend();
     else startRecording();
   }
 
@@ -118,8 +151,11 @@ export function VoiceMemoSheet({
         <div className="flex max-h-[88vh] flex-col rounded-t-[28px] bg-white dark:bg-[#231B1E] px-5 pt-3 pb-7 shadow-[var(--shadow-soft-lg)]">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border-strong" />
 
+          {/* 头部 */}
           <div className="flex items-center justify-between px-0.5">
-            <p className="text-[15px] font-semibold text-ink">语音速记</p>
+            <p className="text-[15px] font-semibold text-ink">
+              小佳佳的 AI 小助手
+            </p>
             <button
               onClick={onClose}
               aria-label="关闭"
@@ -129,36 +165,38 @@ export function VoiceMemoSheet({
             </button>
           </div>
 
+          {/* 消息列表 */}
           <div
             ref={listRef}
             className="mt-3 min-h-[160px] flex-1 space-y-3 overflow-y-auto pb-1"
           >
-            {!saved && !recording && !draft && (
+            {messages.length === 0 && !recording && (
               <p className="mt-10 text-center text-[13px] text-ink-4">
-                点下面的麦克风，想到什么就说～
-                <br />
-                说完自动存进「我的日记」
+                点下面的麦克风，跟我说点什么吧～
               </p>
             )}
 
-            {saved && (
-              <div className="flex justify-start">
-                <div className="max-w-[82%] rounded-[16px] rounded-tl-[6px] bg-cream px-3.5 py-2.5">
-                  <p className="flex items-center gap-1 text-[11.5px] font-medium text-[#4E9A6E]">
-                    <Check className="size-3.5" strokeWidth={2.4} /> 已记下
+            {messages.map((m) =>
+              m.role === "user" ? (
+                <div key={m.id} className="flex justify-end">
+                  <p className="max-w-[78%] whitespace-pre-wrap rounded-[16px] rounded-tr-[6px] bg-[#F16D88] px-3.5 py-2.5 text-[13.5px] leading-relaxed text-white">
+                    {m.content}
                   </p>
-                  <p className="mt-1 whitespace-pre-wrap text-[13.5px] leading-relaxed text-ink">
-                    {saved}
-                  </p>
-                  <Link
-                    href="/diary"
-                    onClick={onClose}
-                    className="mt-2 inline-block text-[12px] font-medium text-[#F16D88]"
-                  >
-                    去日记看看 →
-                  </Link>
                 </div>
-              </div>
+              ) : (
+                <div key={m.id} className="flex justify-start">
+                  <p className="max-w-[82%] whitespace-pre-wrap rounded-[16px] rounded-tl-[6px] bg-cream px-3.5 py-2.5 text-[13.5px] leading-relaxed text-ink">
+                    {m.content ||
+                      (busy ? (
+                        <span className="inline-flex gap-1">
+                          <Dot /> <Dot delay={150} /> <Dot delay={300} />
+                        </span>
+                      ) : (
+                        "…"
+                      ))}
+                  </p>
+                </div>
+              ),
             )}
 
             {recording && draft && (
@@ -174,11 +212,12 @@ export function VoiceMemoSheet({
             )}
           </div>
 
+          {/* 麦克风按钮 */}
           <div className="mt-4 flex flex-col items-center">
             <button
               onClick={toggleMic}
               disabled={busy}
-              aria-label={recording ? "结束并保存" : "开始说话"}
+              aria-label={recording ? "结束说话" : "开始说话"}
               className={`flex size-[60px] items-center justify-center rounded-full transition-all duration-200 ${
                 recording
                   ? "bg-[#E5484D] text-white shadow-[0_6px_18px_rgba(229,72,77,0.4)]"
@@ -189,16 +228,23 @@ export function VoiceMemoSheet({
             </button>
             <p className="mt-2 text-[12px] text-ink-4">
               {busy
-                ? "正在保存…"
+                ? "小助手正在想…"
                 : recording
-                  ? "点一下结束，自动保存"
-                  : saved
-                    ? "再说一条"
-                    : "点一下，开始说"}
+                  ? "点一下结束，自动发送"
+                  : "点一下，开始说"}
             </p>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function Dot({ delay = 0 }: { delay?: number }) {
+  return (
+    <span
+      className="inline-block size-1.5 animate-bounce rounded-full bg-ink-4"
+      style={{ animationDelay: `${delay}ms` }}
+    />
   );
 }

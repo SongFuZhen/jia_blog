@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookHeart, House, Mic, UserRound, WandSparkles } from "lucide-react";
 import { useState } from "react";
-import { VoiceMemoSheet } from "@/components/voice-memo-sheet";
+import { AiChatSheet } from "@/components/ai-chat-sheet";
 
 const navLeft = [
   { label: "首页", icon: House, href: "/", fill: true },
@@ -76,10 +76,10 @@ export function BottomNav() {
             />
           ))}
 
-          {/* 中央语音速记入口：山丘造型，凸出 1/3 */}
+          {/* 中央 AI 语音对话入口：山丘造型，凸出 1/3 */}
           <button
             onClick={() => setAiOpen(true)}
-            aria-label="语音速记"
+            aria-label="AI 聊天"
             className="relative mx-1 flex size-[46px] shrink-0 -translate-y-[14px] items-center justify-center rounded-[50%_50%_46%_54%/64%_64%_36%_36%] border-2 border-white bg-gradient-to-b from-[#FF92A8] to-[#F16D88] text-white shadow-[0_6px_16px_rgba(242,111,134,0.42)] transition-all duration-300 ease-out hover:scale-105 active:scale-95"
           >
             <Mic strokeWidth={2.4} className="size-5" />
@@ -93,7 +93,7 @@ export function BottomNav() {
             />
           ))}
 
-          <VoiceMemoSheet open={aiOpen} onClose={() => setAiOpen(false)} />
+          <AiChatSheet open={aiOpen} onClose={() => setAiOpen(false)} />
         </div>
       </div>
     </nav>
