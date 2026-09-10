@@ -23,7 +23,7 @@ export interface SparkHandlers {
   onError: (msg: string) => void;
 }
 
-const HOST = "spark-api.xfyun.cn";
+const HOST = "spark-api.xf-yun.com";
 const PATH = "/v3.1/chat";
 
 function toBase64(bytes: Uint8Array): string {
@@ -53,7 +53,7 @@ async function buildWsUrl(
   const date = new Date().toUTCString();
   const signatureOrigin = `host: ${HOST}\ndate: ${date}\nGET ${PATH} HTTP/1.1`;
   const signature = toBase64(await hmacSha256(apiSecret, signatureOrigin));
-  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date authorization", signature="${signature}"`;
+  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
   const authorization = toBase64(new TextEncoder().encode(authorizationOrigin));
   return `wss://${HOST}${PATH}?authorization=${encodeURIComponent(authorization)}&date=${encodeURIComponent(date)}&host=${encodeURIComponent(HOST)}`;
 }
