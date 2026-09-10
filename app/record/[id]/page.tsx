@@ -404,12 +404,12 @@ export default function RecordPage({
                 }}
               />
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {moods.map((m) => (
                 <button
                   key={m}
                   onClick={() => setForm({ ...form, mood: form.mood === m ? null : m })}
-                  className={`rounded-full px-3 py-1.5 text-[12.5px] transition-colors ${
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-[12.5px] transition-colors ${
                     form.mood === m
                       ? "bg-pink-soft font-medium text-[#E0697E]"
                       : "bg-cream text-ink-3"

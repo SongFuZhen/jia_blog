@@ -404,12 +404,12 @@ export default function PrivatePage() {
             className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13px] leading-relaxed outline-none placeholder:text-ink-5"
           />
           <div className="mt-2 flex items-center justify-between">
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {moods.map((m) => (
                 <button
                   key={m}
                   onClick={() => setDiaryMood(diaryMood === m ? null : m)}
-                  className={`rounded-full px-2.5 py-1 text-[11px] transition-colors ${
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] transition-colors ${
                     diaryMood === m
                       ? "bg-pink-soft font-medium text-[#E0697E]"
                       : "bg-cream text-ink-3"

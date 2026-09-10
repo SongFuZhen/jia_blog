@@ -2,9 +2,7 @@ import Image from "next/image";
 import { Hero } from "@/components/home/hero";
 import { PrivateCard } from "@/components/home/private-card";
 import { QuickEntries } from "@/components/home/quick-entries";
-import { RecentPosts } from "@/components/home/recent-posts";
 import { TodaySurprise } from "@/components/home/today-surprise";
-import { UpcomingDays } from "@/components/home/upcoming-days";
 
 export default function Home() {
   return (
@@ -18,12 +16,8 @@ export default function Home() {
         {/* 今日小惊喜 + 今日待办，与快捷入口同一组 */}
         <TodaySurprise />
 
-        <UpcomingDays />
-
         {/* 专属私密空间 */}
         <PrivateCard />
-
-        <RecentPosts />
 
         {/* 页脚手写标语（取自设计稿） */}
         <footer className="mt-6 pb-2 flex justify-center">

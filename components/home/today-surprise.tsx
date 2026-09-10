@@ -7,7 +7,6 @@ import { useCopyStore } from "@/lib/stores/copy";
 import { useImportantDaysStore } from "@/lib/stores/important-days";
 import { getSurprise } from "@/lib/surprises";
 import { toSolarMonthDay } from "@/lib/important-days";
-import { TodayTasks } from "@/components/home/today-tasks";
 import type { Mood } from "@/lib/types";
 
 /** 今日小惊喜 + 今日待办 + 本月心情统计 */
@@ -80,9 +79,6 @@ export function TodaySurprise() {
           </p>
         </div>
       </div>
-
-      {/* 今日待办（与惊喜同一张区块，来自「慢慢变好」） */}
-      <TodayTasks />
 
       {/* 本月心情统计（有数据才显示） */}
       {monthRecords.length > 0 && (
