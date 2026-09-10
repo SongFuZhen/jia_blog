@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookHeart, House, UserRound, WandSparkles } from "lucide-react";
+import { BookHeart, House, Mic, UserRound, WandSparkles } from "lucide-react";
+import { useState } from "react";
+import { AiChatSheet } from "@/components/ai-chat-sheet";
 
 const navLeft = [
   { label: "首页", icon: House, href: "/", fill: true },
@@ -60,6 +62,7 @@ function NavItem({
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [aiOpen, setAiOpen] = useState(false);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50">
@@ -73,6 +76,15 @@ export function BottomNav() {
             />
           ))}
 
+          {/* 中央 AI 语音助手入口：山丘造型，凸出 1/3 */}
+          <button
+            onClick={() => setAiOpen(true)}
+            aria-label="AI 聊天"
+            className="relative mx-1 flex size-[46px] shrink-0 -translate-y-[14px] items-center justify-center rounded-[50%_50%_46%_54%/64%_64%_36%_36%] border-2 border-white bg-gradient-to-b from-[#FF92A8] to-[#F16D88] text-white shadow-[0_6px_16px_rgba(242,111,134,0.42)] transition-all duration-300 ease-out hover:scale-105 active:scale-95"
+          >
+            <Mic strokeWidth={2.4} className="size-5" />
+          </button>
+
           {navRight.map((item) => (
             <NavItem
               key={item.href}
@@ -80,6 +92,8 @@ export function BottomNav() {
               active={pathname.startsWith(item.href)}
             />
           ))}
+
+          <AiChatSheet open={aiOpen} onClose={() => setAiOpen(false)} />
         </div>
       </div>
     </nav>
