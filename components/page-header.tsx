@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
@@ -7,11 +8,14 @@ export function PageHeader({
   title,
   subtitle,
   back = true,
+  action,
 }: {
   title: string;
   subtitle?: string;
   /** 默认显示返回按钮（首页不用 PageHeader）；传 false 可关闭 */
   back?: boolean;
+  /** 标题右侧的操作区，一般放「新增」按钮 */
+  action?: ReactNode;
 }) {
   const router = useRouter();
 
@@ -35,7 +39,7 @@ export function PageHeader({
           <ArrowLeft className="size-4.5" strokeWidth={1.8} />
         </button>
       )}
-      <div>
+      <div className="min-w-0 flex-1">
         <h1 className="text-[22px] font-bold text-ink">{title}</h1>
         {subtitle && (
           <p className="font-display mt-1.5 text-[15px] text-ink-3">
@@ -43,6 +47,7 @@ export function PageHeader({
           </p>
         )}
       </div>
+      {action && <div className="shrink-0">{action}</div>}
     </header>
   );
 }

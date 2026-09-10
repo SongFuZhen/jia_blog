@@ -4,13 +4,18 @@ import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { Check, ChevronRight, ListChecks, Repeat } from "lucide-react";
 import { useGrowthStore } from "@/lib/stores/growth";
+import { currentStreak, todayStatus } from "@/lib/habit";
 import { todayLocal } from "@/lib/time";
 import type { GrowthItem } from "@/lib/types";
 
 interface Task extends GrowthItem {
   sectionTitle: string;
-  /** 已逾期天数（0=今天到期，undefined=无截止日） */
+  /** 已逾期天数（0=今天到期） */
   overdueDays?: number;
+  /** 循环任务距离截止日还剩几天（undefined=非循环任务或没设截止日） */
+  daysLeft?: number;
+  /** 循环任务已连续打卡天数 */
+  streak?: number;
 }
 
 function daysBetween(from: string, to: string): number {
@@ -25,6 +30,7 @@ export function TodayTasks() {
   const hydrated = useGrowthStore((s) => s.hydrated);
   const hydrate = useGrowthStore((s) => s.hydrate);
   const toggle = useGrowthStore((s) => s.toggle);
+  const logCheck = useGrowthStore((s) => s.logCheck);
 
   useEffect(() => {
     hydrate();
@@ -37,20 +43,28 @@ export function TodayTasks() {
     for (const section of sections) {
       for (const item of section.items) {
         if (item.done) continue;
-        if (item.due) {
-          if (item.due > today) continue; // 还没到日子
+        if (item.repeat) {
+          // 循环任务每天都做，截止日只表示「做到哪天为止」，未来截止日不该把它藏起来
+          if (todayStatus(item, today)) continue; // 今天已经记过一笔了
+          const left = item.due ? daysBetween(today, item.due) : undefined;
+          list.push({
+            ...item,
+            sectionTitle: section.title,
+            overdueDays: left != null && left < 0 ? -left : 0,
+            daysLeft: left,
+            streak: currentStreak(item, today),
+          });
+        } else if (item.due && item.due <= today) {
+          // 一次性任务：今天到期或已逾期才算今日待办
           list.push({
             ...item,
             sectionTitle: section.title,
             overdueDays: daysBetween(item.due, today),
           });
-        } else if (item.repeat) {
-          // 循环任务没有截止日，也算今天的待办
-          list.push({ ...item, sectionTitle: section.title });
         }
       }
     }
-    // 逾期的排前面，其次今天到期，最后循环任务
+    // 逾期越久排越前
     return list
       .sort((a, b) => (b.overdueDays ?? -1) - (a.overdueDays ?? -1))
       .slice(0, 5);
@@ -75,14 +89,23 @@ export function TodayTasks() {
       </div>
       <div className="space-y-2">
         {tasks.map((t) => (
-          <button
+          <div
             key={t.id}
-            onClick={() => toggle(t.sectionTitle, t.id)}
-            className="flex w-full items-center gap-3 rounded-[16px] bg-card px-3.5 py-3 text-left shadow-[var(--shadow-soft-sm)] active:opacity-60"
+            className="flex items-center gap-3 rounded-[16px] bg-card px-3.5 py-3 shadow-[var(--shadow-soft-sm)]"
           >
-            <span className="flex size-[22px] shrink-0 items-center justify-center rounded-full border border-toggle-off bg-white dark:bg-card">
-              {/* 未完成的空心圈：点一下即完成 */}
-            </span>
+            <button
+              aria-label={t.repeat ? "记一笔做了" : "完成"}
+              onClick={() =>
+                t.repeat
+                  ? logCheck(t.sectionTitle, t.id, today, "done")
+                  : toggle(t.sectionTitle, t.id)
+              }
+              className="flex size-9 shrink-0 items-center justify-center active:opacity-60"
+            >
+              <span className="flex size-[22px] items-center justify-center rounded-full border border-toggle-off bg-white dark:bg-card">
+                {/* 未完成的空心圈：点一下即完成 */}
+              </span>
+            </button>
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-1.5">
                 <span className="truncate text-[14px] font-medium text-ink">
@@ -94,13 +117,26 @@ export function TodayTasks() {
               </span>
               <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ink-4">
                 {t.sectionTitle}
-                {t.overdueDays != null && t.overdueDays > 0 && (
+                {t.streak ? (
+                  <span className="text-[#4E9A6E]">连续 {t.streak} 天</span>
+                ) : null}
+                {t.overdueDays ? (
                   <span className="text-[#E5484D]">逾期 {t.overdueDays} 天</span>
-                )}
+                ) : null}
+                {t.daysLeft ? <span>还剩 {t.daysLeft} 天</span> : null}
               </span>
             </span>
-            <Check className="size-4 shrink-0 text-ink-5" strokeWidth={2} />
-          </button>
+            {t.repeat ? (
+              <button
+                onClick={() => logCheck(t.sectionTitle, t.id, today, "skip")}
+                className="shrink-0 rounded-full bg-field px-3 py-2 text-[11.5px] text-ink-3 active:opacity-60"
+              >
+                没做
+              </button>
+            ) : (
+              <Check className="size-4 shrink-0 text-ink-5" strokeWidth={2} />
+            )}
+          </div>
         ))}
       </div>
     </div>

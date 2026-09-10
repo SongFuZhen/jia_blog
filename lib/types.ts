@@ -163,17 +163,34 @@ export interface PrivateDiary {
   mood?: Mood;
 }
 
+/** 循环任务某一天的打卡结果 */
+export type CheckStatus = "done" | "skip";
+
+/** 「看今日」热点来源 */
+export type HotSource = "weibo" | "toutiao" | "baidu" | "zhihu" | "x" | "reddit";
+
+/** 「看今日」一条热点：标题 + 原文链接 + 热度/摘要 */
+export interface HotItem {
+  title: string;
+  url: string;
+  hot?: string;
+  desc?: string;
+}
+
 /** 成长清单 */
 export interface GrowthItem {
   id: string;
   text: string;
+  /** 仅一次性任务使用；循环任务的当天状态一律看 log */
   done: boolean;
-  /** 循环任务：勾选完成后自动生成一条新的待办副本，让习惯一直转下去 */
+  /** 循环任务：每天记一笔「做了 / 没做」，不做完也一直留在清单里 */
   repeat?: boolean;
-  /** 循环任务已完成的次数（每完成一次 +1，随副本传递下去） */
+  /** 改成打卡前累计完成的次数（历史基线，累计次数由 totalChecks 现算） */
   cycleCount?: number;
-  /** 截止日期 YYYY-MM-DD（循环任务的新副本会继承同一截止日） */
+  /** 截止日期 YYYY-MM-DD（循环任务表示「做到哪天为止」） */
   due?: string;
+  /** 循环任务打卡日志：YYYY-MM-DD → 做了/没做；中间空白天在渲染时推导为「没做」，不写库 */
+  log?: Record<string, CheckStatus>;
 }
 export interface GrowthSection {
   title: string;
@@ -231,8 +248,8 @@ export interface FoodVisit {
   createdAt: string;
 }
 
-/** 演出记录（演唱会/Livehouse/音乐节/话剧等） */
-export type ShowType = "演唱会" | "Livehouse" | "音乐节" | "话剧" | "其他";
+/** 演出 / 出行记录（演唱会/Livehouse/音乐节/话剧/旅游等） */
+export type ShowType = "演唱会" | "Livehouse" | "音乐节" | "话剧" | "旅游" | "其他";
 
 export interface Show {
   id: string;
@@ -249,7 +266,7 @@ export interface Show {
   /** 同行人数（用于计算总花费） */
   people?: number;
   note?: string;
-  image?: string;
+  images?: string[];
   rating?: number;
   /** 回购：还会再看 */
   repurchase?: boolean;

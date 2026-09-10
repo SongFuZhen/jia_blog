@@ -11,11 +11,10 @@ import {
   History,
   Info,
   Lock,
-  Mic2,
   NotebookPen,
   PenLine,
   Settings,
-  UtensilsCrossed,
+  Sprout,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { useRecordsStore } from "@/lib/stores/records";
@@ -25,13 +24,12 @@ import { useBeautyStore } from "@/lib/stores/beauty";
 const menus = [
   { label: "我的草稿", icon: NotebookPen, href: "/drafts" },
   { label: "时光轴", icon: History, href: "/timeline" },
-  { label: "美食记录", icon: UtensilsCrossed, href: "/food" },
-  { label: "演出记录", icon: Mic2, href: "/shows" },
   { label: "我的收藏", icon: Bookmark, href: "/inspiration" },
+  { label: "成长清单", icon: Sprout, href: "/growth" },
   { label: "回顾 · 月报年报", icon: BarChart3, href: "/review" },
-  { label: "设置", icon: Settings, href: "/settings" },
   { label: "文案编辑", icon: PenLine, href: "/copy" },
   { label: "重要日子", icon: CalendarDays, href: "/important-days" },
+  { label: "设置", icon: Settings, href: "/settings" },
   { label: "帮助与关于", icon: Info, href: "/settings" },
 ];
 

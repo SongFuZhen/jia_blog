@@ -148,7 +148,26 @@ export default function ImportantDaysPage() {
   if (!hydrated) {
     return (
       <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
-        <PageHeader title="重要日子" subtitle="每一年的重要时刻" />
+        <PageHeader
+          title="重要日子"
+          subtitle="每一年的重要时刻"
+          action={
+            <button
+              onClick={() => {
+                if (showForm) {
+                  setShowForm(false);
+                  setEditingId(null);
+                } else {
+                  startAdd();
+                }
+              }}
+              className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
+            >
+              <Plus className="size-3.5" strokeWidth={2} />
+              {showForm ? "收起" : "加一个重要日子"}
+            </button>
+          }
+        />
         <Loading />
       </main>
     );
@@ -446,16 +465,6 @@ export default function ImportantDaysPage() {
             </button>
           </div>
         </div>
-      )}
-
-      {!showForm && (
-        <button
-          onClick={startAdd}
-          className="mt-4 inline-flex w-full items-center justify-center gap-1 rounded-[16px] border border-dashed border-[#E8C3CC] py-2.5 text-[13px] font-medium text-[#E0697E] transition-colors hover:bg-pink-soft/40"
-        >
-          <Plus className="size-3.5" strokeWidth={2} />
-          加一个重要日子
-        </button>
       )}
     </main>
   );

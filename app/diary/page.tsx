@@ -2,11 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Check, Repeat, Sparkles } from "lucide-react";
+import { HabitDots } from "@/components/habit-dots";
 import { PageHeader } from "@/components/page-header";
 import { Loading } from "@/components/loading";
 import { useRecordsStore } from "@/lib/stores/records";
+import { useGrowthStore } from "@/lib/stores/growth";
 import { UpcomingDaysCard } from "@/components/upcoming-days-card";
+import { currentStreak, habitsOf, last7Days, todayStatus } from "@/lib/habit";
+import { todayLocal } from "@/lib/time";
 import type { LifeRecord, Mood } from "@/lib/types";
 
 type MoodTone = "pink" | "green" | "orange" | "purple";
@@ -100,9 +104,14 @@ export default function DiaryPage() {
   const hydrate = useRecordsStore((s) => s.hydrate);
   const [moodFilter, setMoodFilter] = useState<Mood | "全部">("全部");
 
+  const sections = useGrowthStore((s) => s.sections);
+  const hydrateGrowth = useGrowthStore((s) => s.hydrate);
+  const logCheck = useGrowthStore((s) => s.logCheck);
+
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+    hydrateGrowth();
+  }, [hydrate, hydrateGrowth]);
 
   const filtered = useMemo(
     () =>
@@ -127,6 +136,9 @@ export default function DiaryPage() {
   }, [filtered]);
 
   const now = new Date();
+  const today = todayLocal();
+  const habits = useMemo(() => habitsOf(sections), [sections]);
+  const habitDone = habits.filter((h) => todayStatus(h, today) === "done").length;
   const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const monthCount = records.filter(
     (r) => !r.draft && r.createdAt.startsWith(monthPrefix),
@@ -157,6 +169,81 @@ export default function DiaryPage() {
           </p>
         </div>
       </div>
+
+      {/* 今日习惯打卡：写日记前先把今天做了没做记一笔 */}
+      {habits.length > 0 && (
+        <section className="mt-3 rounded-[20px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+          <div className="flex items-center justify-between px-0.5">
+            <p className="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink">
+              <Repeat className="size-4 text-[#E0697E]" strokeWidth={1.8} />
+              今日习惯打卡
+            </p>
+            <span className="text-[11.5px] text-ink-4">
+              做了 {habitDone} / {habits.length}
+            </span>
+          </div>
+          <div className="mt-3 space-y-3">
+            {habits.map((h) => {
+              const status = todayStatus(h, today);
+              const streak = currentStreak(h, today);
+              return (
+                <div key={h.id} className="flex items-center gap-2.5">
+                  <button
+                    aria-label="记一笔做了"
+                    onClick={() => logCheck(h.sectionTitle, h.id, today, "done")}
+                    className="flex size-8 shrink-0 items-center justify-center active:opacity-60"
+                  >
+                    <span
+                      className={`flex size-[22px] items-center justify-center rounded-full border transition-colors ${
+                        status === "done"
+                          ? "border-[#F16D88] bg-[#F16D88] text-white"
+                          : "border-toggle-off bg-white dark:bg-card"
+                      }`}
+                    >
+                      {status === "done" && (
+                        <Check className="size-3" strokeWidth={3} />
+                      )}
+                    </span>
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13.5px] font-medium text-ink">
+                      {h.text}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <HabitDots cells={last7Days(h, today)} today={today} />
+                      <span
+                        className={`text-[11px] ${
+                          status === "skip"
+                            ? "text-[#E5484D]"
+                            : streak > 0
+                              ? "text-[#4E9A6E]"
+                              : "text-ink-4"
+                        }`}
+                      >
+                        {status === "skip"
+                          ? "今天记了没做"
+                          : streak > 0
+                            ? `连续 ${streak} 天`
+                            : "今天还没打卡"}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => logCheck(h.sectionTitle, h.id, today, "skip")}
+                    className={`shrink-0 rounded-full px-3 py-2 text-[11.5px] active:opacity-60 ${
+                      status === "skip"
+                        ? "bg-[#E5484D] text-white"
+                        : "bg-field text-ink-3"
+                    }`}
+                  >
+                    没做
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* 未来一个月的重要日子（传统节日 + 生日 + 纪念日） */}
       <div className="mt-3">

@@ -10,9 +10,17 @@ import { useRecordsStore } from "@/lib/stores/records";
 import { compressImage } from "@/lib/image";
 import { uploadImage } from "@/lib/upload";
 import { nowLocalISO, todayLocal } from "@/lib/time";
+import { parseShowText } from "@/lib/parse-show";
 import type { Show, ShowType } from "@/lib/types";
 
-const showTypes: ShowType[] = ["演唱会", "Livehouse", "音乐节", "话剧", "其他"];
+const showTypes: ShowType[] = [
+  "演唱会",
+  "Livehouse",
+  "音乐节",
+  "话剧",
+  "旅游",
+  "其他",
+];
 
 export default function ShowsPage() {
   const { shows, hydrated, hydrate, add, update, remove } = useShowStore();
@@ -42,7 +50,8 @@ export default function ShowsPage() {
     link: "",
     note: "",
   });
-  const [image, setImage] = useState<string | undefined>(undefined);
+  const [images, setImages] = useState<string[]>([]);
+  const [parseText, setParseText] = useState("");
   const [picking, setPicking] = useState(false);
   const [saving, setSaving] = useState(false);
   const [writeDiary, setWriteDiary] = useState(true);
@@ -79,6 +88,18 @@ export default function ShowsPage() {
     [shows],
   );
 
+  // 按演出月份分组（list 已倒序，月份自然新→旧），参考日记页
+  const groups = useMemo(() => {
+    const map = new Map<string, Show[]>();
+    for (const s of list) {
+      const key = (s.showAt ?? s.createdAt).slice(0, 7);
+      const arr = map.get(key) ?? [];
+      arr.push(s);
+      map.set(key, arr);
+    }
+    return [...map.entries()];
+  }, [list]);
+
   async function handlePick(file: File | undefined) {
     if (!file) return;
     setPicking(true);
@@ -90,7 +111,7 @@ export default function ShowsPage() {
       } catch {
         // 图床不可用回退 base64
       }
-      setImage(url);
+      setImages((prev) => [...prev, url]);
     } finally {
       setPicking(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -110,7 +131,8 @@ export default function ShowsPage() {
       link: "",
       note: "",
     });
-    setImage(undefined);
+    setImages([]);
+    setParseText("");
     setWriteDiary(true);
     setEditingId(null);
   }
@@ -128,7 +150,7 @@ export default function ShowsPage() {
       link: s.link ?? "",
       note: s.note ?? "",
     });
-    setImage(s.image);
+    setImages(s.images ?? []);
     setEditingId(s.id);
     setWriteDiary(false);
     setShowForm(true);
@@ -152,7 +174,7 @@ export default function ShowsPage() {
         people: parseInt(form.people) || undefined,
         link: form.link.trim() || undefined,
         note: form.note.trim() || undefined,
-        image,
+        images,
       };
 
       if (editingId) {
@@ -180,7 +202,7 @@ export default function ShowsPage() {
               ]
                 .filter(Boolean)
                 .join("\n"),
-              images: image ? [image] : [],
+              images: images,
               mood: null,
               tags: ["演出", showData.title],
               visibility: "仅自己",
@@ -202,7 +224,22 @@ export default function ShowsPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
-      <PageHeader title="演出记录" subtitle="看过的现场，都记下来" />
+      <PageHeader
+        title="演出记录"
+        subtitle="看过的现场、去过的旅行，都记下来"
+        action={
+          <button
+            onClick={() => {
+              resetForm();
+              setShowForm((v) => !v);
+            }}
+            className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+            {showForm && !editingId ? "收起" : "记一场演出"}
+          </button>
+        }
+      />
 
       {/* 统计 */}
       {shows.length > 0 && (
@@ -235,26 +272,32 @@ export default function ShowsPage() {
         </div>
       )}
 
-      {/* 添加 */}
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={() => {
-            resetForm();
-            setShowForm((v) => !v);
-          }}
-          className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
-        >
-          <Plus className="size-3.5" strokeWidth={2} />
-          {showForm && !editingId ? "收起" : "记一场演出"}
-        </button>
-      </div>
-
       {/* 添加 / 编辑表单 */}
       {showForm && (
         <div className="mt-3 space-y-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
           <p className="text-[13px] font-semibold text-ink">
             {editingId ? "编辑演出" : "记一场演出"}
           </p>
+          <textarea
+            value={parseText}
+            onChange={(e) => {
+              const v = e.target.value;
+              setParseText(v);
+              const p = parseShowText(v);
+              setForm((f) => ({
+                ...f,
+                title: f.title || p.title || "",
+                showAt: f.showAt || p.showAt || "",
+                venue: f.venue || p.venue || "",
+                city: f.city || p.city || "",
+                price: f.price || (p.price != null ? String(p.price) : ""),
+                note: f.note || p.note || "",
+              }));
+            }}
+            rows={3}
+            placeholder="粘贴演出 / 旅游详情，自动识别名称·时间·场地·票价…"
+            className="w-full resize-none rounded-[12px] bg-pink-soft/40 px-3 py-2.5 text-[12.5px] leading-relaxed text-ink outline-none"
+          />
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -324,41 +367,13 @@ export default function ShowsPage() {
             placeholder="大麦 / 猫眼链接（选填）"
             className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] text-ink outline-none"
           />
-          <div className="flex gap-2">
-            <textarea
-              value={form.note}
-              onChange={(e) => setForm({ ...form, note: e.target.value })}
-              rows={2}
-              placeholder="备注：观后感 / 想聊的"
-              className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] leading-relaxed text-ink outline-none"
-            />
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="inline-flex shrink-0 items-center gap-1 self-start rounded-[12px] bg-field px-3 py-2.5 text-[12px] text-ink-3"
-            >
-              {picking ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <ImagePlus className="size-4" strokeWidth={1.8} />
-              )}
-              图
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handlePick(e.target.files?.[0])}
-            />
-          </div>
-          {image && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={image}
-              alt="预览"
-              className="h-20 w-20 rounded-[10px] object-cover"
-            />
-          )}
+          <textarea
+            value={form.note}
+            onChange={(e) => setForm({ ...form, note: e.target.value })}
+            rows={2}
+            placeholder="备注：观后感 / 想聊的"
+            className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[12.5px] leading-relaxed text-ink outline-none"
+          />
           {!editingId && (
             <label className="flex w-fit items-center gap-1.5 text-[11.5px] text-ink-4">
               <input
@@ -369,6 +384,57 @@ export default function ShowsPage() {
               同时写进日记
             </label>
           )}
+          {/* 图片（可多张，放在最底下） */}
+          <div className="space-y-2">
+            {images.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                {images.map((src, idx) => (
+                  <div key={idx} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt=""
+                      className="h-20 w-full rounded-[10px] object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImages((prev) => prev.filter((_, i) => i !== idx))
+                      }
+                      aria-label="删除图片"
+                      className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-black/60 text-[12px] leading-none text-white"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="inline-flex items-center gap-1 rounded-[12px] bg-field px-3 py-2.5 text-[12px] text-ink-3"
+            >
+              {picking ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ImagePlus className="size-4" strokeWidth={1.8} />
+              )}
+              添加图片{images.length > 0 ? `（${images.length}）` : ""}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
+                files.forEach((f) => handlePick(f));
+                e.target.value = "";
+              }}
+            />
+          </div>
           <div className="flex justify-end gap-2">
             <button
               onClick={() => {
@@ -390,120 +456,137 @@ export default function ShowsPage() {
         </div>
       )}
 
-      {/* 列表 */}
+      {/* 列表：按演出月份分组 */}
       {!hydrated ? (
         <Loading />
+      ) : groups.length === 0 ? (
+        <p className="mt-8 text-center text-[13px] text-ink-4">
+          还没有记录，看过的现场 / 去过的旅行随手记下来吧
+        </p>
       ) : (
-        <div className="mt-3 space-y-3">
-          {list.map((s) => (
-            <div
-              key={s.id}
-              className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="truncate text-[14.5px] font-semibold text-ink">
-                    {s.title}
-                  </h3>
-                  <p className="mt-0.5 text-[11.5px] text-ink-4">
-                    {s.type}
-                    {s.artist && ` · ${s.artist}`}
-                    {s.showAt && ` · ${s.showAt}`}
-                  </p>
-                  <p className="text-[11.5px] text-ink-4">
-                    {[s.venue, s.city].filter(Boolean).join(" · ")}
-                    {s.price ? ` · ¥${s.price}/人` : ""}
-                    {s.people ? ` · ${s.people}人` : ""}
-                    {s.price && s.people ? ` · 共 ¥${s.price * s.people}` : ""}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
-                    onClick={() => startEdit(s)}
-                    aria-label="编辑"
-                    className="text-ink-5 hover:text-[#E0697E]"
+        groups.map(([month, items]) => {
+          const year = month.slice(0, 4);
+          const monthLabel = `${Number(month.slice(5, 7))}月`;
+          return (
+            <section key={month} className="mt-5">
+              <h2 className="flex flex-wrap items-baseline gap-x-2 px-1 text-[13px] font-semibold text-ink-3">
+                <span>{monthLabel}</span>
+                <span className="text-[12px] font-normal text-ink-4">
+                  {year}年
+                </span>
+              </h2>
+              <div className="mt-2.5 space-y-3">
+                {items.map((s) => (
+                  <div
+                    key={s.id}
+                    className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]"
                   >
-                    <Pencil className="size-3.5" strokeWidth={1.8} />
-                  </button>
-                  <button
-                    onClick={async () => {
-                      const ok = await confirm({
-                        title: "删掉这条演出记录？",
-                        confirmText: "删除",
-                        danger: true,
-                      });
-                      if (ok) remove(s.id);
-                    }}
-                    aria-label="删除"
-                    className="text-ink-5 hover:text-[#E76F7B]"
-                  >
-                    <Trash2 className="size-3.5" strokeWidth={1.8} />
-                  </button>
-                </div>
-              </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-[14.5px] font-semibold text-ink">
+                          {s.title}
+                        </h3>
+                        <p className="mt-0.5 text-[11.5px] text-ink-4">
+                          {s.type}
+                          {s.artist && ` · ${s.artist}`}
+                          {s.showAt && ` · ${s.showAt}`}
+                        </p>
+                        <p className="text-[11.5px] text-ink-4">
+                          {[s.venue, s.city].filter(Boolean).join(" · ")}
+                          {s.price ? ` · ¥${s.price}/人` : ""}
+                          {s.people ? ` · ${s.people}人` : ""}
+                          {s.price && s.people ? ` · 共 ¥${s.price * s.people}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          onClick={() => startEdit(s)}
+                          aria-label="编辑"
+                          className="text-ink-5 hover:text-[#E0697E]"
+                        >
+                          <Pencil className="size-3.5" strokeWidth={1.8} />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: "删掉这条演出记录？",
+                              confirmText: "删除",
+                              danger: true,
+                            });
+                            if (ok) remove(s.id);
+                          }}
+                          aria-label="删除"
+                          className="text-ink-5 hover:text-[#E76F7B]"
+                        >
+                          <Trash2 className="size-3.5" strokeWidth={1.8} />
+                        </button>
+                      </div>
+                    </div>
 
-              {s.image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={s.image}
-                  alt={s.title}
-                  className="mt-2 max-h-[140px] w-full rounded-[10px] object-cover"
-                />
-              )}
-              {s.note && (
-                <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-ink-2">
-                  {s.note}
-                </p>
-              )}
+                    {s.note && (
+                      <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-ink-2">
+                        {s.note}
+                      </p>
+                    )}
 
-              {/* 评分 */}
-              <div className="mt-1.5 flex items-center gap-1">
-                <span className="text-[11px] text-ink-4">评分</span>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star
-                    key={n}
-                    onClick={() => update(s.id, { rating: n })}
-                    className={`size-3.5 ${
-                      n <= (s.rating ?? 0)
-                        ? "fill-[#FFC46B] text-[#FFC46B]"
-                        : "text-[#E8D5CE]"
-                    }`}
-                  />
+                    {/* 评分 */}
+                    <div className="mt-1.5 flex items-center gap-1">
+                      <span className="text-[11px] text-ink-4">评分</span>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star
+                          key={n}
+                          onClick={() => update(s.id, { rating: n })}
+                          className={`size-3.5 ${
+                            n <= (s.rating ?? 0)
+                              ? "fill-[#FFC46B] text-[#FFC46B]"
+                              : "text-[#E8D5CE]"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="mt-2.5 flex items-center gap-2">
+                      {s.link && (
+                        <a
+                          href={s.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-blue-soft px-3 py-1.5 text-[11.5px] font-medium text-blue-ink"
+                        >
+                          <ExternalLink className="size-3" strokeWidth={2} />
+                          购票页
+                        </a>
+                      )}
+                      <button
+                        onClick={() => update(s.id, { repurchase: !s.repurchase })}
+                        className={`rounded-full px-3 py-1.5 text-[11.5px] font-medium transition-colors ${
+                          s.repurchase
+                            ? "bg-[#FFF1E0] text-[#E8853D]"
+                            : "bg-cream text-ink-3"
+                        }`}
+                      >
+                        {s.repurchase ? "🧡 还会再看" : "还会再看吗"}
+                      </button>
+                    </div>
+                    {s.images && s.images.length > 0 && (
+                      <div className="mt-2.5 grid grid-cols-3 gap-2">
+                        {s.images.map((src, idx) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={idx}
+                            src={src}
+                            alt=""
+                            className="h-24 w-full rounded-[10px] object-cover"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
-
-              <div className="mt-2.5 flex items-center gap-2">
-                {s.link && (
-                  <a
-                    href={s.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full bg-blue-soft px-3 py-1.5 text-[11.5px] font-medium text-blue-ink"
-                  >
-                    <ExternalLink className="size-3" strokeWidth={2} />
-                    购票页
-                  </a>
-                )}
-                <button
-                  onClick={() => update(s.id, { repurchase: !s.repurchase })}
-                  className={`rounded-full px-3 py-1.5 text-[11.5px] font-medium transition-colors ${
-                    s.repurchase
-                      ? "bg-[#FFF1E0] text-[#E8853D]"
-                      : "bg-cream text-ink-3"
-                  }`}
-                >
-                  {s.repurchase ? "🧡 还会再看" : "还会再看吗"}
-                </button>
-              </div>
-            </div>
-          ))}
-
-          {hydrated && list.length === 0 && (
-            <p className="mt-8 text-center text-[13px] text-ink-4">
-              还没有演出记录，看过的现场随手记下来吧
-            </p>
-          )}
-        </div>
+            </section>
+          );
+        })
       )}
     </main>
   );

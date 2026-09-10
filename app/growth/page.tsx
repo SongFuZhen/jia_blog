@@ -13,11 +13,13 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import { HabitDots } from "@/components/habit-dots";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
 import { useGrowthStore } from "@/lib/stores/growth";
 import { useConfirm } from "@/lib/stores/confirm";
 import { useRecordsStore } from "@/lib/stores/records";
+import { currentStreak, last7Days, todayStatus, totalChecks } from "@/lib/habit";
 import { todayLocal } from "@/lib/time";
 import type { GrowthItem } from "@/lib/types";
 
@@ -26,6 +28,7 @@ export default function GrowthPage() {
   const hydrated = useGrowthStore((s) => s.hydrated);
   const hydrate = useGrowthStore((s) => s.hydrate);
   const toggle = useGrowthStore((s) => s.toggle);
+  const logCheck = useGrowthStore((s) => s.logCheck);
   const addItem = useGrowthStore((s) => s.addItem);
   const updateItem = useGrowthStore((s) => s.updateItem);
   const removeItem = useGrowthStore((s) => s.removeItem);
@@ -69,14 +72,17 @@ export default function GrowthPage() {
     [records],
   );
 
-  const { total, done, cycleDone } = useMemo(() => {
+  // 循环任务永远不会 done，单独按「今天有没有打卡」统计
+  const { total, done, habits, habitDone } = useMemo(() => {
     const all = sections.flatMap((s) => s.items);
+    const repeat = all.filter((i) => i.repeat);
     return {
-      total: all.length,
-      done: all.filter((i) => i.done).length,
-      cycleDone: all.filter((i) => i.repeat && i.done).length,
+      total: all.length - repeat.length,
+      done: all.filter((i) => !i.repeat && i.done).length,
+      habits: repeat.length,
+      habitDone: repeat.filter((i) => todayStatus(i, today) === "done").length,
     };
-  }, [sections]);
+  }, [sections, today]);
 
   async function handleAdd(sectionTitle: string) {
     if (!newText.trim()) return;
@@ -151,10 +157,10 @@ export default function GrowthPage() {
             style={{ width: `${percent}%` }}
           />
         </div>
-        {cycleDone > 0 && (
+        {habits > 0 && (
           <p className="mt-2 flex items-center gap-1 text-[11.5px] text-[#D56983]">
             <Repeat className="size-3.5" strokeWidth={2} />
-            循环任务已完成 {cycleDone} 次
+            今日打卡 {habitDone} / {habits}
           </p>
         )}
       </div>
@@ -200,6 +206,9 @@ export default function GrowthPage() {
               <ul className="mt-2.5 space-y-1">
                 {section.items.map((item, idx) => {
                   const overdue = item.due && !item.done && item.due < today;
+                  const status = item.repeat ? todayStatus(item, today) : undefined;
+                  const checked = item.repeat ? status === "done" : item.done;
+                  const streak = item.repeat ? currentStreak(item, today) : 0;
                   if (editingId === item.id) {
                     return (
                       <li key={item.id} className="rounded-xl bg-field/70 p-2.5">
@@ -315,25 +324,35 @@ export default function GrowthPage() {
                       </li>
                     );
                   }
+                  // 普通模式：循环任务按天打卡（做了 / 没做），一次性任务点圆圈完成
                   return (
-                  <li key={item.id}>
+                  <li key={item.id} className="flex items-center gap-2 rounded-xl px-1.5 py-2">
                     <button
-                      onClick={() => toggle(section.title, item.id)}
-                      className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left"
+                      aria-label={item.repeat ? "记一笔做了" : "完成"}
+                      onClick={() =>
+                        item.repeat
+                          ? logCheck(section.title, item.id, today, "done")
+                          : toggle(section.title, item.id)
+                      }
+                      className="flex size-7 shrink-0 items-center justify-center active:opacity-60"
                     >
                       <span
-                        className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                          item.done
+                        className={`flex size-5 items-center justify-center rounded-full border transition-colors ${
+                          checked
                             ? "border-[#F16D88] bg-[#F16D88] text-white"
                             : "border-toggle-off bg-white dark:bg-card"
                         }`}
                       >
-                        {item.done && <Check className="size-3" strokeWidth={3} />}
+                        {checked && <Check className="size-3" strokeWidth={3} />}
                       </span>
-                      <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
                         <span
                           className={`text-[14px] ${
-                            item.done ? "text-ink-5 line-through" : "text-ink"
+                            !item.repeat && item.done
+                              ? "text-ink-5 line-through"
+                              : "text-ink"
                           }`}
                         >
                           {item.text}
@@ -341,9 +360,7 @@ export default function GrowthPage() {
                         {item.repeat && (
                           <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[11px] text-[#E08AA0]">
                             <Repeat className="size-3.5" strokeWidth={2} />
-                            {!item.done && (item.cycleCount ?? 0) > 0
-                              ? `已循环 ${item.cycleCount} 次`
-                              : null}
+                            累计打卡 {totalChecks(item)} 次
                           </span>
                         )}
                         {item.due && (
@@ -357,8 +374,42 @@ export default function GrowthPage() {
                             {overdue ? " · 逾期" : ""}
                           </span>
                         )}
-                      </span>
-                    </button>
+                      </div>
+                      {item.repeat && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <HabitDots cells={last7Days(item, today)} today={today} />
+                          <span
+                            className={`text-[11px] ${
+                              status === "skip"
+                                ? "text-[#E5484D]"
+                                : streak > 0
+                                  ? "text-[#4E9A6E]"
+                                  : "text-ink-4"
+                            }`}
+                          >
+                            {status === "skip"
+                              ? "今天记了没做"
+                              : streak > 0
+                                ? `连续 ${streak} 天`
+                                : "今天还没打卡"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {item.repeat && (
+                      <button
+                        onClick={() =>
+                          logCheck(section.title, item.id, today, "skip")
+                        }
+                        className={`shrink-0 rounded-full px-3 py-2 text-[11.5px] active:opacity-60 ${
+                          status === "skip"
+                            ? "bg-[#E5484D] text-white"
+                            : "bg-field text-ink-3"
+                        }`}
+                      >
+                        没做
+                      </button>
+                    )}
                   </li>
                   );
                 })}

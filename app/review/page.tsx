@@ -2,34 +2,82 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { HabitDots } from "@/components/habit-dots";
 import { PageHeader } from "@/components/page-header";
 import { YearReview } from "@/components/review/year-review";
 import { useRecordsStore } from "@/lib/stores/records";
 import { useInspirationStore } from "@/lib/stores/inspiration";
 import { useBeautyStore } from "@/lib/stores/beauty";
+import { useGrowthStore } from "@/lib/stores/growth";
 import { useSettingsStore } from "@/lib/stores/settings";
-import type { Mood } from "@/lib/types";
+import {
+  addDays,
+  dayList,
+  habitsOf,
+  monthRange,
+  summarizeRange,
+  weekRange,
+  weekStartOf,
+} from "@/lib/habit";
+import { todayLocal } from "@/lib/time";
+import type { LifeRecord, Mood } from "@/lib/types";
 
-type Mode = "month" | "year";
+type Mode = "week" | "month" | "year";
+
+/** 心情分布条：月报与周报共用 */
+function MoodBars({ records }: { records: LifeRecord[] }) {
+  const counts = useMemo(() => {
+    const map = new Map<Mood, number>();
+    for (const r of records) {
+      if (r.mood) map.set(r.mood, (map.get(r.mood) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  }, [records]);
+
+  if (counts.length === 0) return null;
+  return (
+    <>
+      <h2 className="mt-5 text-[13.5px] font-semibold text-ink">心情天气图</h2>
+      <div className="mt-2 space-y-1.5">
+        {counts.slice(0, 4).map(([mood, count]) => (
+          <div key={mood} className="flex items-center gap-2">
+            <span className="w-16 shrink-0 text-[12px] text-ink-2">{mood}</span>
+            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border-soft">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88]"
+                style={{ width: `${(count / counts[0][1]) * 100}%` }}
+              />
+            </div>
+            <span className="w-6 text-right text-[11px] text-ink-4">{count}</span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 
 export default function ReviewPage() {
   const { records, hydrate } = useRecordsStore();
   const { items: inspirations, hydrate: hydrateInsp } = useInspirationStore();
   const { tips, hydrate: hydrateBeauty } = useBeautyStore();
   const { settings, hydrate: hydrateSettings } = useSettingsStore();
+  const { sections: growthSections, hydrate: hydrateGrowth } = useGrowthStore();
 
   const now = new Date();
+  const today = todayLocal();
   const [mode, setMode] = useState<Mode>("month");
   const [month, setMonth] = useState(
     `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
   );
+  const [weekStart, setWeekStart] = useState(() => weekStartOf(today));
 
   useEffect(() => {
     hydrate();
     hydrateInsp();
     hydrateBeauty();
     hydrateSettings();
-  }, [hydrate, hydrateInsp, hydrateBeauty, hydrateSettings]);
+    hydrateGrowth();
+  }, [hydrate, hydrateInsp, hydrateBeauty, hydrateSettings, hydrateGrowth]);
 
   const monthRecords = useMemo(
     () => records.filter((r) => !r.draft && r.createdAt.startsWith(month)),
@@ -40,13 +88,39 @@ export default function ReviewPage() {
   );
   const triedTips = tips.filter((t) => t.triedAt?.startsWith(month));
 
-  const moodCount = useMemo(() => {
-    const map = new Map<Mood, number>();
-    for (const r of monthRecords) {
-      if (r.mood) map.set(r.mood, (map.get(r.mood) ?? 0) + 1);
-    }
-    return [...map.entries()].sort((a, b) => b[1] - a[1]);
-  }, [monthRecords]);
+  // 周报：按日期区间过滤（周一 ~ 周日）
+  const { from: weekFrom, to: weekTo } = weekRange(weekStart);
+  const weekRecords = useMemo(
+    () =>
+      records.filter(
+        (r) =>
+          !r.draft &&
+          r.createdAt.slice(0, 10) >= weekFrom &&
+          r.createdAt.slice(0, 10) <= weekTo,
+      ),
+    [records, weekFrom, weekTo],
+  );
+  const weekInspirations = useMemo(
+    () =>
+      inspirations.filter(
+        (i) => i.createdAt.slice(0, 10) >= weekFrom && i.createdAt.slice(0, 10) <= weekTo,
+      ),
+    [inspirations, weekFrom, weekTo],
+  );
+
+  // 习惯打卡
+  const habits = useMemo(() => habitsOf(growthSections), [growthSections]);
+  const weekChecks = useMemo(
+    () =>
+      habits.map((h) => ({ habit: h, ...summarizeRange(h, weekFrom, weekTo, today) })),
+    [habits, weekFrom, weekTo, today],
+  );
+  const monthChecks = useMemo(() => {
+    const { from, to } = monthRange(month);
+    return habits
+      .map((h) => ({ habit: h, ...summarizeRange(h, from, to, today) }))
+      .filter((x) => x.total > 0);
+  }, [habits, month, today]);
 
   const topTags = useMemo(() => {
     const map = new Map<string, number>();
@@ -64,6 +138,13 @@ export default function ReviewPage() {
     setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
 
+  function shiftWeek(delta: number) {
+    setWeekStart((cur) => addDays(cur, delta * 7));
+  }
+
+  const isFutureWeek = weekStart >= weekStartOf(today);
+  const weekChecksDone = weekChecks.reduce((n, x) => n + x.done, 0);
+
   const [year, monthNum] = month.split("-");
   const isFuture =
     month >= `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -72,12 +153,13 @@ export default function ReviewPage() {
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="回顾" subtitle="原来这段时间变了这么多" />
 
-      {/* 月报 / 年报切换 */}
+      {/* 周报 / 月报 / 年报切换 */}
       <div className="mt-4 flex gap-1.5 rounded-full bg-cream p-1">
         {(
           [
+            { key: "week", label: "周报" },
             { key: "month", label: "月报" },
-            { key: "year", label: "年报 · 我的这一年" },
+            { key: "year", label: "年报" },
           ] as { key: Mode; label: string }[]
         ).map((t) => (
           <button
@@ -95,6 +177,94 @@ export default function ReviewPage() {
       </div>
 
       {mode === "year" && <YearReview />}
+
+      {mode === "week" && (
+        <>
+          {/* 周切换 */}
+          <div className="mt-4 flex items-center justify-between rounded-full bg-white dark:bg-[#2B2225] px-2 py-1.5 shadow-[var(--shadow-xs)]">
+            <button
+              onClick={() => shiftWeek(-1)}
+              aria-label="上一周"
+              className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-card-hover hover:text-[#E0697E]"
+            >
+              <ArrowLeft className="size-4" strokeWidth={1.8} />
+            </button>
+            <p className="text-[14.5px] font-bold text-ink">
+              {weekFrom.replace(/-/g, ".")} - {weekTo.replace(/-/g, ".")}
+            </p>
+            <button
+              onClick={() => shiftWeek(1)}
+              disabled={isFutureWeek}
+              aria-label="下一周"
+              className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-card-hover hover:text-[#E0697E] disabled:opacity-30"
+            >
+              <ArrowRight className="size-4" strokeWidth={1.8} />
+            </button>
+          </div>
+
+          <div className="mt-4 rounded-[20px] bg-card p-5 shadow-[var(--shadow-soft-sm)]">
+            <p className="font-display text-center text-[18px] font-bold text-pink-ink">
+              {settings.nickname}的本周小报
+            </p>
+            <div className="mx-auto mt-2 h-px w-16 bg-[#F5B8C4]" />
+
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-[14px] bg-card-warm py-3">
+                <p className="text-[20px] font-bold text-[#E0697E]">
+                  {weekRecords.length}
+                </p>
+                <p className="mt-0.5 text-[11px] text-ink-4">条记录</p>
+              </div>
+              <div className="rounded-[14px] bg-card-warm py-3">
+                <p className="text-[20px] font-bold text-purple-ink">
+                  {weekInspirations.length}
+                </p>
+                <p className="mt-0.5 text-[11px] text-ink-4">个灵感</p>
+              </div>
+              <div className="rounded-[14px] bg-card-warm py-3">
+                <p className="text-[20px] font-bold text-green-ink">
+                  {weekChecksDone}
+                </p>
+                <p className="mt-0.5 text-[11px] text-ink-4">次习惯打卡</p>
+              </div>
+            </div>
+
+            {weekChecks.length > 0 && (
+              <>
+                <h2 className="mt-5 text-[13.5px] font-semibold text-ink">
+                  习惯打卡
+                </h2>
+                <div className="mt-2 space-y-2">
+                  {weekChecks.map((x) => (
+                    <div key={x.habit.id} className="flex items-center gap-2">
+                      <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-2">
+                        {x.habit.text}
+                      </span>
+                      <HabitDots
+                        cells={dayList(x.habit, weekFrom, 7, today)}
+                        today={today}
+                      />
+                      <span className="w-14 shrink-0 text-right text-[11px] text-ink-4">
+                        {x.done}/7 · {x.rate}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <MoodBars records={weekRecords} />
+
+            {weekRecords.length === 0 &&
+              weekInspirations.length === 0 &&
+              weekChecksDone === 0 && (
+                <p className="mt-5 text-center text-[12.5px] text-ink-5">
+                  这周还很安静，去写下点什么吧
+                </p>
+              )}
+          </div>
+        </>
+      )}
 
       {mode === "month" && (
         <>
@@ -143,28 +313,7 @@ export default function ReviewPage() {
         </div>
 
         {/* 心情分布 */}
-        {moodCount.length > 0 && (
-          <>
-            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">心情天气图</h2>
-            <div className="mt-2 space-y-1.5">
-              {moodCount.slice(0, 4).map(([mood, count]) => {
-                const max = moodCount[0][1];
-                return (
-                  <div key={mood} className="flex items-center gap-2">
-                    <span className="w-16 shrink-0 text-[12px] text-ink-2">{mood}</span>
-                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border-soft">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88]"
-                        style={{ width: `${(count / max) * 100}%` }}
-                      />
-                    </div>
-                    <span className="w-6 text-right text-[11px] text-ink-4">{count}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+        <MoodBars records={monthRecords} />
 
         {/* 高频标签 */}
         {topTags.length > 0 && (
@@ -178,6 +327,33 @@ export default function ReviewPage() {
                 >
                   {tag} × {count}
                 </span>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* 习惯打卡 */}
+        {monthChecks.length > 0 && (
+          <>
+            <h2 className="mt-5 text-[13.5px] font-semibold text-ink">习惯打卡</h2>
+            <div className="mt-2 space-y-2">
+              {monthChecks.map((x) => (
+                <div key={x.habit.id}>
+                  <div className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-2">
+                      {x.habit.text}
+                    </span>
+                    <span className="shrink-0 text-[11px] text-ink-4">
+                      打卡 {x.done} 天 · 完成率 {x.rate}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-border-soft">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[#FFB4C3] to-[#F16D88]"
+                      style={{ width: `${x.rate}%` }}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           </>

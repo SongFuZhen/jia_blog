@@ -1,34 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Brush, Image as ImageIcon, Sprout, Utensils } from "lucide-react";
+import { Mic2, Newspaper, PenLine, Utensils } from "lucide-react";
 
 const entries = [
   {
-    title: "美食记录",
+    title: "看今朝",
+    icon: Newspaper,
+    href: "/today",
+    iconColor: "text-orange-ink",
+    bg: "bg-orange-soft",
+  },
+  {
+    title: "随便记",
+    icon: PenLine,
+    href: "/note",
+    iconColor: "text-purple-ink",
+    bg: "bg-purple-soft",
+  },
+  {
+    title: "吃美食",
     icon: Utensils,
     href: "/food",
     iconColor: "text-[#E0697E]",
     bg: "bg-pink-soft",
   },
   {
-    title: "化妆技巧",
-    icon: Brush,
-    href: "/beauty",
-    iconColor: "text-purple-ink",
-    bg: "bg-purple-soft",
-  },
-  {
-    title: "灵感收藏",
-    icon: ImageIcon,
-    href: "/inspiration",
-    iconColor: "text-orange-ink",
-    bg: "bg-orange-soft",
-  },
-  {
-    title: "成长清单",
-    icon: Sprout,
-    href: "/growth",
+    title: "嗨翻天",
+    icon: Mic2,
+    href: "/shows",
     iconColor: "text-green-ink",
     bg: "bg-green-soft",
   },

@@ -155,7 +155,19 @@ export default function FoodPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
-      <PageHeader title="美食记录" subtitle="把好吃的都记下来" />
+      <PageHeader
+        title="美食记录"
+        subtitle="把好吃的都记下来"
+        action={
+          <button
+            onClick={() => setShowAdd((v) => !v)}
+            className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+            收藏美食
+          </button>
+        }
+      />
 
       {/* 统计 */}
       {foods.length > 0 && (
@@ -232,14 +244,6 @@ export default function FoodPage() {
             </button>
           );
         })}
-        <span className="flex-1" />
-        <button
-          onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
-        >
-          <Plus className="size-3.5" strokeWidth={2} />
-          收藏美食
-        </button>
       </div>
 
       {/* 添加表单 */}

@@ -1,12 +1,19 @@
 import { create } from "zustand";
 import { genId, growthRepo } from "@/lib/repository";
-import type { GrowthItem, GrowthSection } from "@/lib/types";
+import type { CheckStatus, GrowthItem, GrowthSection } from "@/lib/types";
 
 interface GrowthState {
   sections: GrowthSection[];
   hydrated: boolean;
   hydrate: () => Promise<void>;
   toggle: (sectionTitle: string, itemId: string) => Promise<void>;
+  /** 循环任务打卡：再点一次同一状态 = 撤销当天的记录 */
+  logCheck: (
+    sectionTitle: string,
+    itemId: string,
+    date: string,
+    status: CheckStatus,
+  ) => Promise<void>;
   addItem: (sectionTitle: string, text: string, repeat?: boolean) => Promise<void>;
   updateItem: (
     sectionTitle: string,
@@ -51,24 +58,28 @@ export const useGrowthStore = create<GrowthState>((set, get) => ({
       const items = [...s.items];
       const idx = items.findIndex((i) => i.id === itemId);
       if (idx === -1) return s;
-      const item = items[idx];
-      const nowDone = !item.done;
-      // 循环任务：仅「未完成→完成」时计数 +1
-      const cycleCount = (item.cycleCount ?? 0) + (nowDone && item.repeat ? 1 : 0);
-      items[idx] = { ...item, done: nowDone, cycleCount };
-      // 循环任务：从「未完成」勾选为「完成」时，紧接其后生成一条新的待办副本
-      if (nowDone && item.repeat) {
-        items.splice(idx + 1, 0, {
-          id: genId(),
-          text: item.text,
-          done: false,
-          repeat: true,
-          cycleCount,
-          due: item.due,
-        });
-      }
+      items[idx] = { ...items[idx], done: !items[idx].done };
       return { ...s, items };
     });
+    await persistSections(set, get, next, prev);
+  },
+
+  logCheck: async (sectionTitle, itemId, date, status) => {
+    const prev = get().sections;
+    const next = prev.map((s) =>
+      s.title !== sectionTitle
+        ? s
+        : {
+            ...s,
+            items: s.items.map((i) => {
+              if (i.id !== itemId || !i.repeat) return i;
+              const log = { ...(i.log ?? {}) };
+              if (log[date] === status) delete log[date]; // 撤销
+              else log[date] = status;
+              return { ...i, log };
+            }),
+          },
+    );
     await persistSections(set, get, next, prev);
   },
 

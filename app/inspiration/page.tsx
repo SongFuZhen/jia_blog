@@ -50,7 +50,19 @@ export default function InspirationPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
-      <PageHeader title="灵感收藏" subtitle="喜欢的都装进小口袋" />
+      <PageHeader
+        title="灵感收藏"
+        subtitle="喜欢的都装进小口袋"
+        action={
+          <button
+            onClick={() => setShowAdd((v) => !v)}
+            className="inline-flex items-center gap-1 rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983]"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+            {showAdd ? "收起" : "收一条灵感"}
+          </button>
+        }
+      />
 
       {/* 筛选 */}
       <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -69,74 +81,64 @@ export default function InspirationPage() {
         ))}
       </div>
 
-      {/* 添加 */}
-      <div className="mt-3">
-        {showAdd ? (
-          <div className="space-y-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
-            <div className="flex flex-wrap gap-1.5">
-              {filters.filter((f) => f !== "全部").map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setForm({ ...form, type: t as InspirationType })}
-                  className={`rounded-full px-2.5 py-1 text-[11.5px] transition-colors ${
-                    form.type === t
-                      ? "bg-pink-soft font-medium text-[#E0697E]"
-                      : "bg-cream text-ink-3"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-            <textarea
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              rows={2}
-              placeholder="记下这句文案 / 这个瞬间…"
-              className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
-            />
-            <input
-              value={form.tags}
-              onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              placeholder="标签，空格分隔：眼妆 穿搭"
-              className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
-            />
-            <div className="flex justify-end gap-2">
+      {/* 添加表单 */}
+      {showAdd && (
+        <div className="mt-3 space-y-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+          <div className="flex flex-wrap gap-1.5">
+            {filters.filter((f) => f !== "全部").map((t) => (
               <button
-                onClick={() => setShowAdd(false)}
-                className="rounded-full bg-cream px-3.5 py-1.5 text-[12.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
+                key={t}
+                onClick={() => setForm({ ...form, type: t as InspirationType })}
+                className={`rounded-full px-2.5 py-1 text-[11.5px] transition-colors ${
+                  form.type === t
+                    ? "bg-pink-soft font-medium text-[#E0697E]"
+                    : "bg-cream text-ink-3"
+                }`}
               >
-                取消
+                {t}
               </button>
-              <button
-                onClick={async () => {
-                  if (!form.content.trim()) return;
-                  await add({
-                    type: form.type,
-                    content: form.content.trim(),
-                    tags: form.tags.split(/[\s,，]+/).map((t) => t.trim()).filter(Boolean),
-                    createdAt: new Date().toISOString(),
-                  });
-                  setForm({ type: "文案", content: "", tags: "" });
-                  setShowAdd(false);
-                }}
-                disabled={!form.content.trim()}
-                className="rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983] disabled:opacity-40"
-              >
-                收进口袋
-              </button>
-            </div>
+            ))}
           </div>
-        ) : (
-          <button
-            onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3.5 dark:bg-[#2B2225] py-2 text-[12.5px] font-medium text-ink-3 shadow-[var(--shadow-xs)] transition-colors hover:text-[#E0697E]"
-          >
-            <Plus className="size-3.5" strokeWidth={2} />
-            收一条灵感
-          </button>
-        )}
-      </div>
+          <textarea
+            value={form.content}
+            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            rows={2}
+            placeholder="记下这句文案 / 这个瞬间…"
+            className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
+          />
+          <input
+            value={form.tags}
+            onChange={(e) => setForm({ ...form, tags: e.target.value })}
+            placeholder="标签，空格分隔：眼妆 穿搭"
+            className="w-full rounded-[12px] bg-field px-3 py-2.5 text-[13px] outline-none"
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setShowAdd(false)}
+              className="rounded-full bg-cream px-3.5 py-1.5 text-[12.5px] text-ink-3 transition-colors hover:bg-pink-soft hover:text-[#E0697E]"
+            >
+              取消
+            </button>
+            <button
+              onClick={async () => {
+                if (!form.content.trim()) return;
+                await add({
+                  type: form.type,
+                  content: form.content.trim(),
+                  tags: form.tags.split(/[\s,，]+/).map((t) => t.trim()).filter(Boolean),
+                  createdAt: new Date().toISOString(),
+                });
+                setForm({ type: "文案", content: "", tags: "" });
+                setShowAdd(false);
+              }}
+              disabled={!form.content.trim()}
+              className="rounded-full bg-[#E96882] px-3.5 py-1.5 text-[12.5px] font-medium text-white shadow-[0_4px_12px_rgba(233,104,130,0.3)] transition-colors hover:bg-[#D56983] disabled:opacity-40"
+            >
+              收进口袋
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 瀑布流卡片 */}
       {!hydrated && <Loading />}
