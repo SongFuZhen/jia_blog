@@ -37,7 +37,7 @@ export function AiChatSheet({
     messagesRef.current = messages;
   }, [messages]);
 
-  // 每次打开都是新会话
+  // 每次打开都是新会话，并直接进入「听」的状态，点开就能说
   useEffect(() => {
     if (open) {
       setMessages([]);
@@ -45,7 +45,9 @@ export function AiChatSheet({
       setError(null);
       setBusy(false);
       setRecording(false);
+      startRecording();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // 滚到底
@@ -103,33 +105,38 @@ export function AiChatSheet({
     });
   }
 
+  function startRecording() {
+    setError(null);
+    finalRef.current = "";
+    setDraft("");
+    const iat = new XfyunIat();
+    iatRef.current = iat;
+    iat.start({
+      onResult: (t) => {
+        finalRef.current = t;
+        setDraft(t);
+      },
+      onError: (m) => {
+        setRecording(false);
+        setError(m);
+      },
+      onState: (r) => setRecording(r),
+    });
+  }
+
+  function stopAndSend() {
+    iatRef.current?.stop();
+    iatRef.current = null;
+    setRecording(false);
+    const text = finalRef.current.trim();
+    setDraft("");
+    if (text) send(text);
+  }
+
   function toggleMic() {
     if (busy) return;
-    if (!recording) {
-      setError(null);
-      finalRef.current = "";
-      setDraft("");
-      const iat = new XfyunIat();
-      iatRef.current = iat;
-      iat.start({
-        onResult: (t) => {
-          finalRef.current = t;
-          setDraft(t);
-        },
-        onError: (m) => {
-          setRecording(false);
-          setError(m);
-        },
-        onState: (r) => setRecording(r),
-      });
-    } else {
-      iatRef.current?.stop();
-      iatRef.current = null;
-      setRecording(false);
-      const text = finalRef.current.trim();
-      setDraft("");
-      if (text) send(text);
-    }
+    if (recording) stopAndSend();
+    else startRecording();
   }
 
   if (!open) return null;
