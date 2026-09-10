@@ -13,6 +13,19 @@ export interface IatHandlers {
 
 const HOST = "iat-api.xfyun.cn";
 
+/**
+ * 讯飞语音听写（iat）凭证——写死在此，免去环境变量配置。
+ * 注意：iat 的鉴权签名必须在浏览器端用 APISecret 完成，所以这些值本就会进入
+ * 前端包（与之前 NEXT_PUBLIC_ 的暴露范围一致），仅额度风险、非账号风险。
+ * 如需更换，直接改这里；或在 .env.local 用同名 NEXT_PUBLIC_ 变量覆盖。
+ */
+export const XFYUN_APP_ID =
+  process.env.NEXT_PUBLIC_XFYUN_APPID ?? "5c0ec9db";
+export const XFYUN_API_KEY =
+  process.env.NEXT_PUBLIC_XFYUN_API_KEY ?? "856a8da6e76d61f332ca72cd6263b655";
+export const XFYUN_API_SECRET =
+  process.env.NEXT_PUBLIC_XFYUN_API_SECRET ?? "ZmQ5Zjg2YjMzY2E2MzIyOWNkZmFkMDhl";
+
 function toBase64(bytes: Uint8Array): string {
   let bin = "";
   for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
@@ -55,9 +68,9 @@ export class XfyunIat {
   private firstFrame = true;
 
   constructor(
-    private appId: string,
-    private apiKey: string,
-    private apiSecret: string,
+    private appId: string = XFYUN_APP_ID,
+    private apiKey: string = XFYUN_API_KEY,
+    private apiSecret: string = XFYUN_API_SECRET,
   ) {}
 
   async start(h: IatHandlers) {

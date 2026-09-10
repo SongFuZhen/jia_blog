@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { useConfirm } from "@/lib/stores/confirm";
 import { useBeautyStore } from "@/lib/stores/beauty";
 import { useRecordsStore } from "@/lib/stores/records";
+import { dbList, dbClear, isPrivateUnlocked } from "@/lib/repository";
+import { DB_COLLECTIONS, PRIVATE_COLLECTIONS } from "@/lib/db-collections";
 
 function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
@@ -32,10 +34,14 @@ export default function SettingsPage() {
   const beautyHydrate = useBeautyStore((s) => s.hydrate);
   const recordsHydrate = useRecordsStore((s) => s.hydrate);
 
-  const [nickname, setNickname] = useState("");
-  const [targetWeight, setTargetWeight] = useState("");
+  const [nickname, setNickname] = useState(settings.nickname ?? "");
+  const [targetWeight, setTargetWeight] = useState(
+    settings.targetWeight ? settings.targetWeight.toFixed(2) : "",
+  );
   const [savedFlash, setSavedFlash] = useState(false);
-  const [syncedSettings, setSyncedSettings] = useState(settings);
+  // 脏标记：用户正在输入某字段时，不回写 store 值，避免切换开关把输入冲掉
+  const nicknameDirty = useRef(false);
+  const weightDirty = useRef(false);
 
   useEffect(() => {
     hydrate();
@@ -43,16 +49,16 @@ export default function SettingsPage() {
     recordsHydrate();
   }, [hydrate, beautyHydrate, recordsHydrate]);
 
-  // settings 从 store 加载完成后，同步一次到本地表单（渲染期同步，避免 effect 级联）
-  // 只同步昵称/目标体重，切换深色模式等其它设置变更不会打断输入
-  if (
-    settings.nickname !== syncedSettings.nickname ||
-    settings.targetWeight !== syncedSettings.targetWeight
-  ) {
-    setSyncedSettings(settings);
-    setNickname(settings.nickname);
-    setTargetWeight(settings.targetWeight ? settings.targetWeight.toFixed(2) : "");
-  }
+  // store 加载/保存完成后，把昵称/目标体重同步进表单（仅在该字段未被用户改动时）
+  useEffect(() => {
+    if (!nicknameDirty.current) setNickname(settings.nickname ?? "");
+  }, [settings.nickname]);
+
+  useEffect(() => {
+    if (!weightDirty.current) {
+      setTargetWeight(settings.targetWeight ? settings.targetWeight.toFixed(2) : "");
+    }
+  }, [settings.targetWeight]);
 
   async function saveProfile() {
     const weight = parseFloat(targetWeight);
@@ -60,18 +66,46 @@ export default function SettingsPage() {
       nickname: nickname.trim() || "小佳佳",
       targetWeight: weight ? Math.round(weight * 100) / 100 : undefined,
     });
+    nicknameDirty.current = false;
+    weightDirty.current = false;
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1500);
   }
 
   async function clearCache() {
+    const unlocked = isPrivateUnlocked();
     const ok = await confirm({
-      title: "清空所有数据？",
-      message: "会清掉这台设备上的全部记录（含私密空间数据），云端数据不受影响",
+      title: "清空全部数据？",
+      message: unlocked
+        ? "会清掉云端（和本机）的全部记录，含私密空间数据，且无法恢复。"
+        : "会清掉云端（和本机）的全部记录（未解锁的私密空间不在此列），且无法恢复。",
       confirmText: "清空",
       danger: true,
     });
     if (!ok) return;
+
+    // 私密解锁前置判断：未解锁时私密集合清不掉，先告知并让用户决定是否仅清其余
+    if (!unlocked && PRIVATE_COLLECTIONS.size > 0) {
+      const ok2 = await confirm({
+        title: "私密空间未解锁",
+        message:
+          "私密空间（体重记录 / 经期 / 私密日记 / 私密清单）还没解锁，其中的数据不会被清除。仍要清空其余数据吗？",
+        confirmText: "仍要清空",
+        danger: true,
+      });
+      if (!ok2) return;
+    }
+
+    // 解锁后：私密集合随循环一并清除（dbClear 自动带 x-private-key 头）；
+    // 未解锁：私密集合直接跳过，不发起会 401 的请求
+    for (const name of DB_COLLECTIONS) {
+      if (PRIVATE_COLLECTIONS.has(name) && !unlocked) continue;
+      try {
+        await dbClear(name);
+      } catch {
+        // 兜底：仍失败的私密集合跳过，其余照常清除
+      }
+    }
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
@@ -81,12 +115,15 @@ export default function SettingsPage() {
     window.location.reload();
   }
 
-  function exportData() {
-    const data: Record<string, string | null> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k?.startsWith("jia-blog:")) {
-        data[k] = localStorage.getItem(k);
+  async function exportData() {
+    const data: Record<string, unknown> = {};
+    // 从云端逐集合导出（私密集合需凭证，未解锁时跳过）
+    for (const name of DB_COLLECTIONS) {
+      if (PRIVATE_COLLECTIONS.has(name)) continue;
+      try {
+        data[name] = await dbList(name);
+      } catch {
+        data[name] = null;
       }
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -100,8 +137,6 @@ export default function SettingsPage() {
     URL.revokeObjectURL(url);
   }
 
-  const sizeLabel = "全部保存在这台设备上";
-
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="设置" subtitle="把小站调成喜欢的样子" />
@@ -112,7 +147,10 @@ export default function SettingsPage() {
           <p className="text-[12.5px] font-medium text-ink-3">你的昵称</p>
           <input
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              nicknameDirty.current = true;
+              setNickname(e.target.value);
+            }}
             placeholder="小佳佳"
             className="mt-1.5 w-full rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] outline-none"
           />
@@ -121,14 +159,15 @@ export default function SettingsPage() {
           <p className="text-[12.5px] font-medium text-ink-3">体重目标（kg，最多两位小数）</p>
           <input
             value={targetWeight}
-            onChange={(e) =>
+            onChange={(e) => {
+              weightDirty.current = true;
               setTargetWeight(
                 e.target.value
                   .replace(/[^\d.]/g, "")
                   .replace(/(\..*)\./g, "$1")
                   .replace(/(\.\d{2})\d+$/, "$1"),
-              )
-            }
+              );
+            }}
             placeholder="49.90"
             inputMode="decimal"
             className="mt-1.5 w-full rounded-[12px] bg-field px-3 py-2.5 text-[13.5px] outline-none"
@@ -191,9 +230,9 @@ export default function SettingsPage() {
           className="flex w-full items-center justify-between px-4 py-3.5 transition-colors hover:bg-card-hover"
         >
           <span className="text-[14.5px] font-medium text-ink">
-            清除本地数据
+            清除全部数据
           </span>
-          <span className="text-[12.5px] text-ink-5">{sizeLabel}</span>
+          <span className="text-[12.5px] text-ink-5">含云端与私密</span>
         </button>
         <button
           onClick={exportData}

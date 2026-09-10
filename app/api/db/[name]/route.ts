@@ -153,7 +153,12 @@ export async function DELETE(
   if (denied) return denied;
 
   const id = req.nextUrl.searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "missing id" }, { status: 400 });
+
+  // 不带 id：清空整个集合（用于「清除全部数据」）
+  if (!id) {
+    await getSql()`DELETE FROM jia.collections WHERE name = ${name}`;
+    return NextResponse.json({ ok: true, cleared: true });
+  }
 
   const rows = await getSql()`
     DELETE FROM jia.collections WHERE name = ${name} AND id = ${id} RETURNING id

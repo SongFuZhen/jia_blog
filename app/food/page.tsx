@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Loader2, Plus } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
+import { Sheet } from "@/components/sheet";
 import { useFoodStore } from "@/lib/stores/food";
 import { compressImage } from "@/lib/image";
 import { uploadImage } from "@/lib/upload";
@@ -246,9 +247,18 @@ export default function FoodPage() {
         })}
       </div>
 
-      {/* 添加表单 */}
+      {/* 添加表单（底部抽屉） */}
       {showAdd && (
-        <div className="mt-3 space-y-3 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+        <Sheet
+          title="收藏美食"
+          onClose={() => {
+            setForm({ name: "", platform: "美团", location: "", phone: "", price: "", note: "" });
+            setShareText("");
+            setImage(undefined);
+            setShowAdd(false);
+          }}
+        >
+          <div className="space-y-3 pb-2">
           <textarea
             value={shareText}
             onChange={(e) => handleShare(e.target.value)}
@@ -377,7 +387,8 @@ export default function FoodPage() {
               {saving ? "保存中…" : "收下"}
             </button>
           </div>
-        </div>
+          </div>
+        </Sheet>
       )}
 
       {/* 列表 */}

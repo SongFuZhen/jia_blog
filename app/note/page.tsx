@@ -63,14 +63,7 @@ export default function NotePage() {
       iatRef.current?.stop();
       return;
     }
-    const appId = process.env.NEXT_PUBLIC_XFYUN_APPID;
-    const apiKey = process.env.NEXT_PUBLIC_XFYUN_API_KEY;
-    const apiSecret = process.env.NEXT_PUBLIC_XFYUN_API_SECRET;
-    if (!appId || !apiKey || !apiSecret) {
-      setSpeechHint("还没配置讯飞密钥");
-      return;
-    }
-    const iat = new XfyunIat(appId, apiKey, apiSecret);
+    const iat = new XfyunIat();
     iatRef.current = iat;
     setSpeechHint("");
     iat.start({

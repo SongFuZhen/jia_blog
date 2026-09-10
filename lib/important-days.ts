@@ -70,6 +70,40 @@ export const TRADITIONAL_FESTIVALS: Omit<ImportantDay, "id">[] = [
   { name: "圣诞节", kind: "festival", isLunar: false, month: 12, day: 25, emoji: "🎄" },
 ];
 
+/** 二十四节气（每年阳历浮动，用节气表精算）。kind 记为 festival，jieqi 优先于 month/day。 */
+export const SOLAR_TERMS: Omit<ImportantDay, "id">[] = [
+  { name: "小寒", kind: "festival", isLunar: false, month: 1, day: 6, jieqi: "小寒", emoji: "🥶" },
+  { name: "大寒", kind: "festival", isLunar: false, month: 1, day: 20, jieqi: "大寒", emoji: "❄️" },
+  { name: "立春", kind: "festival", isLunar: false, month: 2, day: 4, jieqi: "立春", emoji: "🌱" },
+  { name: "雨水", kind: "festival", isLunar: false, month: 2, day: 19, jieqi: "雨水", emoji: "💧" },
+  { name: "惊蛰", kind: "festival", isLunar: false, month: 3, day: 6, jieqi: "惊蛰", emoji: "🐛" },
+  { name: "春分", kind: "festival", isLunar: false, month: 3, day: 21, jieqi: "春分", emoji: "🌸" },
+  { name: "清明", kind: "festival", isLunar: false, month: 4, day: 5, jieqi: "清明", emoji: "🎋" },
+  { name: "谷雨", kind: "festival", isLunar: false, month: 4, day: 20, jieqi: "谷雨", emoji: "🌾" },
+  { name: "立夏", kind: "festival", isLunar: false, month: 5, day: 6, jieqi: "立夏", emoji: "🍃" },
+  { name: "小满", kind: "festival", isLunar: false, month: 5, day: 21, jieqi: "小满", emoji: "🌾" },
+  { name: "芒种", kind: "festival", isLunar: false, month: 6, day: 6, jieqi: "芒种", emoji: "🌾" },
+  { name: "夏至", kind: "festival", isLunar: false, month: 6, day: 21, jieqi: "夏至", emoji: "☀️" },
+  { name: "小暑", kind: "festival", isLunar: false, month: 7, day: 7, jieqi: "小暑", emoji: "🔥" },
+  { name: "大暑", kind: "festival", isLunar: false, month: 7, day: 23, jieqi: "大暑", emoji: "🔥" },
+  { name: "立秋", kind: "festival", isLunar: false, month: 8, day: 8, jieqi: "立秋", emoji: "🍂" },
+  { name: "处暑", kind: "festival", isLunar: false, month: 8, day: 23, jieqi: "处暑", emoji: "🍂" },
+  { name: "白露", kind: "festival", isLunar: false, month: 9, day: 8, jieqi: "白露", emoji: "🌫️" },
+  { name: "秋分", kind: "festival", isLunar: false, month: 9, day: 23, jieqi: "秋分", emoji: "🍁" },
+  { name: "寒露", kind: "festival", isLunar: false, month: 10, day: 8, jieqi: "寒露", emoji: "🌾" },
+  { name: "霜降", kind: "festival", isLunar: false, month: 10, day: 23, jieqi: "霜降", emoji: "🍂" },
+  { name: "立冬", kind: "festival", isLunar: false, month: 11, day: 7, jieqi: "立冬", emoji: "🧣" },
+  { name: "小雪", kind: "festival", isLunar: false, month: 11, day: 22, jieqi: "小雪", emoji: "🌨️" },
+  { name: "大雪", kind: "festival", isLunar: false, month: 12, day: 7, jieqi: "大雪", emoji: "⛄" },
+  { name: "冬至", kind: "festival", isLunar: false, month: 12, day: 22, jieqi: "冬至", emoji: "🥟" },
+];
+
+/** 节气配图目录（本地，敦煌版 webp），文件名即节气名 */
+export const JIEQI_IMAGE_DIR = "/jieqi";
+export function jieqiImage(name: string): string {
+  return `${JIEQI_IMAGE_DIR}/${name}.webp`;
+}
+
 function pad(n: number): string {
   return String(n).padStart(2, "0");
 }
@@ -254,6 +288,27 @@ export function getFestivalUpcoming(
     seen.add(e.id);
     return true;
   });
+}
+
+/** 二十四节气（未来 windowDays 天，默认覆盖一年），按日期升序 */
+export function getSolarTermUpcoming(
+  windowDays = 370,
+  now = new Date(),
+): UpcomingEvent[] {
+  const all = SOLAR_TERMS.map((t, i) => ({ ...t, id: `jieqi-${i}` }));
+  return buildEvents(all, windowDays, now);
+}
+
+/** 节假日（传统节日 + 公历节假日，不含二十四节气），未来 windowDays 天 */
+export function getHolidayUpcoming(
+  windowDays = 370,
+  now = new Date(),
+): UpcomingEvent[] {
+  const all = TRADITIONAL_FESTIVALS.filter((f) => !f.jieqi).map((f, i) => ({
+    ...f,
+    id: `holiday-${i}`,
+  }));
+  return buildEvents(all, windowDays, now);
 }
 
 /** YYYY-MM-DD → 周几（按本地时区构造，避免 UTC 偏移算错一天） */

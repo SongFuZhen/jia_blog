@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, ImagePlus, Loader2, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
+import { Sheet } from "@/components/sheet";
 import { useShowStore } from "@/lib/stores/show";
 import { useConfirm } from "@/lib/stores/confirm";
 import { useRecordsStore } from "@/lib/stores/records";
@@ -272,12 +273,16 @@ export default function ShowsPage() {
         </div>
       )}
 
-      {/* 添加 / 编辑表单 */}
+      {/* 添加 / 编辑表单（底部抽屉） */}
       {showForm && (
-        <div className="mt-3 space-y-2 rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
-          <p className="text-[13px] font-semibold text-ink">
-            {editingId ? "编辑演出" : "记一场演出"}
-          </p>
+        <Sheet
+          title={editingId ? "编辑演出" : "记一场演出"}
+          onClose={() => {
+            resetForm();
+            setShowForm(false);
+          }}
+        >
+          <div className="space-y-2 pb-2">
           <textarea
             value={parseText}
             onChange={(e) => {
@@ -453,7 +458,8 @@ export default function ShowsPage() {
               {saving ? "保存中…" : editingId ? "保存" : "收下"}
             </button>
           </div>
-        </div>
+          </div>
+        </Sheet>
       )}
 
       {/* 列表：按演出月份分组 */}

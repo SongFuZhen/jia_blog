@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, RefreshCw, X } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
@@ -41,7 +41,7 @@ function BottomSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-[55] flex items-end justify-center">
       <div
         onClick={close}
         className={`absolute inset-0 bg-black/40 transition-opacity duration-200 ${
@@ -52,7 +52,7 @@ function BottomSheet({
         className={`relative flex w-full max-w-[430px] flex-col overflow-hidden rounded-t-[20px] bg-card shadow-2xl transition-transform duration-200 ${
           shown ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ maxHeight: "94vh" }}
+        style={{ maxHeight: "calc(100vh - 48px)" }}
       >
         <div className="flex items-start gap-2 border-b border-border-soft px-4 py-3">
           <h3 className="min-w-0 flex-1 text-[14px] font-medium leading-snug text-ink">
@@ -102,6 +102,7 @@ export default function TodayPage() {
   const [data, setData] = useState<Partial<Record<HotSource, State>>>({});
   const [loading, setLoading] = useState(false);
   const [sheet, setSheet] = useState<HotItem | null>(null);
+  const tabStripRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async (source: HotSource, fresh = false) => {
     setLoading(true);
@@ -139,18 +140,25 @@ export default function TodayPage() {
     };
   }, [sheet]);
 
+  useEffect(() => {
+    tabStripRef.current
+      ?.querySelector(`[data-key="${active}"]`)
+      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [active]);
+
   const current = data[active];
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="看今朝" subtitle="今天外面都在聊什么" />
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
         {sources.map((s) => (
           <button
             key={s.key}
+            data-key={s.key}
             onClick={() => setActive(s.key)}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+            className={`shrink-0 snap-start rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
               active === s.key
                 ? "bg-[#F16D88] text-white"
                 : "bg-white text-ink-3 shadow-[var(--shadow-xs)] dark:bg-[#2B2225]"

@@ -61,6 +61,11 @@ export function setPrivateCredential(key: string | null) {
   privateCredential = key;
 }
 
+/** 私密空间是否已解锁（清除全部数据时用于前置判断） */
+export function isPrivateUnlocked(): boolean {
+  return privateCredential !== null;
+}
+
 function authHeaders(name: string): Record<string, string> {
   return PRIVATE_COLLECTIONS.has(name) && privateCredential
     ? { "x-private-key": privateCredential }
@@ -169,6 +174,18 @@ export function createApiSingleRepository<T extends object>(
       });
     },
   };
+}
+
+/** 通用读取某个集合全部数据（供导出/备份等使用，绕过单例缓存） */
+export async function dbList<T = Record<string, unknown>>(
+  name: string,
+): Promise<T[]> {
+  return api<T[]>(name);
+}
+
+/** 清空某个集合全部数据（供「清除全部数据」使用，需私密集合凭证） */
+export async function dbClear(name: string): Promise<void> {
+  await api(name, { method: "DELETE" });
 }
 
 /* ---------- 各模块仓库实例 ---------- */

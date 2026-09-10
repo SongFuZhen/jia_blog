@@ -19,6 +19,7 @@ import { uploadImage } from "@/lib/upload";
 import { parseShareText } from "@/lib/parse-share";
 import { nowLocalISO, todayLocal } from "@/lib/time";
 import { priceTier } from "@/lib/food-tiers";
+import { Sheet } from "@/components/sheet";
 import type { Food, FoodPlatform, FoodVisit, Mood } from "@/lib/types";
 
 const platforms: FoodPlatform[] = ["美团", "抖音", "小红书", "其他"];
@@ -338,9 +339,9 @@ export function FoodCard({ food }: { food: Food }) {
     if (ok) remove(food.id);
   }
 
-  if (editing) {
-    return (
-      <div className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+  const editSheet = editing ? (
+    <Sheet title="编辑店铺" onClose={() => setEditing(false)}>
+      <div className="space-y-3 pb-2">
         <textarea
           value={shareText}
           onChange={(e) => handleShare(e.target.value)}
@@ -475,11 +476,12 @@ export function FoodCard({ food }: { food: Food }) {
           </button>
         </div>
       </div>
-    );
-  }
+    </Sheet>
+  ) : null;
 
   return (
-    <div className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
+    <>
+      <div className="rounded-[16px] bg-card p-4 shadow-[var(--shadow-soft-sm)]">
       <div
         onClick={() => setExpanded((v) => !v)}
         className="flex cursor-pointer gap-3"
@@ -791,6 +793,8 @@ export function FoodCard({ food }: { food: Food }) {
           )}
         </div>
       )}
-    </div>
+      </div>
+      {editSheet}
+    </>
   );
 }
