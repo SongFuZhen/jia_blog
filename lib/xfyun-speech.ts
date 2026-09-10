@@ -49,7 +49,7 @@ async function buildWsUrl(appId: string, apiKey: string, apiSecret: string): Pro
   const date = new Date().toUTCString();
   const signatureOrigin = `host: ${HOST}\ndate: ${date}\nGET /v2/iat HTTP/1.1`;
   const signature = toBase64(await hmacSha256(apiSecret, signatureOrigin));
-  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date authorization", signature="${signature}"`;
+  const authorizationOrigin = `api_key="${apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
   const authorization = toBase64(new TextEncoder().encode(authorizationOrigin));
   return `wss://${HOST}/v2/iat?authorization=${encodeURIComponent(authorization)}&date=${encodeURIComponent(date)}&host=${HOST}`;
 }
