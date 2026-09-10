@@ -313,4 +313,6 @@ export interface Settings {
   remind?: boolean;
   /** 暗色模式（默认关） */
   dark?: boolean;
+  /** AI 男友「小祯子」说话风格，A 温柔宠溺 / B 成熟稳重 / C 痞帅逗比 / D 深情浪漫（默认 D） */
+  aiStyle?: "A" | "B" | "C" | "D";
 }

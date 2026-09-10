@@ -25,8 +25,13 @@ export async function aiAvailable(): Promise<boolean> {
   return Boolean(AI_KEY);
 }
 
-/** OpenAI 兼容 chat 调用；失败抛错，由调用方决定兜底 */
-async function chat(system: string, user: string): Promise<string> {
+type ChatTurn = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
+/** OpenAI 兼容 chat 调用（多轮）；失败抛错，由调用方决定兜底 */
+async function chatRaw(messages: ChatTurn[]): Promise<string> {
   if (!AI_KEY) throw new Error("未配置 AGNES_API_KEY");
   const res = await fetch(`${AI_BASE}/chat/completions`, {
     method: "POST",
@@ -36,10 +41,7 @@ async function chat(system: string, user: string): Promise<string> {
     },
     body: JSON.stringify({
       model: AI_MODEL,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
+      messages,
       temperature: 0.8,
     }),
     signal: AbortSignal.timeout(45000),
@@ -53,6 +55,14 @@ async function chat(system: string, user: string): Promise<string> {
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) throw new Error("AI 没有返回内容");
   return text;
+}
+
+/** 单轮便捷封装：system + 单条 user */
+async function chat(system: string, user: string): Promise<string> {
+  return chatRaw([
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ]);
 }
 
 export interface DiaryInput {

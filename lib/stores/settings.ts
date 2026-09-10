@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { settingsRepo } from "@/lib/repository";
 import type { Settings } from "@/lib/types";
+import { DEFAULT_AI_BOYFRIEND_STYLE } from "@/lib/ai-boyfriend";
 
 interface SettingsState {
   settings: Settings;
@@ -10,7 +11,13 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  settings: { nickname: "小佳佳", autoLock: true, remind: true, dark: false },
+  settings: {
+    nickname: "小佳佳",
+    autoLock: true,
+    remind: true,
+    dark: false,
+    aiStyle: DEFAULT_AI_BOYFRIEND_STYLE,
+  },
   hydrated: false,
 
   hydrate: async () => {

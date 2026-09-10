@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { useConfirm } from "@/lib/stores/confirm";
@@ -8,6 +9,7 @@ import { useBeautyStore } from "@/lib/stores/beauty";
 import { useRecordsStore } from "@/lib/stores/records";
 import { dbList, dbClear, isPrivateUnlocked } from "@/lib/repository";
 import { DB_COLLECTIONS, PRIVATE_COLLECTIONS } from "@/lib/db-collections";
+import { AI_BOYFRIEND_STYLES } from "@/lib/ai-boyfriend";
 
 function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
@@ -221,6 +223,39 @@ export default function SettingsPage() {
             onClick={() => updateSettings({ dark: !settings.dark })}
           />
         </div>
+      </div>
+
+      {/* AI 小祯子：男友风格 */}
+      <div className="mt-3 overflow-hidden rounded-[20px] bg-card shadow-[var(--shadow-soft-sm)]">
+        <p className="px-4 pt-4 text-[12.5px] font-medium text-ink-3">
+          AI 男友「小祯子」风格
+        </p>
+        {AI_BOYFRIEND_STYLES.map((s, i) => {
+          const active = (settings.aiStyle ?? "D") === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => updateSettings({ aiStyle: s.id })}
+              className={`flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-card-hover ${
+                i > 0 ? "border-t border-border-soft" : ""
+              }`}
+            >
+              <div>
+                <p className="text-[14.5px] font-medium text-ink">{s.label}</p>
+                <p className="mt-0.5 text-[11.5px] text-ink-4">{s.desc}</p>
+              </div>
+              <span
+                className={`flex size-5 shrink-0 items-center justify-center rounded-full border ${
+                  active
+                    ? "border-[#F16D88] bg-[#F16D88] text-white"
+                    : "border-border-strong text-transparent"
+                }`}
+              >
+                <Check className="size-3.5" strokeWidth={3} />
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* 数据 */}
