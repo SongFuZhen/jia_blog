@@ -17,11 +17,11 @@ export default function Home() {
         {/* 今日小惊喜 + 今日待办，与快捷入口同一组 */}
         <TodaySurprise />
 
-        {/* 专属私密空间 */}
-        <PrivateCard />
-
         {/* 未来一个月的重要日子（传统节日 + 生日 + 纪念日） */}
         <UpcomingDays />
+
+        {/* 专属私密空间（放在最后） */}
+        <PrivateCard />
 
         {/* 页脚手写标语（取自设计稿） */}
         <footer className="mt-6 pb-2 flex justify-center">
