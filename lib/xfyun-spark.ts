@@ -60,6 +60,7 @@ async function buildWsUrl(
 
 export class XfyunSpark {
   private ws: WebSocket | null = null;
+  private failed = false;
 
   constructor(
     private appId: string = XFYUN_APP_ID,
@@ -70,6 +71,7 @@ export class XfyunSpark {
   /** 发送一轮对话（history 含 system/user/assistant 多轮），增量回调 onDelta */
   chat(history: SparkMessage[], h: SparkHandlers) {
     const messages = history.map((m) => ({ role: m.role, content: m.content }));
+    this.failed = false;
     buildWsUrl(this.appId, this.apiKey, this.apiSecret)
       .then((u) => {
         const ws = new WebSocket(u);
@@ -90,10 +92,19 @@ export class XfyunSpark {
             }),
           );
         };
-        ws.onerror = () => h.onError("AI 连接失败，检查网络或讯飞密钥");
+        ws.onerror = () => {
+          if (this.failed) return;
+          this.failed = true;
+          h.onError("AI 连接失败，检查网络或讯飞密钥");
+        };
         ws.onmessage = (e) => this.onMessage(e, h);
-        ws.onclose = () => {
+        ws.onclose = (e) => {
           this.ws = null;
+          // 非正常关闭且还没报过错，把关闭码带出来方便排查
+          if (!this.failed && e.code !== 1000 && e.code !== 1005) {
+            this.failed = true;
+            h.onError(`AI 连接中断（code ${e.code}）`);
+          }
         };
       })
       .catch(() => h.onError("AI 连接失败"));
@@ -110,6 +121,7 @@ export class XfyunSpark {
       return;
     }
     if (j.header?.code && j.header.code !== 0) {
+      this.failed = true;
       h.onError(`星火返回错误 ${j.header.code}${j.header.message ? `：${j.header.message}` : ""}`);
       this.close();
       return;
