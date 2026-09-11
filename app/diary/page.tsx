@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Loading } from "@/components/loading";
 import { useRecordsStore } from "@/lib/stores/records";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import { todayLocal } from "@/lib/time";
 import type { LifeRecord, Mood } from "@/lib/types";
 
@@ -99,6 +100,8 @@ export default function DiaryPage() {
   const hydrated = useRecordsStore((s) => s.hydrated);
   const hydrate = useRecordsStore((s) => s.hydrate);
   const [moodFilter, setMoodFilter] = useState<Mood | "全部">("全部");
+  const moodScrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(moodScrollRef);
 
   useEffect(() => {
     hydrate();
@@ -160,7 +163,10 @@ export default function DiaryPage() {
       </div>
 
       {/* 心情筛选 */}
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={moodScrollRef}
+        className="mt-4 flex flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+      >
         {allMoods.map((m) => (
           <button
             key={m}

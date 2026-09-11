@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import Link from "next/link";
 import { Camera, MapPin, Star } from "lucide-react";
 import { Loading } from "@/components/loading";
@@ -52,6 +53,8 @@ function isMilestone(r: LifeRecord): boolean {
 }
 
 export default function TimelinePage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(scrollRef);
   const records = useRecordsStore((s) => s.records);
   const hydrated = useRecordsStore((s) => s.hydrated);
   const hydrate = useRecordsStore((s) => s.hydrate);
@@ -140,7 +143,7 @@ export default function TimelinePage() {
       </div>
 
       {/* 筛选：类型 + 年份 */}
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div ref={scrollRef} className="mt-4 flex flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
         {typeFilters.map((t) => (
           <button
             key={t.key}

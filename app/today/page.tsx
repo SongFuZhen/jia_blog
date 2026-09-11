@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, RefreshCw, X } from "lucide-react";
 import { Loading } from "@/components/loading";
 import { PageHeader } from "@/components/page-header";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import type { HotItem, HotSource } from "@/lib/types";
 
 const sources: { key: HotSource; label: string }[] = [
@@ -103,6 +104,7 @@ export default function TodayPage() {
   const [loading, setLoading] = useState(false);
   const [sheet, setSheet] = useState<HotItem | null>(null);
   const tabStripRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(tabStripRef);
 
   const load = useCallback(async (source: HotSource, fresh = false) => {
     setLoading(true);
@@ -152,7 +154,7 @@ export default function TodayPage() {
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-background px-6 pb-32">
       <PageHeader title="看今朝" subtitle="今天外面都在聊什么" />
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
+      <div className="mt-4 flex flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
         {sources.map((s) => (
           <button
             key={s.key}

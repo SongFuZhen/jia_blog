@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import { Camera, Image as ImageIcon, Music, Plus, Quote, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Loading } from "@/components/loading";
@@ -32,6 +33,8 @@ const typeStyles: Record<InspirationType, { icon: typeof Quote; tagClass: string
 };
 
 export default function InspirationPage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(scrollRef);
   const { items, hydrated, hydrate, add, remove } = useInspirationStore();
   const confirm = useConfirm();
   const [filter, setFilter] = useState<InspirationType | "全部">("全部");
@@ -65,7 +68,7 @@ export default function InspirationPage() {
       />
 
       {/* 筛选 */}
-      <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div ref={scrollRef} className="mt-5 flex flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
         {filters.map((f) => (
           <button
             key={f}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import Link from "next/link";
 import { verifyPrivatePassword } from "@/app/actions";
 import { setPrivateCredential } from "@/lib/repository";
@@ -61,6 +62,8 @@ function WeightTrend({ logs }: { logs: { date: string; weight: number }[] }) {
 }
 
 export default function PrivatePage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(scrollRef);
   const {
     locked,
     weightLogs,
@@ -404,7 +407,7 @@ export default function PrivatePage() {
             className="w-full resize-none rounded-[12px] bg-field px-3 py-2.5 text-[13px] leading-relaxed outline-none placeholder:text-ink-5"
           />
           <div className="mt-2 flex items-center justify-between">
-            <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div ref={scrollRef} className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
               {moods.map((m) => (
                 <button
                   key={m}

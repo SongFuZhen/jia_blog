@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useRef, useState } from "react";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -81,6 +82,8 @@ export default function RecordPage({
   const [imgBusy, setImgBusy] = useState(false);
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const imgFileRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(scrollRef);
 
   // AI 状态（override 绑定记录 id，切换记录时自然失效）
   const [xhsOverride, setXhsOverride] = useState<{
@@ -404,7 +407,7 @@ export default function RecordPage({
                 }}
               />
             </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div ref={scrollRef} className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
               {moods.map((m) => (
                 <button
                   key={m}

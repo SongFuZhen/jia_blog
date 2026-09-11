@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import {
   CalendarDays,
   ChevronDown,
@@ -64,6 +65,8 @@ function groupByMonth(events: UpcomingEvent[]) {
 }
 
 export default function ImportantDaysPage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(scrollRef);
   const days = useImportantDaysStore((s) => s.days);
   const hydrated = useImportantDaysStore((s) => s.hydrated);
   const hydrate = useImportantDaysStore((s) => s.hydrate);
@@ -242,7 +245,7 @@ export default function ImportantDaysPage() {
       />
 
       {/* 三类切换 */}
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
+      <div ref={scrollRef} className="mt-4 flex flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
         {TABS.map((t) => (
           <button
             key={t.key}

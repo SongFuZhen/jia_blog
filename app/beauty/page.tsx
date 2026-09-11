@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useHorizontalScroll } from "@/lib/use-horizontal-scroll";
 import Link from "next/link";
 import { Check, Plus, Star } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
@@ -61,6 +62,8 @@ const wishStatusColors: Record<string, string> = {
 };
 
 export default function BeautyPage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScroll(scrollRef);
   const {
     tips,
     hydrated,
@@ -133,7 +136,7 @@ export default function BeautyPage() {
       {/* ============ 技巧库 ============ */}
       {tab === "tips" && (
         <>
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div ref={scrollRef} className="mt-4 flex flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
             {categories.map((c) => (
               <button
                 key={c}
